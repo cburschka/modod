@@ -25,7 +25,7 @@ class Choice(Token):
 class Plus(Token):
     pass
     
-class Question(Token):
+class Opt(Token):
     pass
     
-
+allTokens = [Terminal, LeftParen, RightParen, Concat, Choice, Plus, Opt]
