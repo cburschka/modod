@@ -25,7 +25,8 @@ class Choice(Token):
 class Plus(Token):
     pass
     
-class Opt(Token):
+class Question(Token):
     pass
     
-allTokens = [Terminal, LeftParen, RightParen, Concat, Choice, Plus, Opt]
+meta = {'(' : LeftParen, ')' : RightParen, ',' : Concat, '|' : Choice, '+' : Plus, '?' : Question}
+terminal = Terminal
