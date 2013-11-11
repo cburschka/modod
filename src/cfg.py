@@ -1,46 +1,51 @@
-# Christoph Burschka, 2012-2013
+class NonTerm:
+    def __init__(self, production):
+        self.production = production
 
-# Ein SLR(1)-Parser-Generator.
-
-class Start:
+class Start(NonTerm):
     pass
 
 class End:
     pass
 
 class grammar:
-    # prods: Liste der Produktionen. Jede Produktion ist ein Paar-Tupel, dessen
-    #        linke Seite ein Typ ist, und dessen rechte Seite ein 
-    #        Tupel von Typen ist.
+    # prods: Ein dictionary, das jedem Nichtterminal ein set aller Produktions-
+    #        tupel zuweist.
     # start: Ein Nichtterminalsymbol.
-    
-    # Die Menge der Nichtterminale besteht aus allen Symbolen, die links von einer
-    # Produktion stehen; alle übrigen Symbole sind Terminale.
-    
+    # Die Menge der Nichtterminale besteht aus den Schlüsseln von prods;
+    # alle übrigen Symbole, die in Produktionen vorkommen, sind Terminale.
+    # Jedes Nichtterminal sollte ein von NonTerm abgeleiteter Typ sein; mindestens
+    # muss seine __init__ Funktion eine Liste der produzierten Symbole als einziges
+    # Argument akzeptieren.
     def __init__(self, prods, start):
-        assert type(prods) is set, 'Produktionen sind keine Menge.'
-        assert all(type(prod) is tuple and len(prod) is 2 for prod in prods), 'Nicht alle Produktionen sind Paare.'
-        assert all(type(l) is type and type(r) is tuple for (l,r) in prods), 'Eine Produktion hat nicht die Form (type, tuple).'
-        assert all(all(type(t) is type and t not in (Start, End) for t in r) for (l,r) in prods), 'Die rechte Seite einer Produktion besteht nicht aus gültigen Typen.'
+        assert type(prods) is dict, 'Produktionen sind kein dictionary.'
+        assert all(type(l) is type and type(r) is set for (l,r) in prods.items()), 'Eine Produktion hat nicht die Form type -> set.'
+        assert all(all(type(p) is tuple for p in r) for r in prods.values()), 'Die rechte Seite einer Produktion ist keine Menge von Tupeln.'
 
         self.prods = prods
         self.start = start
+        self.nonterms = set(self.prods.keys())
+        self.symbols = {start}
+        for production_set in prods.values():
+            for production in production_set:
+                self.symbols.update(production)
 
-        self.nonterms = {l for (l,r) in prods}
-        self.symbols = self.nonterms.union(*(r for (l,r) in prods))
+        assert self.nonterms <= self.symbols, 'Unerreichbare Nichtterminale auf der linken Seite.'
+        assert type(self.start) is type and start in self.nonterms, 'Startsymbol ist kein Typ, oder nicht produzierbar.'
+        assert all(type(s) is type and s not in (Start, End) for s in self.symbols), 'Nicht alle Symbole sind gültige Typen.'
+
         self.terms = self.symbols - self.nonterms
-        
-        assert type(start) is type and start in self.nonterms, 'Startsymbol ist kein Typ, oder nicht produzierbar.'
-                  
+
     def __str__(self):
         return 'Start: {0}\nTerminale: {1}\nNichtterminale: {2}\nProduktionen:\n{3}'.format(
             self.start.__name__,
             ', '.join(x.__name__ for x in self.terms),
             ', '.join(x.__name__ for x in self.nonterms),
             '\n'.join(
-                '    {0} → {1}'.format(n.__name__, ' | '.join(
-                    (' '.join(x.__name__ for x in r) or 'ε') for (l,r) in self.prods if l == n))
-                for n in self.nonterms)
+                '    {0} → {1}'.format(l.__name__, ' | '.join(
+                    (' '.join(x.__name__ for x in p) or 'ε') for p in r
+                ))
+                for (l, r) in self.prods.items())
         )
 
     def slr1(self):
@@ -53,9 +58,9 @@ class grammar:
         follow = self.follow(nullable, first)
         states, shift, reduce = self.derive_states(start, follow, {start})
 
-        return slr1(self.symbols.union([Start, End]), start, states, shift, reduce)
+        return slr1(self.terms, self.nonterms, start, states, shift, reduce)
 
-    # Ein Zustand ist abgeschlossen, wenn für jedes zu lesende 
+    # Ein Zustand ist abgeschlossen, wenn für jedes zu lesende
     # Nichtterminal auch jede Produktion enthalten ist.
     def close_state(self, state):
         # Wiederhole, bis keine neuen Produktionen eingefügt werden.
@@ -64,27 +69,32 @@ class grammar:
             # Welche Nichtterminale können gelesen werden?
             nonterm_shifts = {right[dot] for (left, right, dot) in state if dot < len(right) and right[dot] in self.nonterms}
             # Füge alle deren Produktionen hinzu.
-            state.update((left, right, 0) for (left, right) in self.prods if left in nonterm_shifts)
+            for left in nonterm_shifts:
+                state.update((left, right, 0) for right in self.prods[left])
             old, new = new, len(state)
-        
+
         # frozenset() ist immutable, und darf daher selbst Element eines sets sein.
         return frozenset(state)
 
     # Die Zustandsmenge ist abgeschlossen, wenn sie für jeden Zustand und jedes lesbare Zeichen
     # auch den abgeschlossenen Folgezustand enthält.
-    def derive_states(self, state, follow, states, shift={}, reduce={}):
+    def derive_states(self, state, follow, states, shift=None, reduce=None):
+        # Initialisiere die shift/reduce Tabellen:
+        if shift == reduce == None:
+            shift, reduce = {}, {}
+
         # Berechne die Reduktionsregeln.
         for left, right, dot in state:
             if dot == len(right):
                 add_reduce = {(state, lookahead) : (left, right) for lookahead in follow[left]}
-                for key in set(reduce.keys()).intersection(add_reduce.keys()):
+                for state, symbol in set(reduce.keys()).intersection(add_reduce.keys()):
                     raise ValueError('Reduce / Reduce-Konflikt.\nZustand: {0}\nLookahead: {1}\nReduktion 1: {2}\nReduktion 2: {3}'.format(
-                        state, lookahead, reduce[key], add_reduce[key]
+                        state_string(state), symbol.__name__, rule_string(reduce[(state, symbol)]), rule_string(add_reduce[(state, symbol)])
                     ))
                 reduce.update(add_reduce)
 
         # Berechne die Shiftregeln.
-        added = set()                
+        added = set()
         for symbol in {right[dot] for (left, right, dot) in state if dot < len(right)}:
             # Füge den erreichten Zustand hinzu:
             next = self.close_state({(left, right, dot+1) for (left, right, dot) in state if dot < len(right) and right[dot] == symbol})
@@ -103,14 +113,15 @@ class grammar:
 
         return states, shift, reduce
 
-    # Bestimme die auf das leere Wort produzierenden Nichtterminale
+    # Bestimme die auf Null produzierenden Nichtterminale
     def nullable(self):
         # Fixpunkt-Iteration
         nullable = {None}
         old, new = 0, 1
         while old < new:
-            for left, right in self.prods:
-                if all(t in nullable for t in right):
+            for left, right in self.prods.items():
+                # Falls alle Symbole einer Alternative auf Null produzieren:
+                if any(all(t in nullable for t in alt) for alt in right):
                     nullable.add(left)
             old, new = new, len(nullable)
         return nullable.difference([None])
@@ -120,13 +131,14 @@ class grammar:
         first = dict([(n,set()) for n in self.nonterms] + [(t,{t}) for t in self.terms] + [(Start, {self.start})])
 
         # Fixpunkt-Iteration
-        old, new = 0, len(self.terms)        
+        old, new = 0, len(self.terms)
         while old < new:
-            for left, right in self.prods:
-                for r in right:
-                    first[left].update(first[r])
-                    if r not in nullable:
-                        break
+            for left, right in self.prods.items():
+                for alt in right:
+                    for t in alt:
+                        first[left].update(first[t])
+                        if t not in nullable:
+                            break
             old, new = new, sum(len(x) for x in first.values())
         return first
 
@@ -134,23 +146,24 @@ class grammar:
     def follow(self, nullable, first):
         direct = {n:set() for n in self.nonterms}
         parents = {n:set() for n in self.nonterms}
-        
+
         parents[Start] = set()
         direct[Start], direct[self.start] = set(), {End}
-        
+
         for symbol in self.nonterms:
             # Finde alle Stellen, wo das Symbol rechts in einer Produktion steht:
-            for left, right in self.prods:
-                for i, r in enumerate(right):
-                    if symbol == r:
-                        # Bestimme alle ersten Terminalsymbole der Folgekette:
-                        for f in right[i+1:]:
-                            direct[symbol] |= first[f]
-                            if f not in nullable:
-                                break
-                        else:
-                            # Wenn die Kette auf das leere Wort produzieren kann, so folge der linken Seite.
-                            parents[symbol].add(left) 
+            for left, right in self.prods.items():
+                for alt in right:
+                    for i, t in enumerate(alt):
+                        if symbol == t:
+                            # Bestimme alle ersten Terminalsymbole der Folgekette:
+                            for f in alt[i+1:]:
+                                direct[symbol] |= first[f]
+                                if f not in nullable:
+                                    break
+                            else:
+                                # Wenn die Kette auf das leere Wort produzieren kann, so folge der linken Seite.
+                                parents[symbol].add(left)
 
         # Berechne transitiven Abschluss von parents:
         old, new = 0, sum(len(p) for p in parents.values())
@@ -164,8 +177,9 @@ class grammar:
         return follow
 
 class slr1:
-    def __init__(self, symbols, start, states, shift, reduce):
-        self.symbols = symbols
+    def __init__(self, terms, nonterms, start, states, shift, reduce):
+        self.terms = terms
+        self.nonterms = nonterms
         self.start = start
         self.states = states
         self.shift = shift
@@ -176,7 +190,7 @@ class slr1:
     def normalize_states(self):
         # Erzeuge eine Numerierung, die mit dem Startzustand beginnt.
         numbering = {self.start : 0}
-        
+
         for state in self.states.difference({self.start}):
             numbering[state] = len(numbering)
         self.start = 0
@@ -188,14 +202,14 @@ class slr1:
 
 
     # Lese eine Symbolkette
-    def parse(self, string):
+    def parse(self, string, verbose=False):
         # Füge das Endsymbol an.
         string = string + [End()]
-        
+
         # Zustand-Stack, Symbol-Stack
         states = [self.start]
         symbols = []
-        
+
         i = 0
         while i < len(string):
 
@@ -217,24 +231,23 @@ class slr1:
             # Fail:
             else:
                 raise ValueError('Unerwartetes token im Zustand %d: %s' % (states[-1], type(string[i]).__name__))
-
-            print('Stack: [{0}]'.format(', '.join(x.__class__.__name__ for x in symbols)))
-            print("State: ", states)
-            print('Tokens: [{0}]'.format(', '.join(x.__class__.__name__ for x in string[i:])))
-            print('+++')
+            if verbose:
+                print('Stack: [{0}]'.format(', '.join(x.__class__.__name__ for x in symbols)))
+                print("State: ", states)
+                print('Tokens: [{0}]'.format(', '.join(x.__class__.__name__ for x in string[i:])))
+                print('+++')
         return symbols[0]
-                
-                
+
+
     def __str__(self):
+        namesort = lambda x:x.__name__
         table = []
-        symbols = sorted(self.symbols.difference([Start, End]), key=lambda x:x.__name__)
-        symbolNames = list(map(lambda x:x.__name__, symbols))
-        table.append(['State', '#'] + symbolNames)
+        symbols = sorted(self.terms, key=namesort) + sorted(self.nonterms, key=namesort)
+        table.append(['State', '$'] + [x.__name__ for x in symbols])
         rules = sorted(set(self.reduce.values()), key=lambda x:x[0].__name__)
-        lookup = dict(zip(rules, range(len(rules))))
-        m = max(map(len, symbolNames))+2
+        lookup = dict(zip(rules, list(range(len(rules)))))
         for state in self.states:
-            row = [state]
+            row = [str(state)]
             if (state, End) in self.reduce:
                 row.append('R {0}'.format(lookup[self.reduce[(state, End)]]))
             else:
@@ -249,10 +262,10 @@ class slr1:
             table.append(row)
 
         rows = []
-            
+
         return '+++++++++++++\nState Table:\n{0}\n++++++++++\nReductions:\n{1}\n+++++++++++'.format(
-            '\n'.join(["|".join([(str(s) + " "*20)[:m] for s in row]) for row in table]), 
-            '\n'.join('{0}: {1} → {2}'.format(i, s.__name__, ' '.join([y.__name__ for y in x])) for (i, (s, x)) in enumerate(rules))
+            table_string(table),
+            '\n'.join('{0}: {1}'.format(i, rule_string(rule)) for (i, rule) in enumerate(rules))
         )
 
 def state_string(state):
@@ -262,3 +275,18 @@ def state_string(state):
         )
         for (l, r, dot) in state
     ))
+
+def rule_string(rule):
+    return '{0} → {1}'.format(rule[0].__name__, ' '.join(r.__name__ for r in rule[1]))
+
+def table_string(table):
+    row_length = max(len(row) for row in table)
+    assert all(len(row) == row_length for row in table)
+    widths = [max(len(row[j])+2 for row in table) for j in range(row_length)]
+    row_width = sum(widths) + row_length + 1
+    separator = '\n' + ('+'.join('-'*w for w in widths)) + '\n'
+    return separator.join(
+        '|'.join(
+            cell.center(width) for cell,width in zip(row, widths)
+        ) for row in table
+    )

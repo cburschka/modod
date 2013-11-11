@@ -1,3 +1,16 @@
-import dre
+import grammar_extended as ge
 
-print(dre.Plus(dre.Concatenation([dre.Terminal("a"), dre.Choice([dre.Terminal("b"), dre.Plus(dre.Terminal("c"))]), dre.Terminal("a")])))
+lexer = ge.build_lexer()
+grammar = ge.build_grammar()
+parser = grammar.slr1()
+
+
+def parse(s):
+    tokens = lexer.lex(s)
+    parsed = parser.parse(tokens, verbose=False)
+    return parsed.dre()
+
+for s in ['(((a)))', '(a? a,a* a+)', '(a(Test|Te)*b(c+))?', 'a|b c | ef d* (a b)?']:
+    tree = parse(s)
+    print('++++\n', s, '\nwird zu:\n', tree, '\nin kanonischer Form: ', tree.formula())
+

@@ -11,7 +11,7 @@ class lexer:
     def lex(self, string):
         tokens = []
         j = -1
-        
+
         for i, c in enumerate(string + ' '):
             if c in self.meta or isWhiteSpace(c):
                 if j >= 0:

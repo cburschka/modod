@@ -1,7 +1,9 @@
+import lexer
+
 class Token:
     def __str__(self):
         return self.__class__.__name__
-    
+
 class Terminal(Token):
     def __init__(self, symbol):
         self.symbol = symbol
@@ -15,18 +17,20 @@ class LeftParen(Token):
 class RightParen(Token):
     def __str__(self):
         return "RightParen"
-    
-class Concat(Token):
+
+class Comma(Token):
     pass
-    
-class Choice(Token):
+
+class Pipe(Token):
     pass
-    
-class Plus(Token):
+
+class PlusSign(Token):
     pass
-    
+
 class Question(Token):
     pass
-    
-meta = {'(' : LeftParen, ')' : RightParen, ',' : Concat, '|' : Choice, '+' : Plus, '?' : Question}
-terminal = Terminal
+
+meta = {'(' : LeftParen, ')' : RightParen, ',' : Comma, '|' : Pipe, '+' : PlusSign, '?' : Question}
+
+def build_lexer():
+    return lexer.lexer(meta, Terminal)
