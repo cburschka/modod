@@ -27,11 +27,10 @@ soreFile.close()
 startTime = time.time()
 wordcounter = 0
 for elt in elementnames:
-	#print "Inferring Element "+str(elt)
 	message("Inferring Element "+elt)
 	soa = SingleOccurrenceAutomaton()
 	for fn in filenames:
-		#rint(timeStamp(), "Parsing XML file",fn)
+		message('Parsing XML file '+fn)
 		root = ET.parse(fn)
 		message("Parsed")
 		message("Searching tree")
@@ -40,7 +39,6 @@ for elt in elementnames:
 			for child in found:
 				word = word + [child.tag]
 			word = word + [SingleOccurrenceAutomaton.snk]
-	#print("adding ",word)
 			soa.addWord(word)
 			wordcounter += 1
 	message("SOA created") 
@@ -51,11 +49,12 @@ for elt in elementnames:
 		chare = ''
 	else:
 		chare=soa.chare()
+	# Normalform nach hier:
+	chare = '('+chare+')'
 
-	elem = '<!ELEMENT '+elt+' ('+chare+')>'
+	elem = '<!ELEMENT '+elt+' '+chare+'>'
 	message('DTD (CHARE):')
 	print(elem)
-	#print "CHARE: "+elem
 	chareDTDFile = open('dtd-chares.txt','a')
 	chareDTDFile.write(elem)
 	chareDTDFile.write('\n')
@@ -64,12 +63,12 @@ for elt in elementnames:
 		sore = ''
 	else:
 		sore=soa.sore()
+	# Normalform nach hier:
 	sore = '('+sore+')'
 	elem = '<!ELEMENT '+elt+' '+sore+'>'
 	print()
 	message('DTD (SORE):')
 	print(elem)
-	#print "SORE: "+elem
 	soreDTDFile = open('dtd-sores.txt','a')
 	soreDTDFile.write(elem)
 	soreDTDFile.write('\n')
