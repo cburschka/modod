@@ -95,8 +95,8 @@ Let $\emptyword$ denote the empty word. Let $\Sigma$ be a terminal alphabet.
 \paragraph{Regular Expressions:} The set of \emph{regular expressions} over $\Sigma$ is defined as follows:
 \begin{enumerate}
 	\item \emph{Terminals:} Every terminal letter $a\in \Sigma$ is a regular expression, and $L(a)=\{a\}$.
-	\item \emph{Plus:} If $\alpha$ is a regular expression, then $\beta\df(\alpha)\rxp$ is a regular expression, and $L(\beta)=L(\alpha)\rxp$.
-	\item \emph{Option:} If $\alpha$ is a regular expression, then $\beta\df(\alpha)\rxo$ is a regular expression, and $L(\beta)=L(\alpha)\cup\{\emptyword\}$.
+	\item \emph{Plus:} If $\alpha$ is a regular expression, then $\beta\df\alpha\rxp$ is a regular expression, and $L(\beta)=L(\alpha)\rxp$.
+	\item \emph{Option:} If $\alpha$ is a regular expression, then $\beta\df\alpha\rxo$ is a regular expression, and $L(\beta)=L(\alpha)\cup\{\emptyword\}$.
 	\item \emph{Concatenation:} If $\alpha_1,\alpha_2,\ldots,\alpha_n$ ($n\geq 2$) are regular expressions, then $\beta\df(\alpha_1\rxc \alpha_2 \rxc \ldots \rxc \alpha_n)$ is a regular expression, and $L(\beta)=L(\alpha_1)\cdot L(\alpha_2)\cdot \ldots \cdot L(\alpha_n)$.
 	\item \emph{Choice:} If $\alpha_1,\alpha_2,\ldots,\alpha_n$ ($n\geq 2$) are regular expressions, then $\beta\df(\alpha_1\ror \alpha_2 \ror \cdots \ror \alpha_n)$ is a regular expression, and $L(\beta)=\bigcup_{i=1}^{n} L(\alpha_i)$.
 \end{enumerate}
