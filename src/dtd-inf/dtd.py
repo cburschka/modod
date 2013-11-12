@@ -84,8 +84,7 @@ for elt in elementnames:
 	
 	if args.writeToFile:
 		fn = writeprefix+elt+writesuffix
-		soreFile = open('sores.txt','a')
+		soreFile = open(fn,'w')
 		soreFile.write(sore)
-		soreFile.write('\n')
 		soreFile.close()
 		message(elt+" written to file.")
