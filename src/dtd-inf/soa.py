@@ -486,8 +486,6 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 	"""A class for generalized single occurrence automata (SOA)"""
 	src = 0
 	snk = 1
-	# src = 'DDFysInappropriateSrcConstant'
-	# snk = 'DDFysInappropriateSnkConstant'
 
 	def __init__(self):
 		self.succ = {}
@@ -537,7 +535,6 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 		return nodestr
 		
 	def getTopolSort(self):
-		# geklaut von http://alda.iwr.uni-heidelberg.de/index.php/Graphen_und_Graphenalgorithmen#Zwei_Algorithmen_zum_Finden_der_topologischen_Sortierung
 		# eigentlich sollte das gleich beim Tarjan erledigt werden, bin aber zu faul
 		result = []                          
 		visited = {}
