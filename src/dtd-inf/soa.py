@@ -9,24 +9,15 @@ dbmode = False
 
 class SingleOccurrenceAutomaton:
 	"""A class for single occurrence automata (SOA)"""
-	src = 'DDFysInappropriateSrcConstant'
-	snk = 'DDFysInappropriateSnkConstant'
+	src = 0
+	snk = 1
 	def __init__(self):
 		self.succ = {}
-		self.prec = {}
 		self.epscount = 0
 
 	def setEdges(self,edgeblob):
 		self.succ = edgeblob
 	
-	def computePrec(self):
-		for orig in self.succ:
-			for target in self.succ[orig]:
-				if target in self.prec:
-					self.prec[target]+=[orig]
-				else:
-					self.prec[target]=[orig]
-
 	def nodeList(self):
 		#returns a list of all nodes of the SOA
 		# assumes that soa is strongly connected, snk always reachable
@@ -236,7 +227,6 @@ class SingleOccurrenceAutomaton:
 		else:
 			newsucc = {}
 			for o in self.succ: # iterate over all possible origins:
-				#print('o:',o)
 				if o in extractees:
 					olab = o
 				else:
@@ -312,8 +302,6 @@ class SingleOccurrenceAutomaton:
 		return reachable
 	
 	def reachableAvoiding(self,start,end,avoid):
-		# if dbmode:
-		# 			print('Computing reachableAvoiding with\nstart',start,'\nend',end,'\navoiding',avoid)
 		"""returns true iff <end> can be reached from <start> without passing nodes from <avoid>"""
 		checkNodes = [start]
 		visited = [start]
@@ -335,14 +323,11 @@ class SingleOccurrenceAutomaton:
 	def exclusive(self,node):
 		if dbmode:
 			print('Computing exclusive for',node)
-		self.computePrec()
 		cand = []
 		for c in self.succ:
 			if (c!=node) and self.reachableAvoiding(node,c,[]):
 				cand+=[c]
-		#cand = list(filter(lambda x: (x!=node) and self.reachableAvoiding(node,x,[]),self.succ))
 		res = []
-		#print('Candidates are:',cand)
 		for c in cand:
 			if not self.reachableAvoiding(self.src,c,[node]):
 				res += [c]
@@ -365,7 +350,7 @@ class SingleOccurrenceAutomaton:
 
 		while len(toBeChecked) > 0:
 			n = toBeChecked.pop()
-			ssr = False # successor of source reachable
+			ssr = False # ssr: Successor of Source Reachable
 			for t in self.succ[n]:
 				if t in self.succ[self.src]:
 					ssr=True
@@ -377,7 +362,7 @@ class SingleOccurrenceAutomaton:
 		if dbmode:
 			print("Computed W as "+str(W))
 
-		# bend transitions
+		# bend transitions from elements of W to succ of src
 		newSucc = {}
 		for n in self.succ:
 			if n not in W: 
@@ -409,13 +394,16 @@ class SingleOccurrenceAutomaton:
 			if len(sclcPlu)>0:
 				U = sclcPlu[0]
 			elif len(sclcMon)>0:
-				U = sclcMon[0]
+				if dbmode:
+					print("small SCLCs found:",sclcMon)
+				U = [sclcMon[0]]
 			else:
 				U=[]
 
 			if len(U)>0: # line 4 in paper
 				if dbmode:
 					print('Case 2')
+					print('U is',U)
 				B = self.extract(U)
 				B.bend()
 				#print 'Bend resulted in'+str(B.succ)+' -- this will be sorified next'
@@ -496,12 +484,14 @@ class SingleOccurrenceAutomaton:
 
 class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 	"""A class for generalized single occurrence automata (SOA)"""
-	src = 'DDFysInappropriateSrcConstant'
-	snk = 'DDFysInappropriateSnkConstant'
+	src = 0
+	snk = 1
+	# src = 'DDFysInappropriateSrcConstant'
+	# snk = 'DDFysInappropriateSnkConstant'
 
 	def __init__(self):
 		self.succ = {}
-		self.prec = {}
+		self.pred = {}
 		self.plussed = {}
 		self.trivial = {}
 		self.level = {}
@@ -561,14 +551,23 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 		visit(self.src)
 		result.reverse()
 		return result
-	
+
+	def computePred(self):
+		for orig in self.succ:
+			for target in self.succ[orig]:
+				if target in self.pred:
+					self.pred[target]+=[orig]
+				else:
+					self.pred[target]=[orig]
+
+
 	def constructLevelOrder(self):
-		self.computePrec()
+		self.computePred()
 		lvl = {}
 		lvl[self.src]=0
 		tops = self.getTopolSort()
 		for n in tops[1:]:
-			lvl[n]=max([lvl[s] for s in self.prec[n]])+1
+			lvl[n]=max([lvl[s] for s in self.pred[n]])+1
 		for node in lvl:
 			if lvl[node] not in self.level:
 				self.level[lvl[node]]=[node]
