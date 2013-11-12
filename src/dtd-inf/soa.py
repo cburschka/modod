@@ -111,6 +111,7 @@ class SingleOccurrenceAutomaton:
 	    for finding the strongly connected components of a graph.
 	    Based on: http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 		taken from http://www.logarithmic.net/pfh-files/blog/01208083168/tarjan.py
+		by Dries Verdegem
 	    """
 
 	    index_counter = [0]
@@ -591,7 +592,7 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 			C = self.getTrivials(l) # trivial nodes
 			B = list(filter(lambda x: x not in C,self.level[l])) # non trivial nodes
 			for a in B:
-				res += self.labelify(a)
+				res += ' '+self.labelify(a)
 				if self.skip[l] or (len(B)+len(C)>1):
 					res += '?'
 			if len(C)>0:
