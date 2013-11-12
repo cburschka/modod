@@ -1,0 +1,36 @@
+dtd-infer [options] xml-file
+
+-a
+--automaton [PREFIX]
+For every element e, the inferred SOA is written to the file PREFIX-e.dot in the dot-Format of Graphviz
+
+-c 
+--chare
+Infer a chain regular expression, instead of a single occurrence regular expression.
+
+-d 
+--dre 
+Write output as deterministic regular expression, instead of an element type declaration.
+
+-e
+--elements LIST 
+Determines for which element names an element type declaration is inferred. If not provided, all elements are computed.
+
+-h
+--help
+Print list of options.
+
+-n 
+--no-inference
+Do not infer element type declarations. (Only useful if -a is used as well.)
+
+-w 
+--write [PREFIX [SUFFIX]]
+For every element e, the inferred element type declaration is written to the file PREFIX-e.SUFFIX (SUFFIX defaults to dtd)
+
+EXAMPLE
+dtd-infer -c -e country river -o test.dtd mondial.dtd
+
+
+dtd-infer -a SOA -n mondial.dtd
+For every element e of mondial.dtd, infer the descriptive SOA, and write it to SOA-e.dot
