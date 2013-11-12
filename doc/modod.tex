@@ -286,7 +286,7 @@ The three measures can be interpreted as follows.
 \begin{itemize}
 	\item\texttt{DREfromString(str)} takes a string $s$, parses it into a DRE (exception if $s$ is not a representation of a DRE, in particular if expression is not deterministic). Some details:
 	\begin{itemize}
-		\item Do not assume that one letter in the string $s$ directly corresponds to one letter in $\Sigma$. A letter could be named \texttt{a1}, or \texttt{123}, or \texttt{alphaAlpha} (etc.). For now, assume that letters are defined by ``standard'' alphanumerical characters (i.\,e., \texttt{a-zA-Z0-9} -- case sensitive). If possible, try to avoid making extensions needlessly hard; but do not consider this a major design goal.
+		\item Do not assume that one letter in the string $s$ directly corresponds to one letter in $\Sigma$. A letter could be named \texttt{a1}, or \texttt{123}, or \texttt{alphaAlpha} (etc.). For now, assume that letters are defined by ``standard'' alphanumerical characters (i.\,e., \texttt{a-zA-Z0-9} -- case sensitive) and underscore (\texttt{\_}). If possible, try to avoid making extensions needlessly hard; but do not consider this a major design goal.
 		\item For now, the concatenation operator can be represented with a comma. Consider that we might also decide to allow the use of whitespace as concatenation operator. Also, consider that whitespace might be allowed between parentheses or around operators. In other words, there might be a point where we want to consider the following three expressions equivalent. \begin{enumerate}
 			\item \texttt{((a,b,a1)|b)}
 			\item \texttt{((a b a1)|b)}
