@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(description="This tool reads a finite sample an
 parser.add_argument("words",help="the words of the sample",nargs="+")
 
 parser.add_argument("-a","--automaton",help="for every element E, the inferred SOA is written to the file AUTOMATON in the dot-format of Graphviz",dest="soafilename")
-parser.add_argument("-c","--chare",help="infer a chain regular expression (CHARE), instead of a single occurrence regular expression (SORE)",action="store_true")
+parser.add_argument("-c","--chare",help="infer a chain regular expression (CHARE), instead of a full SORE",action="store_true")
 parser.add_argument("-o","--outfile",help="write result to OUTFILE",dest="outfilename")
 
 args=parser.parse_args()
@@ -33,7 +33,6 @@ if args.outfilename!=None:
 	soreFile = open(args.outfilename)
 	soreFile.write(sore)
 	soreFile.close()
-
 
 # begin ping lu
 # soa.addString("ababc")

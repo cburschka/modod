@@ -1,0 +1,14 @@
+#!/bin/bash
+echo This script deletes all txt, dot, dtd files in this directory
+echo Are you sure that is what you want?
+echo Last chance to hit Ctrl-C 
+read -p "Press [Enter] key to start deleting all this stuff"
+for SUFF in txt dot dtd
+do
+if ls *.$SUFF &> /dev/null;
+then 
+	rm *.$SUFF
+else
+	echo No .$SUFF file to delete
+fi
+done
