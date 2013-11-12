@@ -53,7 +53,7 @@ for elt in elementnames:
 		chare=soa.chare()
 
 	elem = '<!ELEMENT '+elt+' ('+chare+')>'
-	message('CHARE:')
+	message('DTD (CHARE):')
 	print(elem)
 	#print "CHARE: "+elem
 	chareDTDFile = open('dtd-chares.txt','a')
@@ -64,12 +64,21 @@ for elt in elementnames:
 		sore = ''
 	else:
 		sore=soa.sore()
-	elem = '<!ELEMENT '+elt+' ('+sore+')>'
-	message('SORE:')
+	sore = '('+sore+')'
+	elem = '<!ELEMENT '+elt+' '+sore+'>'
+	print()
+	message('DTD (SORE):')
 	print(elem)
 	#print "SORE: "+elem
 	soreDTDFile = open('dtd-sores.txt','a')
 	soreDTDFile.write(elem)
 	soreDTDFile.write('\n')
-	soreDRDFile.close()
+	soreDTDFile.close()
+	print()
+	message('SORE:')
+	print(sore)
+	soreFile = open('sores.txt','a')
+	soreFile.write(sore)
+	soreFile.write('\n')
+	soreFile.close()
 	message('Number of processed elements: '+str(wordcounter))
