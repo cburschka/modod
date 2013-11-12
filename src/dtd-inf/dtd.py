@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import argparse
 import xml.etree.cElementTree as ET
 from soa import SingleOccurrenceAutomaton
