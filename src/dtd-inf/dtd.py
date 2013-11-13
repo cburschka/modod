@@ -1,10 +1,14 @@
 #!/usr/local/bin/python3
 
 import argparse
-import xml.etree.cElementTree as ET
-from soa import SingleOccurrenceAutomaton
+import itertools
 import os.path
 import sys
+import time
+import xml.etree.cElementTree as ET
+
+from soa import SingleOccurrenceAutomaton
+
 
 parser = argparse.ArgumentParser(description="TODO: What this tool does",epilog="TODO: Further info")
 parser.add_argument("files",help="the XML file(s) from which the element type declarations are to be inferred",nargs="+")
@@ -15,66 +19,92 @@ parser.add_argument("-d","--dre",help="write output as deterministic regular exp
 parser.add_argument("-e","--elements",help="determines for which element names an element type declaration is inferred",dest="elements",nargs="+",default=[])
 parser.add_argument("-f","--force",help="necessary if no list of elements is provided",action="store_true")
 parser.add_argument("-n","--no-inference",help="do not infer element type declarations (only useful if -a is used as well)",dest="noinference",action="store_true")
+parser.add_argument("-s","--skip-empty",help="do not display declarations of elements that have no childer",dest="skipempty",action="store_true")
+parser.add_argument("-t","--timestamps",help="show timestamps for important tasks",action="store_true")
 parser.add_argument("-v","--verbose",help="print additional information and time stamps",dest="verbose",action="store_true")
 parser.add_argument("-w","--write",help="for every element E, write the inferred DTD/regular expression to a file WPREFIX E.WSUFFIX (definable by -wp,-ws)",action="store_true",dest="writeToFile")
-parser.add_argument("-wp","--write-prefix",help="sets WPREFIXe (for -w)",action="store_true",dest="writeprefix",default="")
-parser.add_argument("-ws","--write-suffix",help="sets WPREFIXe (for -w)",action="store_true",dest="writesuffix",default="dtd")
+parser.add_argument("-wp","--write-prefix",help="sets WPREFIXe (for -w), default empty",action="store_true",dest="writeprefix",default="")
+parser.add_argument("-ws","--write-suffix",help="sets WPREFIXe (for -w), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
 
 args=parser.parse_args()
 
 def timeStamp():
 	return round((time.time() - startTime),3)
 
-def message(m):
-	if args.verbose:
+def tmessage(m):
+	if timestamps:
 		print(timeStamp(), m)
 
-filenames = args.files
+def message(m):
+	if verbose:
+		print(timeStamp(), m)
+
+allElts = args.force
 elementnames = args.elements
+filenames = args.files
+skipempty = args.skipempty
+timestamps = args.timestamps
+verbose = args.verbose
+writeprefix = args.writeprefix
+writesuffix = args.writesuffix
+
+startTime = time.time()
 
 if (elementnames==[]):
 	if not args.force:
 		sys.stderr.write("***ERROR***\nNo list of elements provided. Default behaviour is to infer an element type definition for every element in the file or list of files. This is probably very, very slow. If you really want to do this, use the -f option. (As soon as this function is implemented.)\n")
-	else:
-		sys.stderr.write("***ERROR***\nNo list of elements provided. Not yet implemented.\n")
+
 for f in filenames:
 	if not os.path.isfile(f):
 		sys.stderr.write("***ERROR***\nFile "+f+" not found.\n")
 		sys.exit()	
 
 
-for elt in elementnames:
-	message("Inferring Element "+elt)
-	soa = SingleOccurrenceAutomaton()
-	for fn in filenames:
-		message('Parsing XML file '+fn)
-		root = ET.parse(fn)
-		message("Parsed. Searching tree")
-		for found in root.findall('.//'+elt): # this is highly inefficient, but still kinda okay
+# generate the SOAs
+soas = {}
+
+for fn in filenames:
+	tmessage('Parsing XML file'+fn)
+	root = ET.parse(fn)
+	for found in itertools.chain(root.findall('.'),root.findall('.//*')):
+		if (found.tag in elementnames) or allElts:
+			if found.tag not in soas:
+				soas[found.tag] = SingleOccurrenceAutomaton()
+				
 			word = [SingleOccurrenceAutomaton.src]
 			for child in found:
 				word = word + [child.tag]
 			word = word + [SingleOccurrenceAutomaton.snk]
-			soa.addWord(word)
-	message("SOA for "+elt+" created") 
-	
+			soas[found.tag].addWord(word)
+			message("Added "+str(word)+" to "+str(found.tag))
+		
+for elt in soas:
+	if elt not in soas:
+		soas[elt] = SingleOccurrenceAutomaton()
+
+# process the SOAs		
+for elt in soas:
+	if args.noinference:
+		print("You chose not to infer, so that's all.")
+		sys.exit()
+
+	tmessage('Processing soa of '+str(elt))
 	if (args.autprefix != ''):
 		if args.autprefix==None:
 			autpref = 'SOA-'
 		else:
 			autpref = args.autprefix
 		soaFile= open(autpref+elt+'.dot', 'w')
-		soaFile.write(soa.toDotString())
+		soaFile.write(soas[elt].toDotString())
 		soaFile.close()
-		
-	if args.noinference:
-		print("You chose no inference, so that's all.")
-		sys.exit()
-		
+				
 	if args.chare:
-		sore = soa.chare()
+		sore = soas[elt].chare()
 	else:
-		sore = soa.sore()
+		sore = soas[elt].sore()
+
+	if (sore == '') and skipempty:
+		continue
 	
 	# Normalform nach hier:
 	sore = '('+sore+')'
