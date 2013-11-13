@@ -39,6 +39,11 @@ def message(m):
 	if verbose:
 		print(timeStamp(), m)
 
+def pretty(regex):
+	# in Zukunft: return nnf(parse(regex)), wobei für nnf/parse die passenden Funktionen einzusetzen sind
+	return regex
+	
+
 allElts = args.force
 elementnames = args.elements
 filenames = args.files
@@ -102,6 +107,8 @@ for elt in soas:
 		sore = soas[elt].chare()
 	else:
 		sore = soas[elt].sore()
+
+	sore=pretty(sore)
 
 	if (sore == '') and skipempty:
 		continue
