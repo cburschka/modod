@@ -1,5 +1,5 @@
-import grammar_strict as gs
-import grammar_extended as ge
+import modod.grammar_strict as gs
+import modod.grammar_extended as ge
 
 g1 = gs.build_grammar()
 g2 = ge.build_grammar()
