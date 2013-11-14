@@ -6,6 +6,7 @@ import os.path
 import sys
 import time
 import xml.etree.cElementTree as ET
+import modod
 
 from soa import SingleOccurrenceAutomaton
 
@@ -40,9 +41,9 @@ def message(m):
 		print(timeStamp(), m)
 
 def pretty(regex):
-	# in Zukunft: return nnf(parse(regex)), wobei für nnf/parse die passenden Funktionen einzusetzen sind
-	return regex
-	
+	# --(in Zukunft: return nnf(parse(regex)), wobei für nnf/parse die passenden Funktionen einzusetzen sind)
+	# Test:
+	modod.write(modod.nnf(modod.parse(regex)))
 
 allElts = args.force
 elementnames = args.elements
