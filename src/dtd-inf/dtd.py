@@ -26,8 +26,8 @@ parser.add_argument("-v","--verbose",help=argparse.SUPPRESS,dest="verbose",actio
 # parser.add_argument("-t","--timestamps",help="show timestamps for important tasks",action="store_true")
 # parser.add_argument("-v","--verbose",help="print additional information and time stamps",dest="verbose",action="store_true")
 parser.add_argument("-we","--write-elements",help="for every element E, write the inferred DTD/regular expression to a file WPREFIX E.WSUFFIX (definable by -wp,-ws)",action="store_true",dest="writeElements")
-parser.add_argument("-wep","--write-prefix",help="sets WPREFIXe (for -w), default empty",action="store_true",dest="writeprefix",default="")
-parser.add_argument("-wes","--write-suffix",help="sets WPREFIXe (for -w), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
+parser.add_argument("-wep","--write-prefix",help="sets WPREFIXe (for -we), default empty",action="store_true",dest="writeprefix",default="")
+parser.add_argument("-wes","--write-suffix",help="sets WPREFIXe (for -we), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
 
 args=parser.parse_args()
 
@@ -124,8 +124,8 @@ for elt in soas:
 	if (sore == '') and skipempty:
 		continue
 	
-	# Normalform nach hier:
-	sore = '('+sore+')'
+	if sore[-1:]!=')':
+		sore = '('+sore+')'
 
 	if not args.dre:
 		sore = '<!ELEMENT '+elt+' '+sore+'>'
