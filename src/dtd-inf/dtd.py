@@ -21,11 +21,13 @@ parser.add_argument("-e","--elements",help="determines for which element names a
 parser.add_argument("-f","--force",help="necessary if no list of elements is provided",action="store_true")
 parser.add_argument("-n","--no-inference",help="do not infer element type declarations (only useful if -a is used as well)",dest="noinference",action="store_true")
 parser.add_argument("-s","--skip-empty",help="do not display declarations of elements that have no childer",dest="skipempty",action="store_true")
-parser.add_argument("-t","--timestamps",help="show timestamps for important tasks",action="store_true")
-parser.add_argument("-v","--verbose",help="print additional information and time stamps",dest="verbose",action="store_true")
-parser.add_argument("-w","--write",help="for every element E, write the inferred DTD/regular expression to a file WPREFIX E.WSUFFIX (definable by -wp,-ws)",action="store_true",dest="writeToFile")
-parser.add_argument("-wp","--write-prefix",help="sets WPREFIXe (for -w), default empty",action="store_true",dest="writeprefix",default="")
-parser.add_argument("-ws","--write-suffix",help="sets WPREFIXe (for -w), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
+parser.add_argument("-t","--timestamps",help=argparse.SUPPRESS,action="store_true")
+parser.add_argument("-v","--verbose",help=argparse.SUPPRESS,dest="verbose",action="store_true")
+# parser.add_argument("-t","--timestamps",help="show timestamps for important tasks",action="store_true")
+# parser.add_argument("-v","--verbose",help="print additional information and time stamps",dest="verbose",action="store_true")
+parser.add_argument("-we","--write-elements",help="for every element E, write the inferred DTD/regular expression to a file WPREFIX E.WSUFFIX (definable by -wp,-ws)",action="store_true",dest="writeElements")
+parser.add_argument("-wep","--write-prefix",help="sets WPREFIXe (for -w), default empty",action="store_true",dest="writeprefix",default="")
+parser.add_argument("-wes","--write-suffix",help="sets WPREFIXe (for -w), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
 
 args=parser.parse_args()
 
@@ -130,7 +132,7 @@ for elt in soas:
 
 	print(sore)
 	
-	if args.writeToFile:
+	if args.writeElements:
 		fn = writeprefix+elt+writesuffix
 		soreFile = open(fn,'w')
 		soreFile.write(sore)
