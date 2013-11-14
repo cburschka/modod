@@ -1,16 +1,41 @@
+import grammar_strict as gs
 import grammar_extended as ge
+import dre_lexer
+import graph
 
-lexer = ge.build_lexer()
-grammar = ge.build_grammar()
-parser = grammar.slr1()
+strict = (dre_lexer.build_lexer(), gs.build_grammar().slr1())
+extended = (ge.build_lexer(), ge.build_grammar().slr1())
 
+cases = [
+    '(((a)))',
+    '(a? a,a* a+)',
+    '(a(Test|Te)*b(c+))?',
+    'a|b c | ef d* (a b)?',
+    '(a+|a)'
+]
 
-def parse(s):
-    tokens = lexer.lex(s)
-    parsed = parser.parse(tokens, verbose=False)
-    return parsed.dre()
+for i,s in enumerate(cases):
+    print('============================')
+    print('Input:', s)
+    for label, (lexer, parser) in (('strict', strict), ('extended', extended)):
+        print('+++++++++++++++++++')
+        print('Format:', label)
+        try:
 
-for s in ['(((a)))', '(a? a,a* a+)', '(a(Test|Te)*b(c+))?', 'a|b c | ef d* (a b)?']:
-    tree = parse(s)
-    print('++++\n', s, '\nwird zu:\n', tree, '\nin kanonischer Form: ', tree.formula())
-
+            chain = lexer.lex(s)
+            print('  Kette:\n    ', ' '.join(map(str, chain)))
+            tree = parser.parse(chain, verbose=False)
+            tree_dre = tree.dre()
+            print('  Baum:\n    ', tree_dre)
+            canonical = tree_dre.formula()
+            print('  Kanonische Form\n    ', canonical)
+            print('  Eingabe = Kanonische Form?\n    ', ['Nein', 'Ja'][canonical == s])
+            reparse = strict[1].parse(strict[0].lex(canonical)).dre().formula()
+            print('  Kanonisch -> Strict -> Kanonisch:\n    ', reparse)
+            print('  Kanonische Form ist Fixpunkt?\n    ', ['Nein', 'Ja'][canonical == reparse])
+            nodes, edges = tree.graph()
+            open('{}-{}-syntax.dot'.format(label, i), 'w+').write(graph.digraph(nodes, edges).xdot())
+            nodes, edges = tree_dre.graph()
+            open('{}-{}-dre.dot'.format(label, i), 'w+').write(graph.digraph(nodes, edges).xdot())
+        except ValueError as e:
+            print('  Fehler:', e)

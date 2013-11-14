@@ -1,7 +1,8 @@
 import grammar_strict as gs
 import tokens
 import dre
-import cfg
+from parser.cfg import slr1_grammar
+import parser.symbol
 import lexer
 
 # Erweiterungen:
@@ -46,7 +47,7 @@ class Choice(Nary, gs.Choice):
     pass
 
 # Optionaler Komma-Delimiter.
-class ConcatDelim(cfg.NonTerm):
+class ConcatDelim(parser.symbol.NonTerm):
     pass
 
 # Expr kann jede Form haben.
@@ -59,7 +60,7 @@ class Expr3(gs.Expr):
     pass
 
 # *-Nichtterminal
-class Star(tokens.Token):
+class Star(parser.symbol.Term):
     pass
 
 def build_grammar():
@@ -79,10 +80,10 @@ def build_grammar():
         gs.TermExpr : {(tokens.Terminal,)}
     }
 
-    return cfg.grammar(productions, start=gs.Expr)
+    return parser.cfg.slr1_grammar(productions, start=gs.Expr)
 
 def build_lexer():
-    meta = tokens.meta.copy()
-    meta['*'] = Star
+    table = tokens.table.copy()
+    table['*'] = Star
 
-    return lexer.lexer(meta, tokens.Terminal)
+    return lexer.lexer(table, tokens.Terminal)

@@ -1,9 +1,9 @@
 import tokens
 import dre
-import cfg
-import lexer
+import parser.cfg
+from parser.symbol import NonTerm
 
-class Nary(cfg.NonTerm):
+class Nary(NonTerm):
     def children(self):
         yield self.production[1]
         yield self.production[3]
@@ -13,16 +13,16 @@ class Nary(cfg.NonTerm):
     def dre(self):
         return self.dre_type()([x.dre() for x in self.children()])
 
-class NaryRep(cfg.NonTerm):
+class NaryRep(NonTerm):
     def children(self):
         if self.production:
             yield self.production[1]
             for x in self.production[2].children():
                 yield x
 
-class Unary(cfg.NonTerm):
+class Unary(NonTerm):
     def child(self):
-        return self.production[1]
+        return self.production[0]
     def dre(self):
         return self.dre_type()(self.child().dre())
 
@@ -46,11 +46,11 @@ class Optional(Unary):
     def dre_type(self):
         return dre.Optional
 
-class TermExpr(cfg.NonTerm):
+class TermExpr(NonTerm):
     def dre(self):
         return dre.Terminal(self.production[0].symbol)
 
-class Expr(cfg.NonTerm):
+class Expr(NonTerm):
     def dre(self):
         return self.production[0].dre()
 
@@ -58,11 +58,11 @@ def build_grammar():
     productions = { Expr : {(Concat,), (Choice,), (Plus,), (Optional,), (TermExpr,)},
         Concat : {(tokens.LeftParen, Expr, tokens.Comma, Expr, ConcatRep, tokens.RightParen)},
         Choice : {(tokens.LeftParen, Expr, tokens.Pipe, Expr, ChoiceRep, tokens.RightParen)},
-        Plus : {(tokens.LeftParen, Expr, tokens.RightParen, tokens.PlusSign)},
-        Optional : {(tokens.LeftParen, Expr, tokens.RightParen, tokens.Question)},
+        Plus : {(Expr, tokens.PlusSign)},
+        Optional : {(Expr, tokens.Question)},
         ChoiceRep : {(tokens.Pipe, Expr, ChoiceRep), ()},
         ConcatRep : {(tokens.Comma, Expr, ConcatRep), ()},
         TermExpr : {(tokens.Terminal,)}
     }
 
-    return cfg.grammar(productions, start=Expr)
+    return parser.cfg.slr1_grammar(productions, start=Expr)

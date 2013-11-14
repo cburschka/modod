@@ -1,36 +1,36 @@
-import lexer
+from parser.symbol import Term
 
-class Token:
-    def __str__(self):
-        return self.__class__.__name__
-
-class Terminal(Token):
+# Ein Terminalsymbol der Grammatik für reguläre Ausdrücke,
+# welches für ein Terminalsymbol im regulären Ausdruck steht.
+class Terminal(Term):
     def __init__(self, symbol):
         self.symbol = symbol
     def __str__(self):
         return 'Terminal("{0}")'.format(self.symbol)
 
-class LeftParen(Token):
-    def __str__(self):
-        return "LeftParen"
-
-class RightParen(Token):
-    def __str__(self):
-        return "RightParen"
-
-class Comma(Token):
+class LeftParen(Term):
     pass
 
-class Pipe(Token):
+class RightParen(Term):
     pass
 
-class PlusSign(Token):
+class Comma(Term):
     pass
 
-class Question(Token):
+class Pipe(Term):
     pass
 
-meta = {'(' : LeftParen, ')' : RightParen, ',' : Comma, '|' : Pipe, '+' : PlusSign, '?' : Question}
+class PlusSign(Term):
+    pass
 
-def build_lexer():
-    return lexer.lexer(meta, Terminal)
+class Question(Term):
+    pass
+
+table = {
+    '(' : LeftParen,
+    ')' : RightParen,
+    ',' : Comma,
+    '|' : Pipe,
+    '+' : PlusSign,
+    '?' : Question
+}
