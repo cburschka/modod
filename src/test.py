@@ -1,6 +1,6 @@
-import grammar_strict as gs
-import grammar_extended as ge
-import dre_lexer
+import modod.grammar_strict as gs
+import modod.grammar_extended as ge
+import modod.dre_lexer as dre_lexer
 import graph
 
 strict = (dre_lexer.build_lexer(), gs.build_grammar().slr1())

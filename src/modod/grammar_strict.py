@@ -1,5 +1,5 @@
-import tokens
-import dre
+from . import tokens
+from . import dre
 import parser.cfg
 from parser.symbol import NonTerm
 

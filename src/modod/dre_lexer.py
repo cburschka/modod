@@ -1,5 +1,5 @@
-import lexer
-import tokens
+from . import lexer
+from . import tokens
 
 def allowed_character(c):
     return 'a' <= c <= 'z' or 'A' <= c <= 'Z' or '0' <= c <= '9' or c == '_'

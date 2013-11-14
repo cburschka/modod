@@ -1,9 +1,9 @@
-import grammar_strict as gs
-import tokens
-import dre
+from . import grammar_strict as gs
+from . import tokens
+from . import dre
 from parser.cfg import slr1_grammar
 import parser.symbol
-import lexer
+from . import lexer
 
 # Erweiterungen:
 #   - Konkatenation ohne Komma
