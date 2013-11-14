@@ -41,9 +41,13 @@ def message(m):
 		print(timeStamp(), m)
 
 def pretty(regex):
-	# --(in Zukunft: return nnf(parse(regex)), wobei für nnf/parse die passenden Funktionen einzusetzen sind)
 	# Test:
-	modod.write(modod.nnf(modod.parse(regex)))
+	message('Prettifying '+regex)
+	if regex != '':
+		p = modod.write(modod.nnf(modod.parse(regex)))
+		return p.replace('+?','*')
+	else: 
+		return ''
 
 allElts = args.force
 elementnames = args.elements
@@ -72,7 +76,9 @@ soas = {}
 for fn in filenames:
 	tmessage('Parsing XML file'+fn)
 	root = ET.parse(fn)
-	for found in itertools.chain(root.findall('.'),root.findall('.//*')):
+	tmessage('Starting iterating the tree')
+	for found in root.iter():
+#	for found in itertools.chain(root.findall('.'),root.findall('.//*')):
 		if (found.tag in elementnames) or allElts:
 			if found.tag not in soas:
 				soas[found.tag] = SingleOccurrenceAutomaton()
@@ -83,6 +89,8 @@ for fn in filenames:
 			word = word + [SingleOccurrenceAutomaton.snk]
 			soas[found.tag].addWord(word)
 			message("Added "+str(word)+" to "+str(found.tag))
+	tmessage('Done with iterating the tree')
+	
 		
 for elt in soas:
 	if elt not in soas:
