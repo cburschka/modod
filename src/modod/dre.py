@@ -7,19 +7,19 @@ class DRE:
 
     # Kanonische Form des Ausdrucks
     def formula(self):
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__.__name__ + '::formula')
 
     # Beschriftung des Knotens im Baum
     def label(self):
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__.__name__ + '::label')
 
     # Nary-Normal-Form: kein Nary-Operator enthält ein Kind gleichen Typs.
     def nary_normal_form(self):
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__.__name__ + '::nary_normal_form')
 
     # True genau dann wenn der Ausdruck das leere Wort akzeptiert.
     def accepts_empty(self):
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__.__name__ + '::accepts_empty')
 
     # p•
     def _pnf1(self):
@@ -33,6 +33,13 @@ class DRE:
     # p▵
     def _pnf4(self):
         raise NotImplementedError(self.__class__.__name__ + '::p▵')
+
+    def size(self):
+        raise NotImplementedError(self.__class__.__name__ + '::size')
+    def syn(self):
+        raise NotImplementedError(self.__class__.__name__ + '::syn')
+    def aw(self):
+        raise NotImplementedError(self.__class__.__name__ + '::aw')
 
 class Terminal(DRE):
     def __init__(self, symbol):
@@ -59,6 +66,13 @@ class Terminal(DRE):
     def _pnf4(self):
         return self
 
+    def size(self):
+        return 1
+    def syn(self):
+        return 1
+    def aw(self):
+        return 1
+
 
 class Operator(DRE):
     pass
@@ -83,6 +97,13 @@ class Unary(Operator):
         return self.__class__(self.child._pnf3())
     def _pnf4(self):
         return self.__class__(self.child._pnf3())
+
+    def size(self):
+        return 1 + self.child.size()
+    def syn(self):
+        return 1 + self.child.syn()
+    def aw(self):
+        return self.child.aw()
 
 class Nary(Operator):
     def __init__(self, children):
@@ -113,6 +134,14 @@ class Nary(Operator):
         return self.__class__([x._pnf1() for x in self.children])
     def _pnf4(self):
         return self.__class__([x._pnf3() for x in self.children])
+
+    def size(self):
+        return 2 + (n-1) + sum(x.size() for x in self.children)
+    def syn(self):
+        return (n-1) + sum(x.syn() for x in self.children)
+    def aw(self):
+        return sum(x.aw() for x in self.children)
+
 
 class Optional(Unary):
     def formula(self):

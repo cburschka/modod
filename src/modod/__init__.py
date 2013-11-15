@@ -13,5 +13,12 @@ def pnf(dre):
     # nnf(p▴(p•(x)))
     return nnf(dre._pnf1()._pnf3())
 
+def size(dre):
+    return dre.size()
+def syn(dre):
+    return dre.syn()
+def aw(dre):
+    return dre.aw()
+
 def write(dre):
     return dre.formula()
