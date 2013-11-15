@@ -5,19 +5,38 @@ class DRE:
         nodes[len(nodes)] = self.label()
         return nodes, edges
 
+    # Kanonische Form des Ausdrucks
+    def formula(self):
+        raise NotImplementedError()
+        
+    # Beschriftung des Knotens im Baum
+    def label(self):
+        raise NotImplementedError()
+
+    # Nary-Normal-Form: kein Nary-Operator enthält ein Kind gleichen Typs.
+    def nary_normal_form(self):
+        raise NotImplementedError()
+
+    # True genau dann wenn der Ausdruck das leere Wort akzeptiert.
+    def accepts_empty(self):
+        raise NotImplementedError()
+
+
 class Terminal(DRE):
     def __init__(self, symbol):
         self.symbol = symbol
 
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
+
     def formula(self):
         return self.symbol
     def label(self):
         return self.symbol
-
     def nary_normal_form(self):
         return Terminal(self.symbol)
+    def accepts_empty(self):
+        return False
 
 class Operator(DRE):
     pass
@@ -67,27 +86,31 @@ class Optional(Unary):
         return '{}?'.format(self.child.formula())
     def label(self):
         return '?'
-    pass
+    def accepts_empty(self):
+        return True
 
 class Plus(Unary):
     def formula(self):
         return '{}+'.format(self.child.formula())
     def label(self):
         return '+'
-    pass
+    def accepts_empty(self):
+        return self.child.is_empty()
 
 class Concatenation(Nary):
     def formula(self):
         return '({})'.format(','.join(x.formula() for x in self.children))
     def label(self):
         return ','
-    pass
+    def accepts_empty(self):
+        return all(x.is_empty() for x in self.children)
 
 class Choice(Nary):
     def formula(self):
         return '({})'.format('|'.join(x.formula() for x in self.children))
     def label(self):
         return '|'
-    pass
+    def accepts_empty(self):
+        return any(x.is_empty() for x in self.children)
 
 
