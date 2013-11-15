@@ -8,7 +8,7 @@ class DRE:
     # Kanonische Form des Ausdrucks
     def formula(self):
         raise NotImplementedError()
-        
+
     # Beschriftung des Knotens im Baum
     def label(self):
         raise NotImplementedError()
@@ -21,6 +21,18 @@ class DRE:
     def accepts_empty(self):
         raise NotImplementedError()
 
+    # p•
+    def _pnf1(self):
+        raise NotImplementedError(self.__class__.__name__ + '::p•')
+    # p◦
+    def _pnf2(self):
+        raise NotImplementedError(self.__class__.__name__ + '::p◦')
+    # p▴
+    def _pnf3(self):
+        raise NotImplementedError(self.__class__.__name__ + '::p▴')
+    # p▵
+    def _pnf4(self):
+        raise NotImplementedError(self.__class__.__name__ + '::p▵')
 
 class Terminal(DRE):
     def __init__(self, symbol):
@@ -34,9 +46,19 @@ class Terminal(DRE):
     def label(self):
         return self.symbol
     def nary_normal_form(self):
-        return Terminal(self.symbol)
+        return self
     def accepts_empty(self):
         return False
+
+    def _pnf1(self):
+        return self
+    def _pnf2(self):
+        return self
+    def _pnf3(self):
+        return self
+    def _pnf4(self):
+        return self
+
 
 class Operator(DRE):
     pass
@@ -55,6 +77,12 @@ class Unary(Operator):
     def nary_normal_form(self):
         return self.__class__(self.child.nary_normal_form())
 
+    def _pnf2(self):
+        return self.child
+    def _pnf3(self):
+        return self.__class__(self.child._pnf3())
+    def _pnf4(self):
+        return self.__class__(self.child._pnf3())
 
 class Nary(Operator):
     def __init__(self, children):
@@ -81,6 +109,11 @@ class Nary(Operator):
                 children.append(nf)
         return self.__class__(children)
 
+    def _pnf1(self):
+        return self.__class__([x._pnf1() for x in self.children])
+    def _pnf4(self):
+        return self.__class__([x._pnf3() for x in self.children])
+
 class Optional(Unary):
     def formula(self):
         return '{}?'.format(self.child.formula())
@@ -88,6 +121,10 @@ class Optional(Unary):
         return '?'
     def accepts_empty(self):
         return True
+
+    def _pnf1(self):
+        x = self.child._pnf1()
+        return x if self.child.accepts_empty() else Optional(x)
 
 class Plus(Unary):
     def formula(self):
@@ -97,6 +134,10 @@ class Plus(Unary):
     def accepts_empty(self):
         return self.child.is_empty()
 
+    def _pnf1(self):
+        x = self.child._pnf1()._pnf2()
+        return Optional(Plus(x)) if self.child.accepts_empty() else Plus(x)
+
 class Concatenation(Nary):
     def formula(self):
         return '({})'.format(','.join(x.formula() for x in self.children))
@@ -104,6 +145,15 @@ class Concatenation(Nary):
         return ','
     def accepts_empty(self):
         return all(x.is_empty() for x in self.children)
+
+    def _pnf2(self):
+        if self.accepts_empty():
+            return Choice([x._pnf2() for x in self.children])
+        else:
+            return self
+
+    def _pnf3(self):
+        return Concatenation([x._pnf3() for x in self.children])
 
 class Choice(Nary):
     def formula(self):
@@ -113,4 +163,17 @@ class Choice(Nary):
     def accepts_empty(self):
         return any(x.is_empty() for x in self.children)
 
+    def _pnf2(self):
+        return Choice([x._pnf2() for x in self.children])
+    def _pnf3(self):
+        if self.accepts_empty():
+            x = [x._pnf4() for x in self.children]
+
+            # "special"
+            if any(x.__class__ is Concatenation and x.accepts_empty() for x in self.children):
+                return Choice(x)
+            else:
+                return Optional(Choice(x))
+        else:
+            return Choice([self._pnf3() for x in self.children])
 
