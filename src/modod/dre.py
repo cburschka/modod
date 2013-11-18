@@ -220,9 +220,9 @@ class Concatenation(Nary):
     def _label(self):
         return ','
     def _test_empty(self):
-        return all(x.accepts_empty() for x in self.children)
+        return all(x._test_empty() for x in self.children)
     def _pnf2(self):
-        if self.accepts_empty():
+        if self._test_empty():
             return Choice([x._pnf2() for x in self.children])
         else:
             return self
@@ -241,14 +241,14 @@ class Choice(Nary):
     def _label(self):
         return '|'
     def _test_empty(self):
-        return any(x.accepts_empty() for x in self.children)
+        return any(x._test_empty() for x in self.children)
     def _pnf2(self):
         return Choice([x._pnf2() for x in self.children])
     def _pnf3(self):
-        if self.accepts_empty():
+        if self._test_empty():
             x = [x._pnf4() for x in self.children]
             # "special"
-            if any(x.__class__ is Concatenation and x.accepts_empty() for x in self.children):
+            if any(x.__class__ is Concatenation and x._test_empty() for x in self.children):
                 return Choice(x)
             else:
                 return Optional(Choice(x))
