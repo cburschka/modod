@@ -27,7 +27,7 @@ class DRE:
 
     # Die erlaubten ersten Zeichen der Worte dieser Sprache:
     def first(self):
-        pass #TODO
+        return self._first()
 
 
     # Baum-Traversierung. (Achtung, erfordert Erweiterung der Datenstruktur!)
@@ -117,6 +117,9 @@ class Terminal(DRE):
     def _count_terms(self):
         return {self.symbol : 1}
 
+    def _first(self):
+        return {self.symbol}
+
 class Operator(DRE):
     pass
 
@@ -146,6 +149,9 @@ class Unary(Operator):
         return 1 + self.child._size(operators, parentheses)
     def _count_terms(self):
         return self.child._count_terms()
+
+    def _first(self):
+        return self.child._first()
 
 class Nary(Operator):
     def __init__(self, children):
@@ -223,6 +229,14 @@ class Concatenation(Nary):
     def _pnf3(self):
         return Concatenation([x._pnf3() for x in self.children])
 
+    def _first(self):
+        f = set()
+        for x in self.children:
+            f |= x._first()
+            if not x._test_empty():
+                break
+        return f
+
 class Choice(Nary):
     def _label(self):
         return '|'
@@ -241,3 +255,8 @@ class Choice(Nary):
         else:
             return Choice([x._pnf3() for x in self.children])
 
+    def _first(self):
+        f = set()
+        for x in self.children:
+            f |= x._first()
+        return f
