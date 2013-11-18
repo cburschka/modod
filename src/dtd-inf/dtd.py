@@ -46,7 +46,7 @@ def pretty(regex):
 	# Test:
 	message('Prettifying '+regex)
 	if regex != '':
-		p = modod.write(modod.nnf(modod.parse(regex)))
+		p = modod.DREfromString(regex).toNNF().toString()
 		return p.replace('+?','*')
 	else: 
 		return ''

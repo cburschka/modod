@@ -6,8 +6,8 @@ import string
 #   - Genau ein Terminal-Symbol, das aus beliebigen Character bestehen kann,
 #     aber keinen Whitespace und keine Meta-Zeichen enthält.
 #
-# Optional: char_filter (Character -> Bool), gibt aus, ob ein Character 
-#     (der keinem Meta-Symbol zugeordnet ist) Teil eines Terminalsymbols sein 
+# Optional: char_filter (Character -> Bool), gibt aus, ob ein Character
+#     (der keinem Meta-Symbol zugeordnet ist) Teil eines Terminalsymbols sein
 #     darf. Tritt ein Character x auf, der weder Whitespace, noch Meta-Symbol,
 #     noch erlaubtes Zeichen ist, so schlägt die lexikalische Analyse fehl.
 #
@@ -47,7 +47,7 @@ class lexer:
                 raise LexError(i, c)
 
         return tokens
-    
+
 class LexError(ValueError):
     def __init__(self, i, c):
         self.i, self.c = i, c
