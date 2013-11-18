@@ -10,7 +10,7 @@ class DRE:
     def toNNF(self):
         return self._nnf()
     def isInNNF(self):
-        return self._isnnf() #TODO
+        return self._isnnf()
 
     # Plus-Normal-Form
     def toPNF(self):
@@ -97,6 +97,8 @@ class Terminal(DRE):
         return self.symbol
     def _nnf(self):
         return self
+    def _isnnf(self):
+        return True
     def _test_empty(self):
         return False
 
@@ -132,6 +134,8 @@ class Unary(Operator):
         return self.child._formula() + self._label()
     def _nnf(self):
         return self.__class__(self.child._nnf())
+    def _isnnf(self):
+        return self.child._isnnf()
     def _pnf2(self):
         return self.child
     def _pnf3(self):
@@ -167,6 +171,9 @@ class Nary(Operator):
             else:
                 children.append(nf)
         return self.__class__(children)
+
+    def _isnnf(self):
+        return all(self.__class__ != x.__class__ and x._isnnf() for x in self.children)
 
     def _pnf1(self):
         return self.__class__([x._pnf1() for x in self.children])
