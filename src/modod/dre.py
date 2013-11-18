@@ -161,7 +161,7 @@ class Plus(Unary):
     def label(self):
         return '+'
     def accepts_empty(self):
-        return self.child.is_empty()
+        return self.child.accepts_empty()
 
     def _pnf1(self):
         x = self.child._pnf1()._pnf2()
@@ -173,7 +173,7 @@ class Concatenation(Nary):
     def label(self):
         return ','
     def accepts_empty(self):
-        return all(x.is_empty() for x in self.children)
+        return all(x.accepts_empty() for x in self.children)
 
     def _pnf2(self):
         if self.accepts_empty():
@@ -190,7 +190,7 @@ class Choice(Nary):
     def label(self):
         return '|'
     def accepts_empty(self):
-        return any(x.is_empty() for x in self.children)
+        return any(x.accepts_empty() for x in self.children)
 
     def _pnf2(self):
         return Choice([x._pnf2() for x in self.children])
@@ -204,5 +204,5 @@ class Choice(Nary):
             else:
                 return Optional(Choice(x))
         else:
-            return Choice([self._pnf3() for x in self.children])
+            return Choice([x._pnf3() for x in self.children])
 
