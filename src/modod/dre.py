@@ -1,26 +1,67 @@
+import graph
+
 class DRE:
-    def graph(self, nodes=None, edges=None):
-        if nodes == None:
-            nodes, edges = {}, set()
-        nodes[len(nodes)] = self.label()
-        return nodes, edges
 
-    # Kanonische Form des Ausdrucks
-    def formula(self):
-        raise NotImplementedError(self.__class__.__name__ + '::formula')
-
-    # Beschriftung des Knotens im Baum
-    def label(self):
-        raise NotImplementedError(self.__class__.__name__ + '::label')
+    ##############################################################
+    # Spezifikation
+    ##############################################################
 
     # Nary-Normal-Form: kein Nary-Operator enthält ein Kind gleichen Typs.
-    def nary_normal_form(self):
-        raise NotImplementedError(self.__class__.__name__ + '::nary_normal_form')
+    def toNNF(self):
+        return self._nnf()
+    def isInNNF(self):
+        return self._isnnf()
 
-    # True genau dann wenn der Ausdruck das leere Wort akzeptiert.
-    def accepts_empty(self):
-        raise NotImplementedError(self.__class__.__name__ + '::accepts_empty')
+    # Plus-Normal-Form
+    def toPNF(self):
+        return self._pnf1()._pnf3()._nnf()
+    def isInPNF(self):
+        pass #TODO
 
+    # Menge der Terminalsymbole und deren Anzahl:
+    def terminals(self):
+        pass #TODO
+    def terminalOccurrences(self):
+        pass #TODO
+
+
+    # Die erlaubten ersten Zeichen der Worte dieser Sprache:
+    def first(self):
+        pass #TODO
+
+
+    # Baum-Traversierung. (Achtung, erfordert Erweiterung der Datenstruktur!)
+    def getParent(self):
+        return self._parent #TODO
+    def leftSibling(self):
+        return self._left #TODO
+    def rightSibling(self):
+        return self._rigth #TODO
+    def getNextL2RBF(self):
+        return self._l2rbf # TODO
+
+    # size: Anzahl Terminalzeichen, Operatoren, Klammern
+    def size(self):
+        return self._size(operators=True, parentheses=True)
+    # syn/rpn: Anzahl Terminalzeichen, Operatoren
+    def rpn(self):
+        return self._size(operators=True, parentheses=False)
+    # aw/awidth: Anzahl Terminalzeichen
+    def awidth(self):
+        return self._size(operators=False, parentheses=False)
+
+    # Ausgabe:
+    def toString(self):
+        return self._formula()
+    def toDOTString(self):
+        nodes, edges = self._graph()
+        return graph.digraph(nodes, edges).xdot()
+    def toTikZString(self):
+        nodes, edges = self._graph()
+        return graph.digraph(nodes, edges).tikz() # TODO
+
+
+    # "Private" Methoden:
     # p•
     def _pnf1(self):
         raise NotImplementedError(self.__class__.__name__ + '::p•')
@@ -34,8 +75,14 @@ class DRE:
     def _pnf4(self):
         raise NotImplementedError(self.__class__.__name__ + '::p▵')
 
-    def size(self, operators, parentheses):
+    def _size(self, operators, parentheses):
         raise NotImplementedError(self.__class__.__name__ + '::size')
+
+    def _graph(self, nodes=None, edges=None):
+        if nodes == None:
+            nodes, edges = {}, set()
+        nodes[len(nodes)] = self._label()
+        return nodes, edges
 
 class Terminal(DRE):
     def __init__(self, symbol):
@@ -44,13 +91,13 @@ class Terminal(DRE):
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
 
-    def formula(self):
+    def _formula(self):
         return self.symbol
-    def label(self):
+    def _label(self):
         return self.symbol
-    def nary_normal_form(self):
+    def _nnf(self):
         return self
-    def accepts_empty(self):
+    def _test_empty(self):
         return False
 
     def _pnf1(self):
@@ -62,7 +109,7 @@ class Terminal(DRE):
     def _pnf4(self):
         return self
 
-    def size(self, operators, parentheses):
+    def _size(self, operators, parentheses):
         return 1
 
 class Operator(DRE):
@@ -74,42 +121,41 @@ class Unary(Operator):
     def __str__(self):
         return '{} [{}]'.format(self.__class__.__name__, self.child)
 
-    def graph(self, nodes=None, edges=None):
-        nodes, edges = DRE.graph(self, nodes, edges)
+    def _graph(self, nodes=None, edges=None):
+        nodes, edges = DRE._graph(self, nodes, edges)
         edges.add((len(nodes)-1, len(nodes)))
-        return self.child.graph(nodes, edges)
-
-    def nary_normal_form(self):
-        return self.__class__(self.child.nary_normal_form())
-
+        return self.child._graph(nodes, edges)
+    def _formula(self):
+        return self.child._formula() + self._label()
+    def _nnf(self):
+        return self.__class__(self.child._nnf())
     def _pnf2(self):
         return self.child
     def _pnf3(self):
         return self.__class__(self.child._pnf3())
     def _pnf4(self):
         return self.__class__(self.child._pnf3())
-
-    def size(self, operators, parentheses):
-        return 1 + self.child.size(operators, parentheses)
+    def _size(self, operators, parentheses):
+        return 1 + self.child._size(operators, parentheses)
 
 class Nary(Operator):
     def __init__(self, children):
         self.children = children
     def __str__(self):
-        return '{} [{}]'.format(self.__class__.__name__, ', '.join(map(str, self.children)))
-
-    def graph(self, nodes=None, edges=None):
-        nodes, edges = DRE.graph(self, nodes, edges)
+        return self.__class__.__name__ + ' [' + ', '.join(map(str, self.children)) + ']'
+    def _formula(self):
+        return '(' + self._label().join(x._formula() for x in self.children) + ')'
+    def _graph(self, nodes=None, edges=None):
+        nodes, edges = DRE._graph(self, nodes, edges)
         i = len(nodes) - 1
         for x in self.children:
             edges.add((i, len(nodes)))
-            nodes, edges = x.graph(nodes, edges)
+            nodes, edges = x._graph(nodes, edges)
         return nodes, edges
-
-    def nary_normal_form(self):
+    def _nnf(self):
         children = []
         for x in self.children:
-            nf = x.nary_normal_form()
+            nf = x._nnf()
             # Direkter Nachfolger gleichen Typs:
             if nf.__class__ == self.__class__:
                 children.extend(nf.children)
@@ -121,65 +167,50 @@ class Nary(Operator):
         return self.__class__([x._pnf1() for x in self.children])
     def _pnf4(self):
         return self.__class__([x._pnf3() for x in self.children])
-
-    def size(self):
-        return 2*parentheses + (n-1)*operators + sum(x.size(operators, parentheses) for x in self.children)
+    def _size(self):
+        return 2*parentheses + (n-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
 
 class Optional(Unary):
-    def formula(self):
-        return '{}?'.format(self.child.formula())
-    def label(self):
+    def _label(self):
         return '?'
-    def accepts_empty(self):
+    def _test_empty(self):
         return True
-
     def _pnf1(self):
         x = self.child._pnf1()
-        return x if self.child.accepts_empty() else Optional(x)
+        return x if self.child._test_empty() else Optional(x)
 
 class Plus(Unary):
-    def formula(self):
-        return '{}+'.format(self.child.formula())
-    def label(self):
+    def _label(self):
         return '+'
-    def accepts_empty(self):
-        return self.child.accepts_empty()
-
+    def _test_empty(self):
+        return self.child._test_empty()
     def _pnf1(self):
         x = self.child._pnf1()._pnf2()
-        return Optional(Plus(x)) if self.child.accepts_empty() else Plus(x)
+        return Optional(Plus(x)) if self.child._test_empty() else Plus(x)
 
 class Concatenation(Nary):
-    def formula(self):
-        return '({})'.format(','.join(x.formula() for x in self.children))
-    def label(self):
+    def _label(self):
         return ','
-    def accepts_empty(self):
+    def _test_empty(self):
         return all(x.accepts_empty() for x in self.children)
-
     def _pnf2(self):
         if self.accepts_empty():
             return Choice([x._pnf2() for x in self.children])
         else:
             return self
-
     def _pnf3(self):
         return Concatenation([x._pnf3() for x in self.children])
 
 class Choice(Nary):
-    def formula(self):
-        return '({})'.format('|'.join(x.formula() for x in self.children))
-    def label(self):
+    def _label(self):
         return '|'
-    def accepts_empty(self):
+    def _test_empty(self):
         return any(x.accepts_empty() for x in self.children)
-
     def _pnf2(self):
         return Choice([x._pnf2() for x in self.children])
     def _pnf3(self):
         if self.accepts_empty():
             x = [x._pnf4() for x in self.children]
-
             # "special"
             if any(x.__class__ is Concatenation and x.accepts_empty() for x in self.children):
                 return Choice(x)

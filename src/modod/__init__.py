@@ -1,24 +1,18 @@
 from . import grammar_extended
+from . import grammar_strict
+from . import dre_lexer
 
-_lexer = grammar_extended.build_lexer()
-_parser = grammar_extended.build_grammar().slr1()
+_lexerExt = grammar_extended.build_lexer()
+_parserExt = grammar_extended.build_grammar().slr1()
+_lexerStrict = dre_lexer.build_lexer()
+_parserStrict = grammar_strict.build_grammar().slr1()
 
-def parse(string):
-    return _parser.parse(_lexer.lex(string)).dre()
+def DREfromstring(string, strict=False):
+    if strict:
+        return _parserStrict.parse(_lexerStrict.lex(string)).dre()
+    else:
+        return _parserExt.parse(_lexerExt.lex(string)).dre()
 
-def nnf(dre):
-    return dre.nary_normal_form()
+def compareDREs(a, b):
+    raise NotImplementedError() #TODO
 
-def pnf(dre):
-    # nnf(p▴(p•(x)))
-    return nnf(dre._pnf1()._pnf3())
-
-def size(dre):
-    return dre.size(operators=True, parentheses=True)
-def syn(dre):
-    return dre.size(operators=True, parentheses=False)
-def aw(dre):
-    return dre.size(operators=False, parentheses=False)
-
-def write(dre):
-    return dre.formula()
