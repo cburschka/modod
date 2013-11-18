@@ -7,7 +7,7 @@ _parserExt = grammar_extended.build_grammar().slr1()
 _lexerStrict = dre_lexer.build_lexer()
 _parserStrict = grammar_strict.build_grammar().slr1()
 
-def DREfromstring(string, strict=False):
+def DREfromString(string, strict=False):
     if strict:
         return _parserStrict.parse(_lexerStrict.lex(string)).dre()
     else:

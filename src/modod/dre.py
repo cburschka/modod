@@ -10,7 +10,7 @@ class DRE:
     def toNNF(self):
         return self._nnf()
     def isInNNF(self):
-        return self._isnnf()
+        return self._isnnf() #TODO
 
     # Plus-Normal-Form
     def toPNF(self):
@@ -20,9 +20,9 @@ class DRE:
 
     # Menge der Terminalsymbole und deren Anzahl:
     def terminals(self):
-        pass #TODO
+        return set(self._count_terms().keys())
     def terminalOccurrences(self):
-        pass #TODO
+        return self._count_terms()
 
 
     # Die erlaubten ersten Zeichen der Worte dieser Sprache:
@@ -112,6 +112,9 @@ class Terminal(DRE):
     def _size(self, operators, parentheses):
         return 1
 
+    def _count_terms(self):
+        return {self.symbol : 1}
+
 class Operator(DRE):
     pass
 
@@ -137,6 +140,8 @@ class Unary(Operator):
         return self.__class__(self.child._pnf3())
     def _size(self, operators, parentheses):
         return 1 + self.child._size(operators, parentheses)
+    def _count_terms(self):
+        return self.child._count_terms()
 
 class Nary(Operator):
     def __init__(self, children):
@@ -169,6 +174,16 @@ class Nary(Operator):
         return self.__class__([x._pnf3() for x in self.children])
     def _size(self):
         return 2*parentheses + (n-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
+
+    def _count_terms(self):
+        count = {}
+        for x in self.children:
+            for t,c in x._count_terms().items():
+                if t in count:
+                    count[t] += c
+                else:
+                    count[t] = c
+        return count
 
 class Optional(Unary):
     def _label(self):
