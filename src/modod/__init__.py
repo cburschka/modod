@@ -14,11 +14,11 @@ def pnf(dre):
     return nnf(dre._pnf1()._pnf3())
 
 def size(dre):
-    return dre.size()
+    return dre.size(operators=True, parentheses=True)
 def syn(dre):
-    return dre.syn()
+    return dre.size(operators=True, parentheses=False)
 def aw(dre):
-    return dre.aw()
+    return dre.size(operators=False, parentheses=False)
 
 def write(dre):
     return dre.formula()
