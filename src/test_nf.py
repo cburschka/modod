@@ -22,12 +22,12 @@ for i,s in enumerate(cases):
         reparse = parser.parse(lexer.lex(canonical)).dre().formula()
         print('  Kanonisch -> Strict -> Kanonisch:\n    ', reparse)
         print('  Kanonische Form ist Fixpunkt?\n    ', ['Nein', 'Ja'][canonical == reparse])
-        
+
         nf = tree_dre.nary_normal_form()
-        
+
         print('  Normalform:\n    ', nf)
         print('  Normalform kanonisch:\n    ', nf.formula())
-        
+
         nodes, edges = tree_dre.graph()
         open('nftest-{}.dot'.format(i), 'w+').write(graph.digraph(nodes, edges).xdot())
         nodes, edges = nf.graph()
