@@ -352,7 +352,7 @@ Extends \texttt{DRE} by adding labels to the terminal nodes. Labels are integers
 \begin{itemize}
 	\item\texttt{first} set of entry nodes
 	\item\texttt{last} set of exit nodes
-	\item\texttt{follow} Set of edges (i.\,e., tuples of nodes). Might be empty (e.\,g., if the automaton accepts only a single letter)
+	\item\texttt{follow} Set of edges (i.\,e., tuples of nodes). Might be empty (e.\,g., if the automaton accepts only a single letter). I suggest using a dictionary that maps nodes to sets of successors. 
 	\item\texttt{nullable} True iff.\ the automaton accepts the empty word
 \end{itemize}
 Note that set set of vertices is not modeled explicitly. Furthermore, note that $\src$ and $\snk$ are not modeled as vertices, but via first, last, and nullable.
@@ -365,7 +365,9 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 	\item\texttt{toDOTStringDFA()} Returns a tree representation of the automaton as an DFA in the DOT format that is used by GraphViz. Every state contains the label as state name; terminals are written to the edges. Add an initial state which is connected to the states that correspond to elements of first, and make all states that correspond to elements of last accepting states.
 \end{itemize}
 \paragraph{The Conversion Algorithm}
-We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$ to denote follow, and $\nullable$ to denote wether an automaton is nullable. These can be used as functions, e.\,g, $\first(\mathcal{A})$ denotes the first set of the automaton $\mathcal{A}$. Denote the input (labeled) DRE by~$\delta$.
+We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$ to denote follow, and $\nullable$ to denote wether an automaton is nullable. These can be used as functions, e.\,g, $\first(\mathcal{A})$ denotes the first set of the automaton $\mathcal{A}$.
+
+\emph{Input:} (labeled) DRE~$\delta$.
 \begin{enumerate}
 	\item If $\delta$ is a (labeled) terminal, let $F\df L\df \{\delta\}$, $\follow\df\emptyset$, and set nullable to \emph{false}.
 	\item If $\delta$ is a unary operator, let $\gamma$ denote the (only) child of $\delta$.
