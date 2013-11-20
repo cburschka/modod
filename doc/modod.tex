@@ -44,6 +44,15 @@
 \DeclareMathOperator{\lab}{lab}
 \DeclareMathOperator{\src}{src}
 \DeclareMathOperator{\snk}{snk}
+\DeclareMathOperator{\err}{err}
+
+
+\DeclareMathOperator{\makeset}{MakeSet}
+\DeclareMathOperator{\union}{Union}
+\DeclareMathOperator{\find}{Find}
+\DeclareMathOperator{\push}{push}
+\DeclareMathOperator{\pop}{pop}
+
 
 \DeclareMathOperator{\OA}{OA}
 
@@ -303,7 +312,7 @@ The three measures can be interpreted as follows.
 		\item Optional: Allow omission of parentheses (if unambiguity is preserved, or unambiguity modulo nNF). Can also be implemented for some operators only (e.\,g., allow $a?$ instead of $(a)?$).
 		\item Optional: Allow use of \texttt{*} as shorthand. 
 	\end{itemize}
-		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the algorithm by Hopcroft and Karp (see Section~\ref{sec:dredef} for further information).
+%		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{DRE}}\label{sec:des:dre}
@@ -337,12 +346,12 @@ The three measures can be interpreted as follows.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{\texttt{LabeledDRE}}\label{sec:des:ldre}
+\subsection{\texttt{IndexedDRE}}\label{sec:des:idre}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Extends \texttt{DRE} by adding labels to the terminal nodes. Labels are integers, and every label occurs only once (i.\,e., is characteristic for that terminal). Ideally, labels start with 1 at the leftmost terminal symbol of the expression, and ascend accordingly. The rightmost label should be the alphabetic width of the expression. If this is too difficult, any other characteristic labeling function is fine, too.
+Extends \texttt{DRE} by adding indices to the terminal nodes. Indices are integers, and every index occurs only once (i.\,e., is characteristic for that terminal). Ideally, the indices start with 1 at the leftmost terminal symbol of the expression, and ascend accordingly. The rightmost index should be the alphabetic width of the expression. If this is too difficult, any other characteristic indexing function is fine, too.
 \paragraph{Functions}
 \begin{itemize}
-	\item constructor, takes a (D)RE and adds labels
+	\item constructor, takes a (D)RE and adds indices
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -354,22 +363,30 @@ Extends \texttt{DRE} by adding labels to the terminal nodes. Labels are integers
 	\item\texttt{last} set of exit nodes
 	\item\texttt{follow} Set of edges (i.\,e., tuples of nodes). Might be empty (e.\,g., if the automaton accepts only a single letter). I suggest using a dictionary that maps nodes to sets of successors. 
 	\item\texttt{nullable} True iff.\ the automaton accepts the empty word
+	\item\texttt{src} constant that symbolizes the $\src$ node of the automaton
+	\item\texttt{err} constant that symbolizes the failure node of the automaton	
 \end{itemize}
-Note that set set of vertices is not modeled explicitly. Furthermore, note that $\src$ and $\snk$ are not modeled as vertices, but via first, last, and nullable.
+Note that set set of vertices is not modeled explicitly. Furthermore, note that $\src$ and $\snk$ are not modeled as vertices, but via first, last, and nullable. In order to simplify the implementation, each nodes is modeled as a tuple of the label and some index.
 \paragraph{Functions}
 \begin{itemize}
-%	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}).
-	\item\texttt{isDeterministic()} Returns true if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$) such that $v_1$ and $v_2$ contain the same terminal letter, but with different labels.
-	\item constructor, takes a labeled (D)RE (see the conversion algorithm below)
-	\item\texttt{toDOTString()} Returns a tree representation of the automaton as an OA in the DOT format that is used by GraphViz  (\url{http://www.graphviz.org/}). Every state contains the terminal and the label. Add a dot for $\src$ and $\snk$ and respective edges to elements of first or from elements of last.
-	\item\texttt{toDOTStringDFA()} Returns a tree representation of the automaton as an DFA in the DOT format that is used by GraphViz. Every state contains the label as state name; terminals are written to the edges. Add an initial state which is connected to the states that correspond to elements of first, and make all states that correspond to elements of last accepting states.
+	\item constructor, takes a indexed (D)RE (see the conversion algorithm below)
+	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
+	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
+	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$) such that $v_1$ and $v_2$ contain the same label. 
+	\item\texttt{delta(node,terminal)}: When called with a node $v$ and a terminal $u$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic.
+%	\item\texttt{isComplete()} Returns \emph{true} if the automaton is complete.
+%	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
+	\item\texttt{toDOTString()} Returns a tree representation of the automaton as an OA in the DOT format that is used by GraphViz  (\url{http://www.graphviz.org/}). Every state contains the terminal and an index. Add a dot for $\src$ and $\snk$ and respective edges to elements of first or from elements of last.
+	\item\texttt{toDOTStringDFA()} Returns a tree representation of the automaton as an DFA in the DOT format that is used by GraphViz. Every state contains the index as state name; terminals are written to the edges. Add an initial state which is connected to the states that correspond to elements of first, and make all states that correspond to elements of last accepting states.
+	\item\texttt{equivalentTo(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $L(A)=L(B)$. Returns \texttt{A.equivalentToMeW(B) and (A.nullable()==B.nullable())}.
+	\item\texttt{equivalentToMeW(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See below for an algorithm that decides equivalence modulo $\emptyword$.
 \end{itemize}
 \paragraph{The Conversion Algorithm}
 We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$ to denote follow, and $\nullable$ to denote wether an automaton is nullable. These can be used as functions, e.\,g, $\first(\mathcal{A})$ denotes the first set of the automaton $\mathcal{A}$.
 
-\emph{Input:} (labeled) DRE~$\delta$.
+\emph{Input:} (indexed) DRE~$\delta$.
 \begin{enumerate}
-	\item If $\delta$ is a (labeled) terminal, let $F\df L\df \{\delta\}$, $\follow\df\emptyset$, and set nullable to \emph{false}.
+	\item If $\delta$ is a (indexed) terminal, let $F\df L\df \{\delta\}$, $\follow\df\emptyset$, and set nullable to \emph{false}.
 	\item If $\delta$ is a unary operator:
 	\begin{enumerate}[label*=\arabic*.]
 		\item Let $\gamma$ denote the (only) child of $\delta$.
@@ -424,6 +441,40 @@ We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$
 	\end{enumerate}
 \end{enumerate}
 
+\paragraph{The Equivalence mod $\emptyword$ Algorithm} This algorithm is a slightly modified version of the equivalence algorithm from Hopcroft and Karp~\cite{hop:lin}.
+
+\emph{Input:} Occurrence automata $A$, $B$
+
+\emph{Assertion:} the \texttt{nodes} sets of $A$ and $B$ are disjoint. (This is something the implementation has to ensure; e.\,g.\ by renaming indices. One approach: Make every index from $A$ odd ($i\to 2i-1$), and every index from $B$ even $i\to 2i$.)
+\begin{enumerate}
+	\item Let $V_A\df A.\mathtt{nodes()}\cup\{A.\src,A.\err\}$.
+	\item Let $V_B\df A.\mathtt{nodes()}\cup\{B.\src,B.\err\}$.
+	\item Initialize union-find structure\footnote{Also called disjoint set data structure. See any introduction to algorithms, e.\,g., Cormen et al.~\cite{cor:int}, Chapter~21.} $U$
+	\item Initialize stack $S$
+	\item For each $v\in V_A\cup V_B: U.\makeset(v)$ 
+	\item $U.\union(A.\src,A.\snk)$
+	\item $S.\push((A.\src,A.\snk))$
+	\item while $S$ not empty:
+	\begin{enumerate}[label*=\arabic*.]
+		\item $(q_A,q_B)\df S.\pop()$
+		\item For each $a\in \Sigma$:
+		\begin{enumerate}[label*=\arabic*.]
+			\item $r_A\df U.\find(\delta_A(q_A,a))$
+			\item $r_B\df U.\find(\delta_B(q_B,a))$
+			\item if $r_A\neq r_B$:
+			\begin{enumerate}[label*=\arabic*.]
+				\item $\union(r_A,r_B)$
+				\item $S.\push(r_A,r_B)$
+			\end{enumerate} 
+		\end{enumerate}
+	\end{enumerate}
+	\item $L\df A.\mathtt{last}()\cup B.\mathtt{last}()$
+	\item for each set $M$ in $U$:
+	\begin{enumerate}[label*=\arabic*.]
+		\item if there exist $u,v\in M$ such that $u\in\last$ and $v\notin\last$: return \emph{false}
+	\end{enumerate}
+	\item return \emph{true} (if no such $M$ with such elements exists)
+\end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % REFERENCES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
