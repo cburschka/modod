@@ -373,7 +373,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
 	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$) such that $v_1$ and $v_2$ contain the same label. 
-	\item\texttt{delta(node,terminal)}: When called with a node $v$ and a terminal $u$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic.
+	\item\texttt{delta(node,terminal)}: When called with a node $v$ and a terminal $u$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic. If the set is empty, return the node \texttt{err}. Also, for every terminal \texttt{a}, define \texttt{delta(err,a)=err}.
 %	\item\texttt{isComplete()} Returns \emph{true} if the automaton is complete.
 %	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
 	\item\texttt{toDOTString()} Returns a tree representation of the automaton as an OA in the DOT format that is used by GraphViz  (\url{http://www.graphviz.org/}). Every state contains the terminal and an index. Add a dot for $\src$ and $\snk$ and respective edges to elements of first or from elements of last.
@@ -452,19 +452,19 @@ We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$
 	\item Initialize union-find structure\footnote{Also called disjoint set data structure. See any introduction to algorithms, e.\,g., Cormen et al.~\cite{cor:int}, Chapter~21. For now, a simple implementation suffices (e.\,g., via linked lists), as long as it is refactor the code without changing anything outside of the union-find data structure.} $U$
 	\item Initialize stack $S$
 	\item For each $v\in V_A\cup V_B: U.\makeset(v)$ 
-	\item $U.\union(A.\src,A.\snk)$
-	\item $S.\push((A.\src,A.\snk))$
+	\item $U.\union(A.\src,b.\src)$
+	\item $S.\push((A.\src,B.\src))$
 	\item while $S$ not empty:
 	\begin{enumerate}[label*=\arabic*.]
 		\item $(q_A,q_B)\df S.\pop()$
 		\item For each $a\in \Sigma$:
 		\begin{enumerate}[label*=\arabic*.]
-			\item $r_A\df U.\find(\delta_A(q_A,a))$
-			\item $r_B\df U.\find(\delta_B(q_B,a))$
+			\item $r_A\df U.\find(\mathtt{A.delta}(q_A,a))$ 
+			\item $r_B\df U.\find(\mathtt{A.delta}(q_B,a))$ 
 			\item if $r_A\neq r_B$:
 			\begin{enumerate}[label*=\arabic*.]
 				\item $\union(r_A,r_B)$
-				\item $S.\push(r_A,r_B)$
+				\item $S.\push(r_A,r_B)$ (instead of $r_A,r_B$, choose representatives from the respective sets)
 			\end{enumerate} 
 		\end{enumerate}
 	\end{enumerate}
