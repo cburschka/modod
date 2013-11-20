@@ -373,13 +373,13 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
 	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$) such that $v_1$ and $v_2$ contain the same label. 
-	\item\texttt{delta(node,terminal)}: When called with a node $v$ and a terminal $u$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic. If the set is empty, return the node \texttt{err}. Also, for every terminal \texttt{a}, define \texttt{delta(err,a)=err}.
+	\item\texttt{delta(node,terminal)}: When called with a node $u$ and a terminal $a$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic. If the set is empty, return the node \texttt{err}. Also, for every terminal \texttt{a}, define \texttt{delta(err,a)=err}.
 %	\item\texttt{isComplete()} Returns \emph{true} if the automaton is complete.
 %	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
 	\item\texttt{toDOTString()} Returns a tree representation of the automaton as an OA in the DOT format that is used by GraphViz  (\url{http://www.graphviz.org/}). Every state contains the terminal and an index. Add a dot for $\src$ and $\snk$ and respective edges to elements of first or from elements of last.
 	\item\texttt{toDOTStringDFA()} Returns a tree representation of the automaton as an DFA in the DOT format that is used by GraphViz. Every state contains the index as state name; terminals are written to the edges. Add an initial state which is connected to the states that correspond to elements of first, and make all states that correspond to elements of last accepting states.
-	\item\texttt{equivalentTo(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $L(A)=L(B)$. Returns \texttt{A.equivalentToMeW(B) and (A.nullable()==B.nullable())}.
-	\item\texttt{equivalentToMeW(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See below for an algorithm that decides equivalence modulo $\emptyword$.
+	\item\texttt{equivalentTo(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $L(A)=L(B)$. Returns \texttt{A.equivalentToMEW(B) and (A.nullable()==B.nullable())}.
+	\item\texttt{equivalentToMEW(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See below for an algorithm that decides equivalence modulo $\emptyword$.
 \end{itemize}
 \paragraph{The Conversion Algorithm}
 We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$ to denote follow, and $\nullable$ to denote wether an automaton is nullable. These can be used as functions, e.\,g, $\first(\mathcal{A})$ denotes the first set of the automaton $\mathcal{A}$.
@@ -463,7 +463,7 @@ We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$
 			\item $r_B\df U.\find(\mathtt{A.delta}(q_B,a))$ 
 			\item if $r_A\neq r_B$:
 			\begin{enumerate}[label*=\arabic*.]
-				\item $\union(r_A,r_B)$
+				\item $U.\union(r_A,r_B)$
 				\item $S.\push(r_A,r_B)$ (instead of $r_A,r_B$, choose representatives from the respective sets)
 			\end{enumerate} 
 		\end{enumerate}
