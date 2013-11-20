@@ -445,7 +445,7 @@ We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$
 
 \emph{Input:} Occurrence automata $A$, $B$
 
-\emph{Assertion:} the \texttt{nodes} sets of $A$ and $B$ are disjoint. (This is something the implementation has to ensure; e.\,g.\ by renaming indices. One approach: Make every index from $A$ odd ($i\to 2i-1$), and every index from $B$ even $i\to 2i$.)
+\emph{Assertion:} the \texttt{nodes} sets of $A$ and $B$ are disjoint. (This is something the implementation has to ensure; e.\,g.\ by renaming indices. One approach: Make every index from $A$ odd ($i\mapsto 2i-1$), and every index from $B$ even $i\mapsto 2i$. On the other hand, it might be preferable to leave the indices of the OAs unchanged, and handle this during $\makeset$.)
 \begin{enumerate}
 	\item Let $V_A\df A.\mathtt{nodes()}\cup\{A.\src,A.\err\}$.
 	\item Let $V_B\df A.\mathtt{nodes()}\cup\{B.\src,B.\err\}$.
