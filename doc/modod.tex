@@ -449,7 +449,7 @@ We use $\first$ and $\last$ to denote the sets first and last (resp.), $\follow$
 \begin{enumerate}
 	\item Let $V_A\df A.\mathtt{nodes()}\cup\{A.\src,A.\err\}$.
 	\item Let $V_B\df A.\mathtt{nodes()}\cup\{B.\src,B.\err\}$.
-	\item Initialize union-find structure\footnote{Also called disjoint set data structure. See any introduction to algorithms, e.\,g., Cormen et al.~\cite{cor:int}, Chapter~21.} $U$
+	\item Initialize union-find structure\footnote{Also called disjoint set data structure. See any introduction to algorithms, e.\,g., Cormen et al.~\cite{cor:int}, Chapter~21. For now, a simple implementation suffices (e.\,g., via linked lists), as long as it is refactor the code without changing anything outside of the union-find data structure.} $U$
 	\item Initialize stack $S$
 	\item For each $v\in V_A\cup V_B: U.\makeset(v)$ 
 	\item $U.\union(A.\src,A.\snk)$
