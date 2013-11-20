@@ -372,7 +372,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 	\item constructor, takes a indexed (D)RE (see the conversion algorithm below)
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
-	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$) such that $v_1$ and $v_2$ contain the same label. 
+	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$ such that $v_1$ and $v_2$ contain the same label.)
 	\item\texttt{delta(node,terminal)}: When called with a node $u$ and a terminal $a$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic. If the set is empty, return the node \texttt{err}. Also, for every terminal \texttt{a}, define \texttt{delta(err,a)=err}.
 %	\item\texttt{isComplete()} Returns \emph{true} if the automaton is complete.
 %	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
