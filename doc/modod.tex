@@ -91,7 +91,7 @@
 \maketitle
 \pagestyle{fancy}
 
-This document as intended to develop into a target specification for the implementation parts of Project M.O.D.O.D.\footnote{Manipulation Operations Designed Only for DREs. \url{http://www.youtube.com/watch?v=-CFc7s4aDlM}}
+This document as intended to develop into a target specification for the implementation parts of Project M.O.D.O.D.\footnote{Manipulation Operations Designed Only for DREs. Obviously, this name was inspired by the great M.O.D.O.K. \url{http://www.youtube.com/watch?v=-CFc7s4aDlM}}
 
 At its current state, all contents are really confidential, and may not be distributed.
 
@@ -695,7 +695,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 
 \umlclass[type=abstract,x=2,y=0]{DRE}{}{}
 
-\umlclass[x=-3,y=-3]{Terminal}{}{}
+\umlclass[x=0.8,y=-3]{Terminal}{}{}
 \umlclass[type=abstract,x=4,y=-3]{Operator}{}{}
 \umlclass[type=abstract,x=2,y=-7]{Unary}{}{}
 \umlclass[type=abstract,x=6,y=-7]{Nary}{}{}
@@ -712,7 +712,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 \umlinherit[geometry=-|]{Nary}{Operator}
 
 %\umlaggreg[geometry=|-|,arm1=85mm,mult1=2..*,mult2=1]{Nary}{DRE}
-\umlaggreg[geometry=|-,anchor2=10,mult1=2..*,mult2=1]{Nary}{DRE}
+\umlaggreg[geometry=|-,anchor2=10,mult2=2..*,mult1=1]{Nary}{DRE}
 \umlaggreg[geometry=--,mult1=1,mult2=1]{Unary}{DRE}
 
 \umlinherit[geometry=|-|]{Optional}{Unary}
