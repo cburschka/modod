@@ -91,7 +91,7 @@
 \maketitle
 \pagestyle{fancy}
 
-This document as intended to develop into a target specification for the implementation parts of Project M.O.D.O.D.\footnote{Manipulation Operations Designed Only for DREs.}% \url{http://www.youtube.com/watch?v=-CFc7s4aDlM}}
+This document as intended to develop into a target specification for the implementation parts of Project M.O.D.O.D.\footnote{Manipulation Operations Designed Only for DREs. \url{http://www.youtube.com/watch?v=-CFc7s4aDlM}}
 
 At its current state, all contents are really confidential, and may not be distributed.
 
@@ -103,7 +103,7 @@ Also, this document is a very drafty work in progress. Some definitions might no
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{(Deterministic) Regular Expressions}\label{sec:dredef}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Let $\emptyword$ denote the empty word. Let $\Sigma$ be a terminal alphabet. 
+We use $\emptyset$ to denote the empty set, and the symbol $\setminus$ for set difference. Let $\emptyword$ denote the empty word, let $\Sigma$ be a terminal alphabet. 
 
 \paragraph{Regular Expressions:} The set of \emph{regular expressions} over $\Sigma$ is defined as follows:
 \begin{enumerate}
@@ -414,6 +414,9 @@ The three measures can be interpreted as follows.
 		\item Optional: Allow use of \texttt{*} as shorthand. 
 	\end{itemize}
 %		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
+\item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning \texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
+\item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
+
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{DRE}}\label{sec:des:dre}
@@ -460,8 +463,8 @@ Extends \texttt{DRE} by adding indices to the terminal nodes. Indices are intege
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \paragraph{Attributes}
 \begin{itemize}
-	\item\texttt{first} set of entry nodes
-	\item\texttt{last} set of exit nodes
+	\item\texttt{first} set of entry nodes (successors of $\src$)
+	\item\texttt{last} set of exit nodes (predecessors of $\snk$)
 	\item\texttt{follow} Set of edges (i.\,e., tuples of nodes). Might be empty (e.\,g., if the automaton accepts only a single letter). I suggest using a dictionary that maps nodes to sets of successors. 
 	\item\texttt{nullable} True iff.\ the automaton accepts the empty word
 	\item\texttt{src} constant that symbolizes the $\src$ node of the automaton
@@ -470,7 +473,7 @@ Extends \texttt{DRE} by adding indices to the terminal nodes. Indices are intege
 Note that set set of vertices is not modeled explicitly. Furthermore, note that $\src$ and $\snk$ are not modeled as vertices, but via first, last, and nullable. In order to simplify the implementation, each nodes is modeled as a tuple of the label and some index.
 \paragraph{Functions}
 \begin{itemize}
-	\item constructor, takes a indexed (D)RE (see Algorithm~\ref{algo:OADRE}, Section~\ref{sec:OADRE})
+	\item constructor, takes an indexed (D)RE (see Algorithm~\ref{algo:OADRE}, Section~\ref{sec:OADRE})
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
 	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$ such that $v_1$ and $v_2$ contain the same label.)
@@ -479,16 +482,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 %	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
 	\item\texttt{toDOTString()} Returns a tree representation of the automaton as an OA in the DOT format that is used by GraphViz  (\url{http://www.graphviz.org/}). Every state contains the terminal and an index, the edges are the edges from follow. Add a dot for $\src$ and $\snk$ and respective edges to elements of first or from elements of last.
 	\item\texttt{toDOTStringDFA()} Returns a tree representation of the automaton as an DFA in the DOT format that is used by GraphViz. Every state contains the index as state name; terminals are written to the edges. Add an initial state which is connected to the states that correspond to elements of first, and make all states that correspond to elements of last accepting states.
-	\item\texttt{equivalentTo(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $L(A)=L(B)$. Returns \texttt{A.equivalentToMEW(B) and (A.nullable()==B.nullable())}.
-	\item\texttt{equivalentToMEW(OccurrenceAutomaton B)} If called on an OccurrenceAutomaton $A$ when given an OccurrenceAutomaton $B$ as parameter, returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
 \end{itemize}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% REFERENCES
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-\addcontentsline{toc}{section}{References}
-\bibliographystyle{plain}
-\bibliography{modod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Examples}\label{sec:exam}
@@ -499,24 +493,24 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 Consider the deterministic regular expression 
 \[\alpha_1\df 
 ((
-	(\mathtt{a})\rxo
+	\mathtt{a}\rxo
  		\ror 
-	(\mathtt{b})\rxo
+	\mathtt{b}\rxo
 )\rxo
 \ror 
 (
-	(\mathtt{c})\rxo
+	\mathtt{c}\rxo
  		\ror 
-	(\mathtt{d})\rxo
+	\mathtt{d}\rxo
 )\rxo)\rxo
 \]
 This expression is in nNF, and its parse tree is depicted in Figure~\ref{fig:parse-alpha}. Applying $\wpnffun$ to $\alpha_1$ leads to the DRE 
 \[
-\wpnf{\alpha_1}= (((\mathtt{a})\rxo \ror (\mathtt{b})\rxo) \ror ((\mathtt{c})\rxo \ror (\mathtt{d})\rxo) )
+\wpnf{\alpha_1}= ((\mathtt{a}\rxo \ror \mathtt{b}\rxo) \ror (\mathtt{c}\rxo \ror \mathtt{d}\rxo) )
 \]
  which is depicted in Figure~\ref{fig:wpnf-alpha}. Note that $\wpnf{\alpha_1}$ is not in nNF; by converting it into nNF, we obtain the DRE 
 \[
-\nnf(\wpnf{\alpha_1})= ((\mathtt{a})\rxo \ror (\mathtt{b})\rxo \ror (\mathtt{c})\rxo \ror (\mathtt{d})\rxo),
+\nnf(\wpnf{\alpha_1})= (\mathtt{a}\rxo \ror \mathtt{b}\rxo \ror \mathtt{c}\rxo \ror \mathtt{d}\rxo),
 \]
 which is depicted in Figure~\ref{fig:nnf-wpnf-alpha}. Finally, the PNF of $\alpha_1$ is obtained by replacing the four occurrences of $\rxo$ with a single $\rxo$ operator over the $\ror$ (the $\rxo$ is moved by to the top). Formally, we apply the function, $\pnfupfun$ to create the PNF
 \[
@@ -568,7 +562,7 @@ The parse tree of this expression can be found in Figure~\ref{fig:pnf-alpha}.
 		}; 
 	\end{tikzpicture}
 \end{center}
-\caption{\label{fig:parse-alpha}From Example 1: The parse tree of the expression $\alpha_1=(((\mathtt{a})\rxo\ror (\mathtt{b})\rxo)\rxo\ror ((\mathtt{c})\rxo\ror (\mathtt{d})\rxo)\rxo)\rxo$.}
+\caption{\label{fig:parse-alpha}From Example 1: The parse tree of the expression $\alpha_1=((\mathtt{a}\rxo\ror \mathtt{b}\rxo)\rxo\ror (\mathtt{c}\rxo\ror \mathtt{d}\rxo)\rxo)\rxo$.}
 \end{figure}
 \begin{figure}
 	\begin{center}
@@ -670,25 +664,23 @@ The parse tree of this expression can be found in Figure~\ref{fig:pnf-alpha}.
 The PNF of the DRE
 \[ 
 \left(   
-\left(\mathtt{a}\right)\rxo
+\mathtt{a}\rxo
 \rxc
-\left(\mathtt{b}\right)\rxo
+\mathtt{b}\rxo
 \right)\rxp
 \]
 is 
 \[
-\left(   
-\left(\mathtt{a} \ror \mathtt{b}\right)\rxp
-\right)\rxo
+\left(\mathtt{a} \ror \mathtt{b}\right)\rxp\rxo
 \]
 %%%%%%%%%%%
 \subsection{Plus Normal Form (Example 3)}
 The PNF of the DRE
 \[
-\left(\left(a\right)\rxo \ror \left( \left(b\right)\rxo \rxc \left(c\right)\rxo \right)\right)\rxo 
+\left( a\rxo \ror \left( b\rxo \rxc c\rxo \right)\right)\rxo 
 \]
 is 
-\[ \left(a \ror \left( \left(b\right)\rxo \rxc \left(c\right)\rxo  \right) \right)
+\[ \left(a \ror \left( b\rxo \rxc c\rxo  \right) \right)
 \]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -729,9 +721,17 @@ is
 
 \end{tikzpicture}
 \end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% REFERENCES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+\bibliography{modod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TABLE OF CONTENTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
+\addcontentsline{toc}{section}{Contents}
 \tableofcontents
 \end{document}
