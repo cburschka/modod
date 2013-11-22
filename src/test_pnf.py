@@ -9,7 +9,8 @@ cases = [
    ['(a?|(b?,c?))?','(a|(b?,c?))','4.3'],
    ['(((a1? | b1?)? |(c1? | d1?)?)?,((a2? | b2?)? |(c2? | d2?)?)?)+','',''],
    ['(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?','',''],
-   ['(a*,b*)+','(a|b)+?','']
+   ['(a*,b*)+','(a|b)+?',''],
+   ['(((a?,b?)+,c*)+,d)','((a|b|c)+?,d) ','']
 ]
 
 problems = False
@@ -25,11 +26,10 @@ for ist,soll,desc in cases:
 
         print('PNF:\n    ', pnfIst)
         if soll!='':
-            print('Expected:\n    ', soll)
             if (pnfIst==soll):
-                print(' OK')
+                print('OK')
             else:
-                print('Not OK! (ಠ_ಠ)')
+                print('Not OK! (ಠ_ಠ). Expected:\n    ', soll)
                 problems = True
 
     except ValueError as e:
@@ -38,6 +38,6 @@ for ist,soll,desc in cases:
 print('============================')
 if problems:
     problems = True
-    print('An error occurred. (ಠ_ಠ)')
+    print('An error occurred.     (ಠ_ಠ)')
 else:
     print('All is well. ┏(-_-)┛┗(-_-﻿ )┓ ')
