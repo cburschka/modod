@@ -14,7 +14,7 @@ class DRE:
 
     # Plus-Normal-Form
     def toPNF(self):
-        return self._pnf1()._pnf3()._nnf()
+        return self._pnf1()._nnf()._pnf3()._nnf()
     def isInPNF(self):
         pass #TODO
 
@@ -143,8 +143,8 @@ class Unary(Operator):
         return self.child
     def _pnf3(self):
         return self.__class__(self.child._pnf3())
-    def _pnf4(self):
-        return self.__class__(self.child._pnf3())
+    # def _pnf4(self):
+    #     return self.__class__(self.child._pnf3())
     def _size(self, operators, parentheses):
         return 1 + self.child._size(operators, parentheses)
     def _count_terms(self):
@@ -206,6 +206,9 @@ class Optional(Unary):
     def _pnf1(self):
         x = self.child._pnf1()
         return x if self.child._test_empty() else Optional(x)
+    def _pnf4(self):
+        return self.child._pnf3()
+
 
 class Plus(Unary):
     def _label(self):
@@ -215,6 +218,9 @@ class Plus(Unary):
     def _pnf1(self):
         x = self.child._pnf1()._pnf2()
         return Optional(Plus(x)) if self.child._test_empty() else Plus(x)
+    def _pnf4(self):
+        return Plus(self.child._pnf3())
+
 
 class Concatenation(Nary):
     def _label(self):

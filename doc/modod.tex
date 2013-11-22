@@ -193,7 +193,7 @@ As the state with the label $b$ has two successors with the label $b$, we can co
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \paragraph{n-ary Normal Form:} The nNf of a regular expression is obtained by contracting all concatenation or choice nodes with children of the same type; i.\,e., $((a\ror b)\ror c)$ becomes $(a \ror b \ror c)$.
 
-\paragraph{Plus Normal Form:} A central part of our approach to DREs is the use of a normal form, called the \emph{plus normal form (PNF)}. The PNF of a regular expression $\alpha$ in nNF is defined as $\nnf(\pnfup{\wpnf{\alpha}})$, where the functions $\pnfupfun$ and $\wpnffun$ are defined below. 
+\paragraph{Plus Normal Form:} A central part of our approach to DREs is the use of a normal form, called the \emph{plus normal form (PNF)}. The PNF of a regular expression $\alpha$ in nNF is defined as $\nnf(\pnfup{\nnf(\wpnf{\alpha})})$, where the functions $\pnfupfun$ and $\wpnffun$ are defined below. 
 
 Intuitively, $\wpnffun$ performs two tasks: The obvious one is the removal of all $\rxo$ operators that are applied to subexpressions which already generate $\emptyword$; the second one is that every special subexpression that occurs inside a star expression is broken up. For example, if $\alpha\df (a\rxo \rxc b\rxo)\rxp$, then $\wpnf{\alpha}= (a\ror b)\rxs$.
 
@@ -268,8 +268,8 @@ Finally, the auxiliary function $\pnfuphfun$ is defined by
 \subsection{Complexity Measures}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The three complexity measures $\siz$, $\syn$, and $\aw$ on regular expressions are defined as in Table~\ref{tab:measures}.
-\begin{table}
-	\begin{tabular}[h]{|l||c|c|c|}
+\begin{table}[h]
+	\begin{tabular}[H]{|l||c|c|c|}
 	\hline
 	& $\siz$ & $\syn$ & $\aw$ \\
 	\hline
@@ -298,7 +298,8 @@ The three measures can be interpreted as follows.
 	\SetKwInOut{Input}{input}
 	\SetKwInOut{Output}{output}
 	\SetKw{KwNot}{not}
-	\SetKwData{delt}{D}\SetKwData{aut}{A}
+	\SetKwData{delt}{D}
+	\SetKwData{aut}{A}
 	\SetKwData{Fset}{first}\SetKwData{Lset}{last}\SetKwData{Eset}{follow}\SetKwData{nullvar}{nullable}
 	\Input{An indexed DRE \delt}
 	\Output{None (this is a constructor)}
@@ -392,6 +393,34 @@ The three measures can be interpreted as follows.
 	\Return{\emph{true}}
 	\caption{\equivalentToMEW\label{algo:mew}} 
 \end{algorithm2e}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \subsection{Algorithm for factoring out common suffixes}\label{sec:factor}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % %Procedure findCommonSuffix
+% % \begin{procedure}[H]
+% % 	\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}
+% % 	\SetKwData{delt}{D}
+% % 	\Input{}
+% % 	
+% % 	\caption{findCommonSuffix}
+% % \end{procedure}
+% 
+% \begin{algorithm2e}[H]
+% 	\SetAlgoLined
+% 	\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}
+% 	\SetKwData{delt}{D}
+% 	\SetKwData{nh}{nothing_happened}
+% 	
+% 	
+% 	\Input{A DRE \delt of type choice}
+% 	\Output{A DRE that is equivalent to \delt and has no children with a common suffix}
+% 	\BlankLine
+% 	$\nh\leftarrow\text{true}$
+% 	
+% 	
+% 	
+% 	\caption{factorOut\label{algo:factor}}
+% \end{algorithm2e}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -436,7 +465,7 @@ The three measures can be interpreted as follows.
 	\item\texttt{rpn()} Returns the $\syn$ of the DRE.
 	\item\texttt{awidth()} Returns the $\aw$ of the DRE.
 	\item\texttt{toString()} Returns a string representation of the DRE. (Must be compatible with \texttt{DREfromString}, cf.\ Section~\ref{sec:des:mod}). Should be able to have an optional argument that states that combinations of $\rxp$ and $\rxo$ are printed as $\rxs$.
-	\item\texttt{toDOTString()} Returns a tree representation of the DRE in the DOT format that is used by GraphViz (\url{http://www.graphviz.org/}).
+	\item\texttt{toDOTString()} Returns a tree representation of the DRE in the DOT format that is used by GraphViz (\url{http://www.graphviz.org/}). Use \texttt{ordering=out} to preserve the order. Consider using subgraphs, to further enforce this.
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
