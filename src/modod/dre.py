@@ -140,7 +140,7 @@ class Unary(Operator):
     def _isnnf(self):
         return self.child._isnnf()
     def _pnf2(self):
-        return self.child
+        return self.child._pnf2()
     def _pnf3(self):
         return self.__class__(self.child._pnf3())
     # def _pnf4(self):

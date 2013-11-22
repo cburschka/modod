@@ -2,9 +2,14 @@ import modod
 import graph
 
 cases = [
+   #format: input expected comment
+   #if expected=='', no comparison is performed
    ['((a? | b?)? |(c? | d?)?)?','(a|b|c|d)?','4.1'],
    ['(a? b?)+','(a|b)+?','4.2'],
-   ['(a?|(b?,c?))?','(a|(b?,c?))','4.3']
+   ['(a?|(b?,c?))?','(a|(b?,c?))','4.3'],
+   ['(((a1? | b1?)? |(c1? | d1?)?)?,((a2? | b2?)? |(c2? | d2?)?)?)+','',''],
+   ['(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?','',''],
+   ['(a*,b*)+','(a|b)+?','']
 ]
 
 problems = False
@@ -13,23 +18,19 @@ for ist,soll,desc in cases:
     print('============================')
     if desc!='':
         print(desc)
-    print('Input:', ist)
     try:
-        chain = modod._lexerExt.lex(ist)
-        tree = modod._parserExt.parse(chain, verbose=False)
-        tree_dre = tree.dre()
-        canonical = tree_dre.toString()
-        reparse = modod._parserStrict.parse(modod._lexerStrict.lex(canonical)).dre().toString()
- 
+        tree_dre = modod._parserExt.parse(modod._lexerExt.lex(ist), verbose=False).dre()
+        print('Input:\n    ', tree_dre.toString())
         pnfIst = tree_dre.toNNF().toPNF().toString()
 
         print('PNF:\n    ', pnfIst)
-        print('Expected:\n    ', soll)
-        if (pnfIst==soll):
-            print(' OK')
-        else:
-            print('Not OK! (ಠ_ಠ)')
-            problems = True
+        if soll!='':
+            print('Expected:\n    ', soll)
+            if (pnfIst==soll):
+                print(' OK')
+            else:
+                print('Not OK! (ಠ_ಠ)')
+                problems = True
 
     except ValueError as e:
         print('  Fehler:', e)
