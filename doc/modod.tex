@@ -41,7 +41,11 @@
 \newcommand{\wpnfh}[1]{\wpnfhfun{\left(#1\right)}}
 \newcommand{\pnfup}[1]{\pnfupfun{\left(#1\right)}}
 \newcommand{\pnfuph}[1]{\pnfuphfun{\left(#1\right)}}
+
+\DeclareMathOperator{\remfun}{rem}
+\DeclareMathOperator{\enf}{ENF}
 \DeclareMathOperator{\nnf}{nNF}
+\DeclareMathOperator{\pnf}{PNF}
 
 \DeclareMathOperator{\lab}{lab}
 \DeclareMathOperator{\src}{src}
@@ -191,9 +195,11 @@ As the state with the label $b$ has two successors with the label $b$, we can co
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Normal Forms}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\paragraph{n-ary Normal Form:} The nNf of a regular expression is obtained by contracting all concatenation or choice nodes with children of the same type; i.\,e., $((a\ror b)\ror c)$ becomes $(a \ror b \ror c)$.
+\subsubsection{n-ary Normal Form:} The nNf of a regular expression is obtained by contracting all concatenation or choice nodes with children of the same type; i.\,e., $((a\ror b)\ror c)$ becomes $(a \ror b \ror c)$.
 
-\paragraph{Plus Normal Form:} A central part of our approach to DREs is the use of a normal form, called the \emph{plus normal form (PNF)}. The PNF of a regular expression $\alpha$ in nNF is defined as $\nnf(\pnfup{\nnf(\wpnf{\alpha})})$, where the functions $\pnfupfun$ and $\wpnffun$ are defined below. 
+\subsubsection{Plus Normal Form:} A central part of our approach to DREs is the use of a normal form, called the \emph{plus normal form (PNF)}. The PNF of a regular expression $\alpha$ in nNF is defined as 
+$$\pnf(\alpha)\df\nnf(\pnfup{\nnf(\wpnf{\alpha})}),$$
+where the functions $\pnfupfun$ and $\wpnffun$ are as defined below. 
 
 Intuitively, $\wpnffun$ performs two tasks: The obvious one is the removal of all $\rxo$ operators that are applied to subexpressions which already generate $\emptyword$; the second one is that every special subexpression that occurs inside a star expression is broken up. For example, if $\alpha\df (a\rxo \rxc b\rxo)\rxp$, then $\wpnf{\alpha}= (a\ror b)\rxs$.
 
@@ -264,6 +270,19 @@ Finally, the auxiliary function $\pnfuphfun$ is defined by
 	\pnfuph{(\alpha_1\ror \cdots \ror \alpha_n)}
 		&\df \pnfup{(\alpha_1\ror \cdots \ror \alpha_n)}.
 \end{align*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{$\emptyword$-free Normal Form}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The (\emph{$\emptyword$-free Normal Form}) of a DRE~$\alpha$  is defined as 
+$$\enf(\alpha)\df\nnf(\remfun(\nnf(\alpha))),$$
+where the  \emph{$\emptyword$-removal function} $\remfun$ is a function that map $\alpha$ into a DRE for the language $L(\alpha)\setminus\emptyword$. It is defined by $\remfun(\alpha)\df\alpha$ for all $\alpha$ that are \emph{not} nullable; while for all nullable DREs $\alpha$, it is defined by
+\begin{align*}
+	\remfun(a)&\df a\text{ for all }a\in \Sigma,\\
+	\remfun(\alpha_1\rxo)&\df \alpha_1,\\
+	\remfun(\alpha_1\ror \cdots\ror \alpha_n)&\df (\remfun(\alpha_1)\ror \cdots\ror \remfun(\alpha_n)),\\
+	\remfun(\alpha_1\rxc \ldots\rxc \alpha_n)&\df ((\remfun(\alpha_1\rxc \ldots\rxc\alpha_{n-1})\rxc\alpha_n)\ror \remfun(\alpha_n)).
+\end{align*}
+If a deterministic regular expression is in PNF and nullable, it cannot be of type plus. Hence, we leave this case undefined. (We do note that the ENF is not a normal form in the strictest sense of the word, as its application removes $\emptyword$ from the language.) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Complexity Measures}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
