@@ -29,17 +29,6 @@ class DRE:
     def first(self):
         return self._first()
 
-
-    # Baum-Traversierung. (Achtung, erfordert Erweiterung der Datenstruktur!)
-    def getParent(self):
-        return self._parent #TODO
-    def leftSibling(self):
-        return self._left #TODO
-    def rightSibling(self):
-        return self._rigth #TODO
-    def getNextL2RBF(self):
-        return self._l2rbf # TODO
-
     # size: Anzahl Terminalzeichen, Operatoren, Klammern
     def size(self):
         return self._size(operators=True, parentheses=True)
@@ -64,29 +53,31 @@ class DRE:
     # "Private" Methoden:
     # p•
     def _pnf1(self):
-        raise NotImplementedError(self.__class__.__name__ + '::p•')
+        pass
     # p◦
     def _pnf2(self):
-        raise NotImplementedError(self.__class__.__name__ + '::p◦')
+        pass
     # p▴
     def _pnf3(self):
-        raise NotImplementedError(self.__class__.__name__ + '::p▴')
+        pass
     # p▵
     def _pnf4(self):
-        raise NotImplementedError(self.__class__.__name__ + '::p▵')
+        pass
 
     def _size(self, operators, parentheses):
-        raise NotImplementedError(self.__class__.__name__ + '::size')
+        pass
 
     def _graph(self, nodes=None, edges=None):
         if nodes == None:
             nodes, edges = {}, set()
         nodes[len(nodes)] = self._label()
+        print(nodes)
         return nodes, edges
 
 class Terminal(DRE):
     def __init__(self, symbol):
         self.symbol = symbol
+        self.children = []
 
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
@@ -126,6 +117,8 @@ class Operator(DRE):
 class Unary(Operator):
     def __init__(self, child):
         self.child = child
+        self.children = [child]
+
     def __str__(self):
         return '{} [{}]'.format(self.__class__.__name__, self.child)
 
@@ -243,6 +236,18 @@ class Concatenation(Nary):
                 break
         return f
 
+    def _deterministic(self):
+        if not all(x._deterministic() for x in self.children):
+            return False
+        f = set()
+        for x in self.children:
+            a, b = x._first(), x._follow()
+            if f & x._first():
+                return False
+            
+            f |= x._first()
+            
+
 class Choice(Nary):
     def _label(self):
         return '|'
@@ -266,3 +271,11 @@ class Choice(Nary):
         for x in self.children:
             f |= x._first()
         return f
+
+    def _deterministic(self):
+        if not all(x._deterministic() for x in self.children):
+            return False
+        f = [x._first() for x in self.children]
+        if any(any(f[i] & f[j] for j in range(i+1,len(f))) for i in range(n)):
+            return False
+        return True

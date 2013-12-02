@@ -20,3 +20,4 @@ for i,s in enumerate(cases):
         open('{}-indexed.dot'.format(i), 'w+').write(tree_index.toDOTString())
     except ValueError as e:
         print('  Fehler:', e)
+
