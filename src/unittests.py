@@ -40,24 +40,26 @@ class TestUM(unittest.TestCase):
 	# 	B = DREfromString('a*')
 	# 	self.assertEqual(equivalentTo(A,A),True)
 	# 	self.assertEqual(equivalentTo(B,B),True)
+	# 	self.assertEqual(equivalentToMEW(A,A),True)
+	# 	self.assertEqual(equivalentToMEW(B,B),True)
 	# 	self.assertEqual(equivalentToMEW(A,B),True)
+	# 	self.assertEqual(equivalentToMEW(B,A),True)
+	# 	self.assertEqual(equivalentTo(B,A),False)
 	# 	self.assertEqual(equivalentTo(A,B),False)
  
 	# def test_eq_2(self):
-	# 	A = DREfromString('a+')
-	# 	B = DREfromString('a*')
+	# 	A = DREfromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
+	# 	B = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+	# 	C = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
 	# 	self.assertEqual(equivalentTo(A,A),True)
 	# 	self.assertEqual(equivalentTo(B,B),True)
+	# 	self.assertEqual(equivalentTo(C,C),True)	
 	# 	self.assertEqual(equivalentToMEW(A,B),True)
-	# 	self.assertEqual(equivalentTo(A,B),False)
-
-	# def test_eq_3(self):
-	# 	A = DREfromString('a+')
-	# 	B = DREfromString('a*')
-	# 	self.assertEqual(equivalentTo(A,A),True)
-	# 	self.assertEqual(equivalentTo(B,B),True)
-	# 	self.assertEqual(equivalentToMEW(A,B),True)
-	# 	self.assertEqual(equivalentTo(A,B),False)
+	# 	self.assertEqual(equivalentToMEW(B,C),True)
+	# 	self.assertEqual(equivalentToMEW(C,A),True)
+	# 	self.assertEqual(equivalentTo(A,B),True)
+	# 	self.assertEqual(equivalentTo(B,C),False)
+	# 	self.assertEqual(equivalentTo(C,A),False)
  
 if __name__ == '__main__':
 	unittest.main()
