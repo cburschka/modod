@@ -1,8 +1,10 @@
-from modod import DREfromString
 import graph
-
 import unittest
- 
+
+from modod import DREfromString
+from modod import indexed_dre
+#from modod import OccurrenceAutomaton
+
 class TestUM(unittest.TestCase):
  
 	def setUp(self):
@@ -36,8 +38,10 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(DREfromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
 
 	# def test_eq_1(self):
-	# 	A = DREfromString('a+')
-	# 	B = DREfromString('a*')
+	# 	rxA = DREfromString('a+')
+	# 	rxB = DREfromString('a*')
+	# 	A = OccurrenceAutomaton(import_dre.add_index(rxA))
+	# 	B = OccurrenceAutomaton(import_dre.add_index(rxB))
 	# 	self.assertEqual(equivalentTo(A,A),True)
 	# 	self.assertEqual(equivalentTo(B,B),True)
 	# 	self.assertEqual(equivalentToMEW(A,A),True)
@@ -48,18 +52,27 @@ class TestUM(unittest.TestCase):
 	# 	self.assertEqual(equivalentTo(A,B),False)
  
 	# def test_eq_2(self):
-	# 	A = DREfromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
-	# 	B = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
-	# 	C = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
+	# 	rxA = DREfromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
+	# 	rxB = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+	# 	rxC = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
+	# 	A = OccurrenceAutomaton(import_dre.add_index(rxA))
+	# 	B = OccurrenceAutomaton(import_dre.add_index(rxB))
+	# 	C = OccurrenceAutomaton(import_dre.add_index(rxC))	
 	# 	self.assertEqual(equivalentTo(A,A),True)
 	# 	self.assertEqual(equivalentTo(B,B),True)
 	# 	self.assertEqual(equivalentTo(C,C),True)	
 	# 	self.assertEqual(equivalentToMEW(A,B),True)
+	# 	self.assertEqual(equivalentToMEW(B,A),True)
 	# 	self.assertEqual(equivalentToMEW(B,C),True)
+	# 	self.assertEqual(equivalentToMEW(C,B),True)
 	# 	self.assertEqual(equivalentToMEW(C,A),True)
+	# 	self.assertEqual(equivalentToMEW(A,C),True)
 	# 	self.assertEqual(equivalentTo(A,B),True)
+	# 	self.assertEqual(equivalentTo(B,A),True)
 	# 	self.assertEqual(equivalentTo(B,C),False)
+	# 	self.assertEqual(equivalentTo(C,B),False)
 	# 	self.assertEqual(equivalentTo(C,A),False)
+	# 	self.assertEqual(equivalentTo(A,C),False)
  
 if __name__ == '__main__':
 	unittest.main()
