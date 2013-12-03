@@ -333,7 +333,7 @@ The three measures can be interpreted as follows.
 			$\nullvar\leftarrow \text{true}$; \Return{}\;
 		}
 		\Else(\tcc*[h]{\delt is a plus}){
-			\lForEach{$u$ in $\aut_1.\Fset$, $v$ in $\aut_1.\Lset$}{add $(u,v)$ to \Eset}
+			\lForEach{$u$ in $\aut_1.\Lset$, $v$ in $\aut_1.\Fset$}{add $(u,v)$ to \Eset}
 			$\nullvar\leftarrow \aut_1.\nullvar$; \Return{}\;
 		}
 	}
@@ -383,7 +383,7 @@ The three measures can be interpreted as follows.
 	\SetKwInOut{Assert}{assert}
 	\Input{Occurrence automata \A, \B}
 	\Output{\emph{true} if $L(\A)\setminus\{\emptyword\}=L(\B)\setminus\{\emptyword\}$, \emph{false} otherwise}
-	\Assert{\A.\nodes() and \B.\nodes are disjoint\footnote{This is something the implementation has to ensure; e.\,g.\ by renaming indices.On the other hand, it might be preferable to leave the indices of the OAs unchanged, and handle this during $\makeset$.}.}
+	\Assert{\A.\nodes() and \B.\nodes are disjoint\footnote{This is something the implementation has to ensure; e.\,g.\ by renaming indices. On the other hand, it might be preferable to leave the indices of the OAs unchanged, and handle this during $\makeset$.}.}
 	\BlankLine
 	$\VA \leftarrow \A.\nodes \cup \{\A.\srcs,\A.\errs\}$\;
 	$\VB \leftarrow \B.\nodes \cup \{\B.\srcs,\B.\errs\}$\;
