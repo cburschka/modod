@@ -2,10 +2,6 @@ import graph
 import unittest
 
 from modod import DREfromString
-from modod import indexed_dre
-#from modod import OccurrenceAutomaton
-#from modod import equivalentTo
-#from modod import equivalentToMEW
 
 class TestUM(unittest.TestCase):
  
@@ -48,25 +44,25 @@ class TestUM(unittest.TestCase):
 	def test_determinism_1(self):
 		rxstr = 'a+'
 		#self.assertTrue(rxstr.isDeterministic())
-		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
+		A = OAfromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
 	def test_determinism_2(self):
 		rxstr = '(a)*a'
 		#self.assertFalse(rxstr.isDeterministic())
-		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
+		A = OAfromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_3(self):
 		rxstr = '(ab)|(ac)'
 		#self.assertFalse(rxstr.isDeterministic())
-		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
+		A = OAfromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_4(self):
 		rxstr = 'aaaa'
 		#self.assertTrue(rxstr.isDeterministic())
-		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
+		A = OAfromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
 	# def test_eq_1(self):

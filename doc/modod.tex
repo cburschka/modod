@@ -518,6 +518,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 \paragraph{Functions}
 \begin{itemize}
 	\item constructor, takes an indexed (D)RE (see Algorithm~\ref{algo:OADRE}, Section~\ref{sec:OADRE})
+	\item \texttt{fromDRE(dre)} Takes a dre, converts itinto an indexed DRE, which is used to construct an \texttt{OccurrenceAutomaton} object, which is then returned. 
 	\item \texttt{fromString(string)} Takes a string, converts it into a DRE, than into an indexed DRE, which is used to construct an \texttt{OccurrenceAutomaton} object, which is then returned. 
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
