@@ -15,10 +15,9 @@ cases = [
 for i, case in enumerate(cases):
     print('============================')
     try:
-        dre = modod.DREfromString(case)
-        idre = modod.IndexedDREfromDRE(dre)
-        oa = modod.OAfromIndexedDRE(idre)
-        print('Input:\n    ', dre.toString())
+        oa = modod.oa.OA.fromString(case)
+        print('Input:    ', case)
+        print('Output: ', 'test_oa.{}.dot'.format(i))
         open('test_oa.{}.dot'.format(i), 'w').write(oa.graph().xdot())
 
     except ValueError as e:

@@ -27,7 +27,7 @@ class OA:
             nullable = False
 
         elif isinstance(node, dre.Unary):
-            oa = OAfromIndexedNode(node.child)
+            oa = OA.fromIndexedNode(node.child)
             first, last = oa.first, oa.last
             
             if isinstance(node, dre.Optional):
@@ -38,7 +38,7 @@ class OA:
                 nullable = oa.nullable
 
         elif isinstance(node, dre.Nary):
-            oas = list(map(OAfromIndexedNode, node.children))
+            oas = list(map(OA.fromIndexedNode, node.children))
             
             # Take the edges of all sub-automata
             follow = set.union(*(x.follow for x in oas))

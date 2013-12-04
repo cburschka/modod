@@ -22,6 +22,6 @@ def compareDREs(a, b):
 # Pseudo-Constructors (shortcuts):
 dre.DRE.fromString = DREfromString
 oa.OA.fromString = lambda string : oa.OA.fromDRE(dre.DRE.fromString(string))
-oa.OA.fromDRE = lambda tree : oa.OA.fromIndexedDRE(dre_indexed.IndexedDRE(tree))
+oa.OA.fromDRE = lambda tree : oa.OA.fromIndexedDRE(dre_indexed.IndexedDRE.fromDRE(tree))
 oa.OA.fromIndexedDRE = lambda itree : oa.OA.fromIndexedNode(itree.root)
 
