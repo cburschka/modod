@@ -57,12 +57,18 @@ class TestUM(unittest.TestCase):
 		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
 		self.assertFalse(A.isDeterministic())
 
-	def test_determinism_2(self):
+	def test_determinism_3(self):
 		rxstr = '(ab)|(ac)'
 		#self.assertFalse(rxstr.isDeterministic())
 		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
 		self.assertFalse(A.isDeterministic())
-		
+
+	def test_determinism_4(self):
+		rxstr = 'aaaa'
+		#self.assertTrue(rxstr.isDeterministic())
+		A = OccurrenceAutomaton(import_dre.add_index(DREfromString(rxstr)))
+		self.assertTrue(A.isDeterministic())
+
 	# def test_eq_1(self):
 	# 	rxA = DREfromString('a+')
 	# 	rxB = DREfromString('a*')
