@@ -1,0 +1,11 @@
+import modod.uf as uf
+x = uf.UF(map(chr, range(65, 75)))
+print(x)
+x.union('A','B')
+print(x)
+x.union('C','D')
+x.union('E','F')
+x.union('G','H')
+print(x)
+x.union('C','H')
+print(x)

@@ -10,7 +10,7 @@ class UF:
         self.list.append(x)
 
     def union(self, a, b):
-        i, j = a.find(a), self.find(b)
+        i, j = self._find(self.index[a]), self._find(self.index[b])
         if i != j:
             self.parent[j] = i
 
@@ -22,4 +22,12 @@ class UF:
             self.parent[i] = self._find(self.parent[i])
         return self.parent[i]
 
+    def export_sets(self):
+        sets = {self._find(i):set() for i in self.parent}
+        for i,x in enumerate(self.list):
+            sets[self._find(i)].add(x)
+        return sets.values()
+        
+    def __str__(self):
+        return ', '.join(map(str, self.export_sets()))
 
