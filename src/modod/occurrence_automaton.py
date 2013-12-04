@@ -1,13 +1,31 @@
 from . import dre_indexed, dre
 import itertools
 import graph
+import union_find
+
+class OA:
+    def __init__(self, first, last, follow, nullable):
+        self.first, self.last = first, last
+        self.follow, self.nullable = follow, nullable
+        
+    def graph(self):
+        nodes = {'Start', 'Accept'}
+        nodes |= self.first | self.last
+        nodes |= {x for (x,y) in self.follow} | {y for (x,y) in self.follow}
+        
+        edges = {('Start', 'Accept')} if self.nullable else set()
+        edges |= {('Start', x) for x in self.first}
+        edges |= {(x, 'Accept') for x in self.last}
+        edges |= self.follow
+        
+        return graph.digraph(nodes, edges)
 
 def OAfromIndexedDRE(tree):
     return OAfromIndexedNode(tree.root)
 
 def OAfromIndexedNode(node):
     if isinstance(node, dre_indexed.Terminal):
-        first = last = {(node.leaf_index, node.symbol)}
+        first = last = {(node.symbol, node.leaf_index)}
         follow = set()
         nullable = False
 
@@ -56,20 +74,8 @@ def OAfromIndexedNode(node):
 
     return OA(first, last, follow, nullable)
 
-class OA:
-    def __init__(self, first, last, follow, nullable):
-        self.first, self.last = first, last
-        self.follow, self.nullable = follow, nullable
-        
-    def graph(self):
-        nodes = {'Start', 'Accept'}
+def equivalenceModE(A, B):
+        nodes = {'Start', 'Accept', 'Err'}
         nodes |= self.first | self.last
         nodes |= {x for (x,y) in self.follow} | {y for (x,y) in self.follow}
-        
-        edges = {('Start', 'Accept')} if self.nullable else set()
-        edges |= {('Start', x) for x in self.first}
-        edges |= {(x, 'Accept') for x in self.last}
-        edges |= self.follow
-        
-        return graph.digraph(nodes, edges)
 
