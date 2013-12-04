@@ -1,7 +1,7 @@
 from . import dre_indexed, dre
 import itertools
 import graph
-import union_find
+from . import uf
 
 class OA:
     def __init__(self, first, last, follow, nullable):
