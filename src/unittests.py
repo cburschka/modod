@@ -1,4 +1,3 @@
-import graph
 import unittest
 
 from modod import DREfromString
@@ -101,7 +100,24 @@ class TestUM(unittest.TestCase):
 	# 	self.assertFalse(equivalentTo(C,B))
 	# 	self.assertFalse(equivalentTo(C,A))
 	# 	self.assertFalse(equivalentTo(A,C))
- 
+	
+	def test_UF(self):
+		import modod.uf as uf
+		x =uf.UF()
+		x.makeset(1)
+		x.makeset(2)
+		x.makeset(3)
+		self.assertEqual(1,x.find(1))
+		self.assertEqual(2,x.find(2))
+		self.assertEqual(3,x.find(3))
+		self.assertNotEqual(1,x.find(2))
+		x.union(1,2)
+		self.assertEqual(1,x.find(1))
+		self.assertEqual(x.find(1),x.find(2))
+		self.assertNotEqual(x.find(1),x.find(3))
+		self.assertEqual(3,x.find(3))
+		
+		
 if __name__ == '__main__':
 	unittest.main()
 
