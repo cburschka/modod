@@ -4,6 +4,8 @@ import unittest
 from modod import DREfromString
 from modod import indexed_dre
 #from modod import OccurrenceAutomaton
+#from modod import equivalentTo
+#from modod import equivalentToMEW
 
 class TestUM(unittest.TestCase):
  

@@ -447,18 +447,7 @@ The three measures can be interpreted as follows.
 \subsection{Module}\label{sec:des:mod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{itemize}
-	\item\texttt{DREfromString(str)} takes a string $s$, parses it into a DRE (exception if $s$ is not a representation of a DRE, in particular if expression is not deterministic). Some details:
-	\begin{itemize}
-		\item Do not assume that one letter in the string $s$ directly corresponds to one letter in $\Sigma$. A letter could be named \texttt{a1}, or \texttt{123}, or \texttt{alphaAlpha} (etc.). For now, assume that letters are defined by ``standard'' alphanumerical characters (i.\,e., \texttt{a-zA-Z0-9} -- case sensitive) and underscore (\texttt{\_}). If possible, try to avoid making extensions needlessly hard; but do not consider this a major design goal.
-		\item For now, the concatenation operator can be represented with a comma. Consider that we might also decide to allow the use of whitespace as concatenation operator. Also, consider that whitespace might be allowed between parentheses or around operators. In other words, there might be a point where we want to consider the following three expressions equivalent. \begin{enumerate}
-			\item \texttt{((a,b,a1)|b)}
-			\item \texttt{((a b a1)|b)}
-			\item \texttt{( (a b a1) | b)}
-		\end{enumerate} 
-		\item Optional: Allow use superfluous parentheses, e.\,g.\ $(((a)))$ instead of $a$
-		\item Optional: Allow omission of parentheses (if unambiguity is preserved, or unambiguity modulo nNF). Can also be implemented for some operators only (e.\,g., allow $a?$ instead of $(a)?$).
-		\item Optional: Allow use of \texttt{*} as shorthand. 
-	\end{itemize}
+	\item\texttt{DREfromString(s)} \emph{deprecated}
 %		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
 \item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning \texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
 \item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
@@ -468,6 +457,15 @@ The three measures can be interpreted as follows.
 \subsection{\texttt{DRE}}\label{sec:des:dre}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{itemize}
+	\item\texttt{fromString(s)} takes a string $s$, parses it into the DRE (exception if $s$ is not a representation of a DRE, in particular if expression is not deterministic). Some details:
+	\begin{itemize}
+		\item Do not assume that one letter in the string $s$ directly corresponds to one letter in $\Sigma$. A letter could be named \texttt{a1}, or \texttt{123}, or \texttt{alphaAlpha} (etc.). For now, assume that letters are defined by ``standard'' alphanumerical characters (i.\,e., \texttt{a-zA-Z0-9} -- case sensitive) and underscore (\texttt{\_}). If possible, try to avoid making extensions needlessly hard; but do not consider this a major design goal.
+		\item For now, the concatenation operator can be represented with a comma. Consider that we might also decide to allow the use of whitespace as concatenation operator. Also, consider that whitespace might be allowed between parentheses or around operators. In other words, there might be a point where we want to consider the following three expressions equivalent. \begin{enumerate}
+			\item \texttt{((a,b,a1)|b)}
+			\item \texttt{((a b a1)|b)}
+			\item \texttt{( (a b a1) | b)}
+		\end{enumerate} 
+	\end{itemize}
 	\item\texttt{isDeterministic()} Returns whether the expression is deterministic. I suggest converting the expression into an \texttt{OccurrenceAutomaton} and calling the respective method.
 	\item\texttt{isInNNF()} Returns whether the expression is in nNF.
 	\item\texttt{toNNF()} Transforms the DRE into nNF.
@@ -520,6 +518,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 \paragraph{Functions}
 \begin{itemize}
 	\item constructor, takes an indexed (D)RE (see Algorithm~\ref{algo:OADRE}, Section~\ref{sec:OADRE})
+	\item \texttt{fromDREstring(string)} Takes a string, converts it into a DRE, than into an indexed DRE, which is used to construct an \texttt{OccurrenceAutomaton} object, which is then returned. 
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
 	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$ such that $v_1$ and $v_2$ contain the same label.)
