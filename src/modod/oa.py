@@ -20,59 +20,56 @@ class OA:
         
         return graph.digraph(nodes, edges)
 
-def OAfromIndexedDRE(tree):
-    return OAfromIndexedNode(tree.root)
+    def fromIndexedNode(node):
+        if isinstance(node, dre_indexed.Terminal):
+            first = last = {(node.symbol, node.leaf_index)}
+            follow = set()
+            nullable = False
 
-def OAfromIndexedNode(node):
-    if isinstance(node, dre_indexed.Terminal):
-        first = last = {(node.symbol, node.leaf_index)}
-        follow = set()
-        nullable = False
-
-    elif isinstance(node, dre.Unary):
-        oa = OAfromIndexedNode(node.child)
-        first, last = oa.first, oa.last
-        
-        if isinstance(node, dre.Optional):
-            follow = oa.follow
-            nullable = True
-        elif isinstance(node, dre.Plus):
-            follow = oa.follow | set(itertools.product(last, first))
-            nullable = oa.nullable
-
-    elif isinstance(node, dre.Nary):
-        oas = list(map(OAfromIndexedNode, node.children))
-        
-        # Take the edges of all sub-automata
-        follow = set.union(*(x.follow for x in oas))
-
-        if isinstance(node, dre.Choice):
-            # Union of all firsts and lasts
-            first = set.union(*(x.first for x in oas))
-            last = set.union(*(x.last for x in oas))
-            nullable = any(x.nullable for x in oas)
+        elif isinstance(node, dre.Unary):
+            oa = OAfromIndexedNode(node.child)
+            first, last = oa.first, oa.last
             
-        elif isinstance(node, dre.Concatenation):
-            null = lambda x:x.nullable
-            # Union of firsts and lasts as long until a non-nullable is reached
-            first = set()
-            for x in oas:
-                first |= x.first
-                if not x.nullable:
-                    break
-            last = set()
-            for x in oas[::-1]:
-                last |= x.last
-                if not x.nullable:
-                    break
+            if isinstance(node, dre.Optional):
+                follow = oa.follow
+                nullable = True
+            elif isinstance(node, dre.Plus):
+                follow = oa.follow | set(itertools.product(last, first))
+                nullable = oa.nullable
+
+        elif isinstance(node, dre.Nary):
+            oas = list(map(OAfromIndexedNode, node.children))
             
-            # Add edges between sub-automata
-            for i in range(len(oas)-1):
-                follow |= set(itertools.product(oas[i].last, oas[i+1].first))
+            # Take the edges of all sub-automata
+            follow = set.union(*(x.follow for x in oas))
 
-            nullable = all(x.nullable for x in oas)
+            if isinstance(node, dre.Choice):
+                # Union of all firsts and lasts
+                first = set.union(*(x.first for x in oas))
+                last = set.union(*(x.last for x in oas))
+                nullable = any(x.nullable for x in oas)
+                
+            elif isinstance(node, dre.Concatenation):
+                null = lambda x:x.nullable
+                # Union of firsts and lasts as long until a non-nullable is reached
+                first = set()
+                for x in oas:
+                    first |= x.first
+                    if not x.nullable:
+                        break
+                last = set()
+                for x in oas[::-1]:
+                    last |= x.last
+                    if not x.nullable:
+                        break
+                
+                # Add edges between sub-automata
+                for i in range(len(oas)-1):
+                    follow |= set(itertools.product(oas[i].last, oas[i+1].first))
 
-    return OA(first, last, follow, nullable)
+                nullable = all(x.nullable for x in oas)
+
+        return OA(first, last, follow, nullable)
 
 def equivalenceModE(A, B):
         nodes = {'Start', 'Accept', 'Err'}

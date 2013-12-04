@@ -1,8 +1,8 @@
 from . import dre
 
 class IndexedDRE:
-    def __init__(self, dre):
-        self.root = IndexedNodefromDRE(dre)
+    def __init__(self, root):
+        self.root = root
         self.nodes = list(self.root._dfs())
         self.leaves = [node for node in self.nodes if node.__class__ is Terminal]
         
@@ -13,20 +13,29 @@ class IndexedDRE:
         for i, n in enumerate(self.leaves):
             n.leaf_index = i
 
-def IndexedNodefromDRE(dre, parent=None):
-    # Determine and defer to sub-type.
-    return classes[dre.__class__](dre, parent)
+    def fromDRE(tree):
+        return IndexedDRE(IndexedNode.fromDRE(tree))
 
 class IndexedNode(dre.DRE):
     def __init__(self, node, parent):
         self.parent = parent
         self.children = []
         for x in node.children:
-            self.children.append(IndexedNodefromDRE(x, self))
+            self.children.append(IndexedNode.fromDRE(x, self))
         for i in range(0, len(node.children)-1):
             self.children[i].right = self.children[i+1]
         for i in range(1, len(node.children)):
             self.children[i].left = self.children[i-1]
+
+    def fromDRE(tree, parent=None):
+        # Determine and defer to sub-type.
+        return {
+            dre.Plus : Plus,
+            dre.Optional : Optional,
+            dre.Concatenation : Concatenation,
+            dre.Choice : Choice,
+            dre.Terminal : Terminal
+        }[tree.__class__](tree, parent)
 
     def _dfs(self):
         yield self
@@ -62,11 +71,3 @@ class Terminal(IndexedNode, dre.Terminal):
     def __init__(self, node, parent):
         IndexedNode.__init__(self, node, parent)
         dre.Terminal.__init__(self, node.symbol)
-
-classes = {
-    dre.Plus : Plus,
-    dre.Optional : Optional,
-    dre.Concatenation : Concatenation,
-    dre.Choice : Choice,
-    dre.Terminal : Terminal
-}
