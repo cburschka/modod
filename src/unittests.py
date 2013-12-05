@@ -67,10 +67,8 @@ class TestUM(unittest.TestCase):
 		self.assertTrue(A.isDeterministic())
 
 	# def test_eq_1(self):
-	# 	rxA = DREfromString('a+')
-	# 	rxB = DREfromString('a*')
-	# 	A = OccurrenceAutomaton(import_dre.add_index(rxA))
-	# 	B = OccurrenceAutomaton(import_dre.add_index(rxB))
+	# 	A = OA.fromString('a+')
+	# 	B = OA.fromString('a*')
 	# 	self.assertTrue(equivalentTo(A,A))
 	# 	self.assertTrue(equivalentTo(B,B))
 	# 	self.assertTrue(equivalentToMEW(A,A))
@@ -81,12 +79,9 @@ class TestUM(unittest.TestCase):
 	# 	self.assertFalse(equivalentTo(A,B))
  
 	# def test_eq_2(self):
-	# 	rxA = DREfromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
-	# 	rxB = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
-	# 	rxC = DREfromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
-	# 	A = OccurrenceAutomaton(import_dre.add_index(rxA))
-	# 	B = OccurrenceAutomaton(import_dre.add_index(rxB))
-	# 	C = OccurrenceAutomaton(import_dre.add_index(rxC))	
+	# 	rxA = OA.fromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
+	# 	rxB = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+	# 	rxC = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
 	# 	self.assertTrue(equivalentTo(A,A))
 	# 	self.assertTrue(equivalentTo(B,B))
 	# 	self.assertTrue(equivalentTo(C,C))	
