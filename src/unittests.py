@@ -54,7 +54,7 @@ class TestUM(unittest.TestCase):
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_3(self):
-		rxstr = '(ab)|(ac)'
+		rxstr = '(a,b)|(a,c)'
 		#self.assertFalse(rxstr.isDeterministic())
 		A = OA.fromString(rxstr)
 		self.assertFalse(A.isDeterministic())
