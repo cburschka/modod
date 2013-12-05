@@ -20,6 +20,19 @@ class OA:
         
         return graph.digraph(nodes, edges)
 
+    def isDeterministic(self):
+        # All states reachable from start must be distinctly labeled.
+        if len({x for (x,y) in self.first}) < len(self.first):
+            return False
+
+        # Every state's successors must be distinctly labeled.
+        adjacency = {x:set() for (x,y) in self.follow}
+        for x, (y, i) in self.follow:
+            if y in adjacency[x]:
+                return False
+            adjacency[x].add(y)
+        return True
+
     def fromIndexedNode(node):
         if isinstance(node, dre_indexed.Terminal):
             first = last = {(node.symbol, node.leaf_index)}
