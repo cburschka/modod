@@ -1,6 +1,7 @@
 import unittest
 
-from modod import DREfromString
+from modod.dre import DRE
+from modod.oa import OA
 
 class TestUM(unittest.TestCase):
  
@@ -8,60 +9,60 @@ class TestUM(unittest.TestCase):
 		pass
  
 	def test_pnf_example_4_1(self):
-		self.assertEqual(DREfromString('((a? | b?)? |(c? | d?)?)?').toNNF().toPNF().toString(),'(a|b|c|d)?')
+		self.assertEqual(DRE.fromString('((a? | b?)? |(c? | d?)?)?').toNNF().toPNF().toString(),'(a|b|c|d)?')
 		
 	def test_pnf_example_4_2(self):
-		self.assertEqual(DREfromString('(a? b?)+').toNNF().toPNF().toString(),'(a|b)+?')
+		self.assertEqual(DRE.fromString('(a? b?)+').toNNF().toPNF().toString(),'(a|b)+?')
 
 	def test_pnf_example_4_3(self):
-		self.assertEqual(DREfromString('(a?|(b?,c?))?').toNNF().toPNF().toString(),'(a|(b?,c?))')
+		self.assertEqual(DRE.fromString('(a?|(b?,c?))?').toNNF().toPNF().toString(),'(a|(b?,c?))')
 
 	def test_pnf_extra_1(self):
 		ist='(a*,b*)+'
-		self.assertEqual(DREfromString(ist).toNNF().toPNF().toString(),'(a|b)+?')
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),'(a|b)+?')
 
 	def test_pnf_extra_2(self):
-		self.assertEqual(DREfromString('(((a?,b?)+,c*)+,d)').toNNF().toPNF().toString(),'((a|b|c)+?,d)')
+		self.assertEqual(DRE.fromString('(((a?,b?)+,c*)+,d)').toNNF().toPNF().toString(),'((a|b|c)+?,d)')
 
 	def test_pnf_extra_3(self):
-		self.assertEqual(DREfromString('(a*+?+?+?,b*+?+?+?)+').toNNF().toPNF().toString(),'(a|b)+?')
+		self.assertEqual(DRE.fromString('(a*+?+?+?,b*+?+?+?)+').toNNF().toPNF().toString(),'(a|b)+?')
 
 	def test_pnf_extra_4(self):
 		ist='(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+'
-		self.assertEqual(DREfromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)+?')
 
 	def test_pnf_extra_5(self):
 		ist='(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?'
-		self.assertEqual(DREfromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
 
 	def test_pnf_no_side_effects(self):
 		rx='(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?'
-		pnfrx=DREfromString(rx).toNNF().toPNF()
+		pnfrx=DRE.fromString(rx).toNNF().toPNF()
 		self.assertEqual(pnfrx.toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
 		self.assertEqual(rx,'(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?')
 
 	def test_determinism_1(self):
 		rxstr = 'a+'
 		#self.assertTrue(rxstr.isDeterministic())
-		A = OAfromString(rxstr)
+		A = OA.fromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
 	def test_determinism_2(self):
 		rxstr = '(a)*a'
 		#self.assertFalse(rxstr.isDeterministic())
-		A = OAfromString(rxstr)
+		A = OA.fromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_3(self):
 		rxstr = '(ab)|(ac)'
 		#self.assertFalse(rxstr.isDeterministic())
-		A = OAfromString(rxstr)
+		A = OA.fromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_4(self):
 		rxstr = 'aaaa'
 		#self.assertTrue(rxstr.isDeterministic())
-		A = OAfromString(rxstr)
+		A = OA.fromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
 	# def test_eq_1(self):
