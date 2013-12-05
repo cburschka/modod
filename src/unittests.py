@@ -43,25 +43,26 @@ class TestUM(unittest.TestCase):
 
 	def test_determinism_1(self):
 		rxstr = 'a+'
-		#self.assertTrue(rxstr.isDeterministic())
 		A = OA.fromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
 	def test_determinism_2(self):
 		rxstr = '(a)*a'
-		#self.assertFalse(rxstr.isDeterministic())
 		A = OA.fromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_3(self):
 		rxstr = '(a,b)|(a,c)'
-		#self.assertFalse(rxstr.isDeterministic())
 		A = OA.fromString(rxstr)
 		self.assertFalse(A.isDeterministic())
 
 	def test_determinism_4(self):
-		rxstr = 'aaaa'
-		#self.assertTrue(rxstr.isDeterministic())
+		rxstr = 'a a a a'
+		A = OA.fromString(rxstr)
+		self.assertTrue(A.isDeterministic())
+
+	def test_determinism_5(self):
+		rxstr = '(ab)|(ac)'
 		A = OA.fromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
