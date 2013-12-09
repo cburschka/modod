@@ -66,6 +66,10 @@ class TestUM(unittest.TestCase):
 		A = OA.fromString(rxstr)
 		self.assertTrue(A.isDeterministic())
 
+	def test_determinism_6(self):
+		A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
+		self.assertTrue(A.isDeterministic())
+
 	# def test_eq_1(self):
 	# 	A = OA.fromString('a+')
 	# 	B = OA.fromString('a*')
@@ -79,9 +83,9 @@ class TestUM(unittest.TestCase):
 	# 	self.assertFalse(equivalentTo(A,B))
  
 	# def test_eq_2(self):
-	# 	rxA = OA.fromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
-	# 	rxB = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
-	# 	rxC = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
+	# 	A = OA.fromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
+	# 	B = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+	# 	C = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
 	# 	self.assertTrue(equivalentTo(A,A))
 	# 	self.assertTrue(equivalentTo(B,B))
 	# 	self.assertTrue(equivalentTo(C,C))	
@@ -97,6 +101,18 @@ class TestUM(unittest.TestCase):
 	# 	self.assertFalse(equivalentTo(C,B))
 	# 	self.assertFalse(equivalentTo(C,A))
 	# 	self.assertFalse(equivalentTo(A,C))
+	
+	# def test_eq_3(self):
+	# 	A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
+	# 	B=OA.fromString('a+')
+	# 	self.assertTrue(equivalentTo(A,B))
+	# 	self.assertTrue(equivalentTo(B,A))
+	# 	C=OA.fromString('a*')
+	# 	self.assertTrue(equivalentToMEW(A,C))
+	# 	self.assertTrue(equivalentToMEW(C,A))
+	# 	self.assertFalse(equivalentTo(A,C))
+	# 	self.assertFalse(equivalentTo(C,A))
+		
 	
 	def test_UF(self):
 		import modod.uf as uf
