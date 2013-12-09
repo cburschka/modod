@@ -4,24 +4,26 @@ from . import dre_lexer
 from . import dre_indexed
 from . import oa
 
+# Compile the parsers (these should not be used directly outside of unit tests, normally)
 _lexerExt = grammar_extended.build_lexer()
 _parserExt = grammar_extended.build_grammar().slr1()
 _lexerStrict = dre_lexer.build_lexer()
 _parserStrict = grammar_strict.build_grammar().slr1()
 
+# Parsing function
 def DREfromString(string, strict=False):
     if strict:
         return _parserStrict.parse(_lexerStrict.lex(string)).dre()
     else:
         return _parserExt.parse(_lexerExt.lex(string)).dre()
     
-def compareDREs(a, b):
-    raise NotImplementedError() #TODO
 
+# Raise comparators to main module namespace (cf. specification)
+equivalentToMEW = oa.OA.equivalentToMEW
+equivalentTo = oa.OA.equivalentTo
 
-# Pseudo-Constructors (shortcuts):
+# Pseudo-Constructor shortcuts (cf. specification):
 dre.DRE.fromString = DREfromString
 oa.OA.fromString = lambda string : oa.OA.fromDRE(dre.DRE.fromString(string))
 oa.OA.fromDRE = lambda tree : oa.OA.fromIndexedDRE(dre_indexed.IndexedDRE.fromDRE(tree))
-oa.OA.fromIndexedDRE = lambda itree : oa.OA.fromIndexedNode(itree.root)
 

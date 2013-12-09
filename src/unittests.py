@@ -2,6 +2,7 @@ import unittest
 
 from modod.dre import DRE
 from modod.oa import OA
+from modod import equivalentTo, equivalentToMEW
 
 class TestUM(unittest.TestCase):
  
@@ -70,48 +71,52 @@ class TestUM(unittest.TestCase):
 		A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
 		self.assertTrue(A.isDeterministic())
 
-	# def test_eq_1(self):
-	# 	A = OA.fromString('a+')
-	# 	B = OA.fromString('a*')
-	# 	self.assertTrue(equivalentTo(A,A))
-	# 	self.assertTrue(equivalentTo(B,B))
-	# 	self.assertTrue(equivalentToMEW(A,A))
-	# 	self.assertTrue(equivalentToMEW(B,B))
-	# 	self.assertTrue(equivalentToMEW(A,B))
-	# 	self.assertTrue(equivalentToMEW(B,A))
-	# 	self.assertFalse(equivalentTo(B,A))
-	# 	self.assertFalse(equivalentTo(A,B))
+	def test_eq_1(self):
+		A = OA.fromString('a+')
+		B = OA.fromString('a*')
+		self.assertTrue(equivalentTo(A,A))
+		self.assertTrue(equivalentTo(B,B))
+		self.assertTrue(equivalentToMEW(A,A))
+		self.assertTrue(equivalentToMEW(B,B))
+		self.assertTrue(equivalentToMEW(A,B))
+		self.assertTrue(equivalentToMEW(B,A))
+		self.assertFalse(equivalentTo(B,A))
+		self.assertFalse(equivalentTo(A,B))
  
-	# def test_eq_2(self):
-	# 	A = OA.fromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
-	# 	B = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
-	# 	C = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
-	# 	self.assertTrue(equivalentTo(A,A))
-	# 	self.assertTrue(equivalentTo(B,B))
-	# 	self.assertTrue(equivalentTo(C,C))	
-	# 	self.assertTrue(equivalentToMEW(A,B))
-	# 	self.assertTrue(equivalentToMEW(B,A))
-	# 	self.assertTrue(equivalentToMEW(B,C))
-	# 	self.assertTrue(equivalentToMEW(C,B))
-	# 	self.assertTrue(equivalentToMEW(C,A))
-	# 	self.assertTrue(equivalentToMEW(A,C))
-	# 	self.assertTrue(equivalentTo(A,B))
-	# 	self.assertTrue(equivalentTo(B,A))
-	# 	self.assertFalse(equivalentTo(B,C))
-	# 	self.assertFalse(equivalentTo(C,B))
-	# 	self.assertFalse(equivalentTo(C,A))
-	# 	self.assertFalse(equivalentTo(A,C))
+	def test_eq_2(self):
+		A = OA.fromString('(((a1?|b1?)?|(c1?|d1?)?)?,((a2?|b2?)?|(c2?|d2?)?)?)+')
+		B = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+?')
+		C = OA.fromString('(a1|b1|c1|d1|a2|b2|c2|d2)+')
+		self.assertTrue(equivalentTo(A,A))
+		self.assertTrue(equivalentTo(B,B))
+		self.assertTrue(equivalentTo(C,C))	
+		self.assertTrue(equivalentToMEW(A,B))
+		self.assertTrue(equivalentToMEW(B,A))
+		self.assertTrue(equivalentToMEW(B,C))
+		self.assertTrue(equivalentToMEW(C,B))
+		self.assertTrue(equivalentToMEW(C,A))
+		self.assertTrue(equivalentToMEW(A,C))
+		self.assertTrue(equivalentTo(A,B))
+		self.assertTrue(equivalentTo(B,A))
+		self.assertFalse(equivalentTo(B,C))
+		self.assertFalse(equivalentTo(C,B))
+		self.assertFalse(equivalentTo(C,A))
+		self.assertFalse(equivalentTo(A,C))
 	
-	# def test_eq_3(self):
-	# 	A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
-	# 	B=OA.fromString('a+')
-	# 	self.assertTrue(equivalentTo(A,B))
-	# 	self.assertTrue(equivalentTo(B,A))
-	# 	C=OA.fromString('a*')
-	# 	self.assertTrue(equivalentToMEW(A,C))
-	# 	self.assertTrue(equivalentToMEW(C,A))
-	# 	self.assertFalse(equivalentTo(A,C))
-	# 	self.assertFalse(equivalentTo(C,A))
+	def test_eq_3(self):
+		#a, b = '(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)', 'a+'
+		#open('_tmp.A.dot', 'w').write(DRE.fromString(a).toDOTString())
+		#open('_tmp.B.dot', 'w').write(DRE.fromString(b).toDOTString())
+
+		A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
+		B=OA.fromString('a+')
+		self.assertTrue(equivalentTo(A,B)) # TODO: Fails!
+		self.assertTrue(equivalentTo(B,A))
+		C=OA.fromString('a*')
+		self.assertTrue(equivalentToMEW(A,C))
+		self.assertTrue(equivalentToMEW(C,A))
+		self.assertFalse(equivalentTo(A,C))
+		self.assertFalse(equivalentTo(C,A))
 		
 	
 	def test_UF(self):

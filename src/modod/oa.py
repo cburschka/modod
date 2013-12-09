@@ -7,18 +7,41 @@ class OA:
     def __init__(self, first, last, follow, nullable):
         self.first, self.last = first, last
         self.follow, self.nullable = follow, nullable
+
+    # Node and edge sets are not needed during recursive OA generation.
+    # Only compute them once the OA is finished.
+    def _finalize(self):
+        self.nodes = set.union(
+            {'Start', 'Accept', 'Error'},
+            self.first, self.last,
+            {x for (x,y) in self.follow},
+            {y for (x,y) in self.follow}
+        )
+
+        self.edges = set.union(
+            {('Error', 'Error')},
+            {('Start', x) for x in self.first},
+            {(x, 'Accept') for x in self.last},
+            self.follow,
+            {('Start', 'Accept')} if self.nullable else set()
+        )
         
+        self.sigma = {
+            x for (x,i) in 
+            self.first | self.last | 
+            {x for (x,y) in self.follow} | 
+            {y for (x,y) in self.follow}
+        }
+
+        self._delta = {(q, s) : (s,i) for q, (s,i) in self.follow}
+        self._delta.update({('Start', s) : (s,i) for (s,i) in self.first})
+        self._delta.update({((s,i), '') : 'Accept' for (s,i) in self.last})
+
+    def delta(self, q, s):
+        return self._delta[q,s] if (q,s) in self._delta else 'Error'
+
     def graph(self):
-        nodes = {'Start', 'Accept'}
-        nodes |= self.first | self.last
-        nodes |= {x for (x,y) in self.follow} | {y for (x,y) in self.follow}
-        
-        edges = {('Start', 'Accept')} if self.nullable else set()
-        edges |= {('Start', x) for x in self.first}
-        edges |= {(x, 'Accept') for x in self.last}
-        edges |= self.follow
-        
-        return graph.digraph(nodes, edges)
+        return graph.digraph(self.nodes(), self.edges())
 
     def isDeterministic(self):
         # All states reachable from start must be distinctly labeled.
@@ -32,6 +55,11 @@ class OA:
                 return False
             adjacency[x].add(y)
         return True
+
+    def fromIndexedDRE(itree):
+        a = OA.fromIndexedNode(itree.root)
+        a._finalize()
+        return a
 
     def fromIndexedNode(node):
         if isinstance(node, dre_indexed.Terminal):
@@ -84,8 +112,34 @@ class OA:
 
         return OA(first, last, follow, nullable)
 
-def equivalenceModE(A, B):
-        nodes = {'Start', 'Accept', 'Err'}
-        nodes |= self.first | self.last
-        nodes |= {x for (x,y) in self.follow} | {y for (x,y) in self.follow}
+    def equivalentToMEW(A, B):
+        VA = {('A', x) for x in A.nodes}
+        VB = {('B', x) for x in B.nodes}
+
+        # TODO: Can we reject non-identical alphabets immediately?
+        Sigma = A.sigma | B.sigma
+
+        Stack = None
+        U = uf.UF(VA | VB)     
+        U.union(('A', 'Start'), ('B', 'Start'))
+        Stack = (('A', 'Start'), ('B', 'Start')), Stack
+        while Stack is not None:
+            ((_, qA), (_, qB)), Stack = Stack
+            for s in Sigma:
+                rA = U.find(('A', A.delta(qA, s)))
+                rB = U.find(('B', B.delta(qB, s)))
+                if rA != rB:
+                    U.union(rA, rB)
+                    Stack = (rA, rB), Stack
+
+        Accepting = {('A', x) for x in A.last} | {('B', x) for x in B.last}
+        NotAccepting = (VA | VB) - Accepting
+
+        return not any(
+            x & Accepting and x & NotAccepting
+            for x in U.export_sets()
+        )
+
+    def equivalentTo(A, B):
+        return A.nullable == B.nullable and A.equivalentToMEW(B)
 
