@@ -110,9 +110,7 @@ class TestUM(unittest.TestCase):
 	def test_eq_3(self):
 		A=OA.fromString('(a,(a,(a,(a,(a,(a,a+?)?)?)?)?)?)')
 		B=OA.fromString('a+')
-		# open('_tmp.A.dot', 'w').write(A.toDOTString())
-		# open('_tmp.B.dot', 'w').write(B.toDOTString())
-		self.assertTrue(equivalentTo(A,B)) # TODO: Fails!
+		self.assertTrue(equivalentTo(A,B))
 		self.assertTrue(equivalentTo(B,A))
 		C=OA.fromString('a*')
 		self.assertTrue(equivalentToMEW(A,C))

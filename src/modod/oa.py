@@ -126,9 +126,8 @@ class OA:
         while Stack is not None:
             ((_, qA), (_, qB)), Stack = Stack
             for s in Sigma:
-                rA = U.find(('A', A.delta(qA, s)))
-                rB = U.find(('B', B.delta(qB, s)))
-                if rA != rB:
+                rA, rB = ('A', A.delta(qA, s)), ('B', B.delta(qB, s))
+                if U.find(rA) != U.find(rB):
                     U.union(rA, rB)
                     Stack = (rA, rB), Stack
 
