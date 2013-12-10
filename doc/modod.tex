@@ -37,6 +37,9 @@
 \newcommand{\wpnfhfun}{p_{\circ}}
 \newcommand{\pnfupfun}{p_{\blacktriangle}}
 \newcommand{\pnfuphfun}{p_{\vartriangle}}
+\newcommand{\rulefivefun}{p_{R}}
+
+\newcommand{\rulefive}[1]{\rulefivefun{\left(#1\right)}}
 
 \newcommand{\wpnf}[1]{\wpnffun{\left(#1\right)}}
 \newcommand{\wpnfh}[1]{\wpnfhfun{\left(#1\right)}}
@@ -198,7 +201,7 @@ As the state with the label $b$ has two successors with the label $b$, we can co
 \subsubsection{n-ary Normal Form:} The nNf of a regular expression is obtained by contracting all concatenation or choice nodes with children of the same type; i.\,e., $((a\ror b)\ror c)$ becomes $(a \ror b \ror c)$.
 
 \subsubsection{Plus Normal Form:} A central part of our approach to DREs is the use of a normal form, called the \emph{plus normal form (PNF)}. The PNF of a regular expression $\alpha$ in nNF is defined as 
-$$\pnf(\alpha)\df\nnf(\pnfup{\nnf(\wpnf{\alpha})}),$$
+$$\pnf(\alpha)\df\nnf(\rulefive{\nnf(\pnfup{\nnf(\wpnf{\alpha})})}),$$
 where the functions $\pnfupfun$ and $\wpnffun$ are as defined below. 
 
 Intuitively, $\wpnffun$ performs two tasks: The obvious one is the removal of all $\rxo$ operators that are applied to subexpressions which already generate $\emptyword$; the second one is that every special subexpression that occurs inside a star expression is broken up. For example, if $\alpha\df (a\rxo \rxc b\rxo)\rxp$, then $\wpnf{\alpha}= (a\ror b)\rxs$.
@@ -258,7 +261,7 @@ We define $\pnfupfun$ by
 		\end{cases}
 \end{align*}
 where a regular expression $\alpha_i$ is called \emph{special} if it is a nullable concatenation.
-Finally, the auxiliary function $\pnfuphfun$ is defined by
+The auxiliary function $\pnfuphfun$ is defined by
 \begin{align*}
 	\pnfuph{a}&\df a \text{ for all $a\in \Sigma$},\\
 	\pnfuph{\alpha\rxp}
@@ -270,6 +273,20 @@ Finally, the auxiliary function $\pnfuphfun$ is defined by
 	\pnfuph{(\alpha_1\ror \cdots \ror \alpha_n)}
 		&\df \pnfup{(\alpha_1\ror \cdots \ror \alpha_n)}.
 \end{align*}
+Finally, the function $\rulefivefun$ performs a simple rewriting step. For DREs that are of type plus, it simply recurses to the children of the expression:
+\begin{align*}
+	\rulefive{a}&\df a \text{ for all $a\in \Sigma$},\\
+	\rulefive{\alpha\rxo}&\df \rulefive{\alpha}\rxo,\\
+	\rulefive{(\alpha_1\rxc \ldots \rxc \alpha_n)}&\df(\rulefive{\alpha_1}\rxc \ldots \rxc \rulefive{\alpha_n}),\\
+	\rulefive{(\alpha_1\ror \ldots \ror \alpha_n)}&\df(\rulefive{\alpha_1}\ror \ldots \ror \rulefive{\alpha_n}).
+\end{align*}
+We now consider $\rulefive{\alpha}$ for $\alpha=(\beta)\rxp$, and distinguish two cases.
+
+\emph{Case~1:} Assume $\beta$ is a concatenation $\beta=(\beta_1\rxc \ldots \rxc \beta_n)$ such that there is exactly one $\beta_i$ that is not nullable, and that this $\beta_i$ is a plus (i.\,e., there is a DRE~$\gamma$ with $\beta_i=(\gamma)^\rxp$). In this case, we define
+\[\rulefive{\alpha}\df (\rulefive{\beta_1}\rxc \ldots \rxc \rulefive{\beta_{i-1}}\rxc\rulefive{\gamma} \rxc \rulefive{\beta_{i+1}}\rxc\ldots\rxc\rulefive{\beta_n})\rxp\]
+In other word, we remove the plus from $\beta_i$, and recurse on all sub-expressions of $\alpha$.
+
+\emph{Case~2}: In all other cases, we define $\rulefive{\alpha}\df (\rulefive{\beta})\rxp$ (i.\,e., if $\beta$ is not a concatenation, or if no child of $\beta$ is nullable, or if more than two children of $\beta$ are nullable, or if the only nullable child of $\beta$ is not a plus).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{$\emptyword$-free Normal Form}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
