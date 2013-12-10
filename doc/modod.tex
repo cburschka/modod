@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{mathtools}
 \usepackage{paralist}
 \usepackage[]{draftwatermark} % add firstpage as option to show watermark only on first page
 \usepackage{svn-multi}
@@ -28,7 +29,7 @@
 \newcommand{\rxo}{\mathtt{?}}
 \newcommand{\rxc}{\cdot}
 \DeclareMathOperator{\ror}{\mathtt{|}}
-
+\DeclareMathOperator{\eqModEw}{=_{\emptyword}}
 \newcommand{\emptyword}{\varepsilon}
 \newcommand{\df}{:=}
 
@@ -61,7 +62,6 @@
 \DeclareMathOperator{\incomp}{\#}
 \DeclareMathOperator{\term}{term}
 
-\DeclareMathOperator{\first}{F}
 \DeclareMathOperator{\last}{L}
 \DeclareMathOperator{\follow}{E}
 \DeclareMathOperator{\nullable}{null}
@@ -107,7 +107,7 @@ Also, this document is a very drafty work in progress. Some definitions might no
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{(Deterministic) Regular Expressions}\label{sec:dredef}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-We use $\emptyset$ to denote the empty set, and the symbol $\setminus$ for set difference. Let $\emptyword$ denote the empty word, let $\Sigma$ be a terminal alphabet. 
+We use $\emptyset$ to denote the empty set, and the symbol $\setminus$ for set difference. Let $\emptyword$ denote the empty word, let $\Sigma$ be a terminal alphabet. Let $L_1,L_2$ be two languages. We define $L_1\eqModEw L_2$ ($L_1$ and $L_2$ are \emph{equal modulo $\emptyword$}) if $L_1\setminus\emptyword=L_2\setminus\emptyword$.
 
 \paragraph{Regular Expressions:} The set of \emph{regular expressions} over $\Sigma$ is defined as follows:
 \begin{enumerate}
@@ -412,34 +412,167 @@ The three measures can be interpreted as follows.
 	\Return{\emph{true}}
 	\caption{\equivalentToMEW\label{algo:mew}} 
 \end{algorithm2e}
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \subsection{Algorithm for factoring out common suffixes}\label{sec:factor}
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % %Procedure findCommonSuffix
-% % \begin{procedure}[H]
-% % 	\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}
-% % 	\SetKwData{delt}{D}
-% % 	\Input{}
-% % 	
-% % 	\caption{findCommonSuffix}
-% % \end{procedure}
-% 
-% \begin{algorithm2e}[H]
-% 	\SetAlgoLined
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Algorithm for factoring out common suffixes}\label{sec:factor}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %Procedure findCommonSuffix
+% \begin{procedure}[H]
 % 	\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}
 % 	\SetKwData{delt}{D}
-% 	\SetKwData{nh}{nothing_happened}
+% 	\Input{}
 % 	
-% 	
-% 	\Input{A DRE \delt of type choice}
-% 	\Output{A DRE that is equivalent to \delt and has no children with a common suffix}
-% 	\BlankLine
-% 	$\nh\leftarrow\text{true}$
-% 	
-% 	
-% 	
-% 	\caption{factorOut\label{algo:factor}}
-% \end{algorithm2e}
+% 	\caption{findCommonSuffix}
+% \end{procedure}
+\begin{algorithm2e}[H]
+	\SetAlgoLined
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{SideEffects}{side effects}
+	\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}	
+	\SetKwData{parnull}{parnull}
+	\SetKwData{rn}{rn}
+	\SetKwData{delList}{deletees}
+	\SetKwData{redList}{reducees}
+	\SetKwFunction{child}{child}
+	\SetKwFunction{children}{children}
+	\SetKwFunction{rmc}{rmc}
+	\SetKwFunction{sploff}{removeRMC}
+	\SetKwFunction{firstfun}{first}
+	\SetKwFunction{unify}{unify}
+	
+	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
+	\SetKwFunction{nullfun}{nullable}
+	%\SetKwFunction{nullify}{nullify}
+
+	\SetKwFunction{factRw}{factRw}
+	\SetKwFunction{factRwP}{factRwPlus}
+
+	\Input{A DRE $\rho$ of type choice, a Boolean variable $\parnull$}
+	\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
+	\Output{true if the DRE was rewritten; false otherwise}
+	\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
+	\BlankLine
+	$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\parnull)$\;
+	pick some child $\gamma$ of $\rho$ that is a concatenation\;
+	$p_\gamma\leftarrow \rmc(\gamma)$\;
+	$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
+	\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
+	{	
+		\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
+		{
+			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
+			{
+				add $\beta$ to \redList\;
+			}
+			\ElseIf{($\beta$ is a plus \KwAnd $L(\beta)\eqModEw L(p_\gamma)$)}
+			{
+				add $\beta$ to $\delList$\;
+			}
+		}
+		\If{$(\redList\cup\delList)\neq \emptyset$}
+		{
+			$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
+			$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
+			% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
+			% {
+			% 	$\factRw(\gamma,\redList,\delList)$\;
+			% }
+			% \uElseIf{$n_P=0$ \KwAnd $((\delList=\emptyset)$ $\KwOr$ $\rn)$}
+			% {
+			% 	$\factRw(\gamma,\redList,\delList)$\;
+			% }
+			% \Else
+			% {
+			% 	$\factRwP(\gamma,\redList,\delList,\rn)$\;
+			% }
+			%
+			% Diese kompaktere Version ist auf 12/134 zu finden
+			\uIf{$(n_S>0)$ \KwAnd $((n_P > 0)$ \KwOr $((\delList\neq\emptyset)$ \KwAnd \KwNot $\rn))$}
+			{
+				$\factRwP(\gamma,\redList,\delList,\rn)$\;
+			}
+			\Else
+			{
+				$\factRw(\gamma,\redList,\delList)$\;
+			}
+			
+		}
+	}
+	\Else
+	{
+		\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
+		{
+			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$  }
+			{
+				add $\beta$ to \redList\;
+			}
+		}
+		$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
+		\uIf{$(\nullfun(p_\gamma))$ \KwAnd $\rn$}
+		{
+			\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
+		}
+		\Else
+		{
+			\lIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+		}
+		\If{$(\redList\cup\delList)\neq \emptyset$}
+		{
+			$\factRw(\gamma,\redList,\delList)$\;
+		}
+	}
+	
+	\caption{factorOut -- work in progress\label{algo:factor}}
+\end{algorithm2e}
+The algorithm \texttt{factorOut} and its subroutines use the following subroutines:
+\begin{itemize}
+	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable.
+	%\item $\nullify(\alpha)$: Takes a DRE $\alpha$. If $\alpha$ is nullable, the function returns $\alpha$; if $\alpha$ is not nullable, it returns $\alpha\rxo$.
+	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
+	\item $\unify(A)$: Takes a Set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
+	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
+	\[\sploff(\alpha)\df \begin{cases}
+		\alpha_1 & \text{ if $n=2$},\\
+		(\alpha_1\rxc\ldots\rxc \alpha_{n-1})& \text{ if $n>2$.}
+	\end{cases}\]
+	\item $\factRw(\gamma,R,D)$: Takes a DRE $\gamma$, a (possibly empty) sets of DREs $R$ and $D$. The DRE $\rho$ is  rewritten in the following way: First, $\gamma$ is replaced with the DRE 
+\begin{align*}
+	\gamma'&\df (\gamma_1\rxc \rmc(\gamma)),\\
+	\shortintertext{where}
+	\gamma_1&\df \begin{cases}
+		\unify(R')\rxo & \text{ if $D\neq \emptyset$,}\\
+		\unify(R') & \text{ if $D=\emptyset$,}
+	\end{cases}
+\end{align*}
+where the set $R'$ is defined by $R'\df\{\sploff(\beta)\mid \beta\in R\cup\{\gamma\}\}$. Then, $\factRw$ deletes all elements of $R$ and $D$ from $\rho$.
+\item $\factRwP(\gamma,R,D,rn)$: Takes a DRE~$\gamma$, and (possibly empty) sets of DREs $R_S$, $R_P$, and $D$, and a Boolean value $rn$. In order to rewrite $\rho$, we first the DRE~$\gamma_{C}$ by
+\begin{align*}
+	\gamma_{C}&\df \begin{cases}
+		\child(\rmc(\gamma)) & \text{if $\rmc(\gamma)$ is not nullable,}\\ 
+		\child(\child(\rmc(\gamma))) & \text{if $\rmc(\gamma)$ is nullable,} 
+	\end{cases}\\
+\intertext{and the sets $R_S, R_P\subseteq R\cup\{\gamma\}$ by}
+	R_S&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is nullable}\},\\
+	R_P&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is not nullable}\}.
+\end{align*}
+The intuition behind this is as follows: Each nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxp\rxo)$, each non-nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxc\gamma_{C}\rxp\rxo)$.
+
+The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replaced with the DRE~$\gamma'$, which is defined by
+\begin{align*}
+	\gamma'&\df (\gamma_1\rxc\gamma_{C}\rxp\rxo),\\
+	\shortintertext{where}	
+	\gamma_1&\df \begin{cases}
+		\gamma_2\rxo &  \text{if $D\neq \emptyset$ and $rn$ is true,}\\
+		\gamma_2 & \text{otherwise.}
+	\end{cases}\\
+	\shortintertext{The DRE~$\gamma_2$ is a union, its children are the elements of $R_S$, as well as the DRE~$\gamma_3$, which is defined by}
+	\gamma_3&\df \begin{cases}
+		\gamma_{C} & \text{if $R_P=\emptyset$},\\
+		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is false},\\
+		(\unify(R_{P})\rxc\gamma_{C})&\text{otherwise}.
+	\end{cases}.
+\end{align*}
+Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
+\end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -492,6 +625,12 @@ The three measures can be interpreted as follows.
 	\item\texttt{arity()} Returns the arity of the DRE node (i.\,e., the number of children).
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\texttt{Concatenation}}\label{sec:des:conc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{itemize}
+	\item\texttt{removeRMC()} Removes the rightmost child of the node. If this results in a concatenation with a single child, that child replaces the concatenation.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{IndexedDRE}}\label{sec:des:idre}
