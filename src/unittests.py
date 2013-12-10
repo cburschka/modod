@@ -36,6 +36,36 @@ class TestUM(unittest.TestCase):
 		ist='(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?'
 		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
 
+	def test_pnf_extra_6(self):
+		ist='(a?,b?,c+,d?)+'
+		soll='(a?,b?,c,d?)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
+	def test_pnf_extra_7(self):
+		ist='(a?,b+)+'
+		soll='(a?,b)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
+	def test_pnf_extra_8(self):
+		ist='(a+,b?)+'
+		soll='(a,b?)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
+	def test_pnf_extra_9(self):
+		ist='(a?,b+,c+)+'
+		soll='(a?,b+,c+)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
+	def test_pnf_extra_10(self):
+		ist='(a?,(b+|c+),d?)+'
+		soll='(a?,(b|c),d?)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
+	def test_pnf_extra_11(self):
+		ist='(a?,(b+|(c?,d+)),e?)+'
+		soll='(a?,(b|(c?,d)),e?)+'
+		self.assertEqual(DRE.fromString(ist).toNNF().toPNF().toString(),soll)
+
 	def test_pnf_no_side_effects(self):
 		rx='(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?'
 		pnfrx=DRE.fromString(rx).toNNF().toPNF()
