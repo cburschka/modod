@@ -16,7 +16,7 @@
 \usepackage{fancyhdr}
 \usepackage{enumitem}
 \usepackage[algo2e,ruled,vlined,linesnumbered,commentsnumbered]{algorithm2e}
-
+\usepackage[top=5cm, bottom=3.5cm, left=2cm, right=2cm]{geometry}
 \usepackage{hyperref}
 
 \usetikzlibrary{shapes.geometric,arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri,automata}
@@ -437,7 +437,7 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{rmc}{rmc}
 	\SetKwFunction{sploff}{removeRMC}
 	\SetKwFunction{firstfun}{first}
-	\SetKwFunction{unify}{unify}
+	\SetKwFunction{unify}{or}
 	
 	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
 	\SetKwFunction{nullfun}{nullable}
@@ -459,13 +459,13 @@ The three measures can be interpreted as follows.
 	{	
 		\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
 		{
-			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
+			\uIf{\KwAnd $L(\beta)\eqModEw L(p_\gamma)$}
+			{
+				add $\beta$ to \delList\;
+			}
+			\ElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
 			{
 				add $\beta$ to \redList\;
-			}
-			\ElseIf{($\beta$ is a plus \KwAnd $L(\beta)\eqModEw L(p_\gamma)$)}
-			{
-				add $\beta$ to $\delList$\;
 			}
 		}
 		\If{$(\redList\cup\delList)\neq \emptyset$}
@@ -499,13 +499,6 @@ The three measures can be interpreted as follows.
 	}
 	\Else
 	{
-		\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
-		{
-			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$  }
-			{
-				add $\beta$ to \redList\;
-			}
-		}
 		$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
 		\uIf{$(\nullfun(p_\gamma))$ \KwAnd $\rn$}
 		{
@@ -514,6 +507,13 @@ The three measures can be interpreted as follows.
 		\Else
 		{
 			\lIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+		}
+		\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
+		{
+			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$  }
+			{
+				add $\beta$ to \redList\;
+			}
 		}
 		\If{$(\redList\cup\delList)\neq \emptyset$}
 		{
@@ -564,7 +564,9 @@ The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replace
 		\gamma_2\rxo &  \text{if $D\neq \emptyset$ and $rn$ is true,}\\
 		\gamma_2 & \text{otherwise.}
 	\end{cases}\\
-	\shortintertext{The DRE~$\gamma_2$ is a union, its children are the elements of $R_S$, as well as the DRE~$\gamma_3$, which is defined by}
+	\shortintertext{with}
+	\gamma_2&\df \unify(R_S\cup\{\gamma_3\})
+	\shortintertext{where the DRE~$\gamma_3$ is defined by }
 	\gamma_3&\df \begin{cases}
 		\gamma_{C} & \text{if $R_P=\emptyset$},\\
 		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is false},\\
