@@ -287,7 +287,9 @@ If a deterministic regular expression is in PNF and nullable, it cannot be of ty
 \subsection{Complexity Measures}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The three complexity measures $\siz$, $\syn$, and $\aw$ on regular expressions are defined as in Table~\ref{tab:measures}.
+
 \begin{table}[h]
+	\centering
 	\begin{tabular}[H]{|l||c|c|c|}
 	\hline
 	& $\siz$ & $\syn$ & $\aw$ \\
@@ -432,6 +434,7 @@ The three measures can be interpreted as follows.
 	\SetKwData{rn}{rn}
 	\SetKwData{delList}{deletees}
 	\SetKwData{redList}{reducees}
+	\SetKwFunction{parent}{parent}
 	\SetKwFunction{child}{child}
 	\SetKwFunction{children}{children}
 	\SetKwFunction{rmc}{rmc}
@@ -446,83 +449,78 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{factRw}{factRw}
 	\SetKwFunction{factRwP}{factRwPlus}
 
-	\Input{A DRE $\rho$ of type choice, a Boolean variable $\parnull$}
-	\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
-	\Output{true if the DRE was rewritten; false otherwise}
-	\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
+	%\Input{A DRE $\rho$ of type choice, a Boolean variable $\parnull$}
+	%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
+	%\Output{true if the DRE was rewritten; false otherwise}
+	%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
 	\BlankLine
-	$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\parnull)$\;
-	pick some child $\gamma$ of $\rho$ that is a concatenation\;
-	$p_\gamma\leftarrow \rmc(\gamma)$\;
-	$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
-	\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
-	{	
-		\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
-		{
-			\uIf{\KwAnd $L(\beta)\eqModEw L(p_\gamma)$}
-			{
-				add $\beta$ to \delList\;
-			}
-			\ElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
-			{
-				add $\beta$ to \redList\;
-			}
-		}
-		\If{$(\redList\cup\delList)\neq \emptyset$}
-		{
-			$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
-			$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
-			% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
-			% {
-			% 	$\factRw(\gamma,\redList,\delList)$\;
-			% }
-			% \uElseIf{$n_P=0$ \KwAnd $((\delList=\emptyset)$ $\KwOr$ $\rn)$}
-			% {
-			% 	$\factRw(\gamma,\redList,\delList)$\;
-			% }
-			% \Else
-			% {
-			% 	$\factRwP(\gamma,\redList,\delList,\rn)$\;
-			% }
-			%
-			% Diese kompaktere Version ist auf 12/134 zu finden
-			\uIf{$(n_S>0)$ \KwAnd $((n_P > 0)$ \KwOr $((\delList\neq\emptyset)$ \KwAnd \KwNot $\rn))$}
-			{
-				$\factRwP(\gamma,\redList,\delList,\rn)$\;
-			}
-			\Else
-			{
-				$\factRw(\gamma,\redList,\delList)$\;
-			}
-			
-		}
-	}
-	\Else
+	$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho)))$\;
+	mark all children of $\rho$ that are not a concatenation\;
+	\While{there are unmarked children of $\rho$}
 	{
-		$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
-		\uIf{$(\nullfun(p_\gamma))$ \KwAnd $\rn$}
-		{
-			\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
+		pick some child $\gamma$ of $\rho$ that is a concatenation\;
+		$p_\gamma\leftarrow \rmc(\gamma)$\;
+		$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
+		\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
+		{	
+			\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
+			{
+				\lIf{$L(\beta)\eqModEw L(p_\gamma)$}
+				{add $\beta$ to \delList}
+				\lElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
+				{add $\beta$ to \redList}
+			}
+			\uIf{$(\redList\cup\delList)\neq \emptyset$}
+			{
+				$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
+				$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
+				% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
+				% {
+				% 	$\factRw(\gamma,\redList,\delList)$\;
+				% }
+				% \uElseIf{$n_P=0$ \KwAnd $((\delList=\emptyset)$ $\KwOr$ $\rn)$}
+				% {
+				% 	$\factRw(\gamma,\redList,\delList)$\;
+				% }
+				% \Else
+				% {
+				% 	$\factRwP(\gamma,\redList,\delList,\rn)$\;
+				% }
+				%
+				% Diese kompaktere Version ist auf 12/134 zu finden
+				\uIf{$(n_S>0)$ \KwAnd $((n_P > 0)$ \KwOr $((\delList\neq\emptyset)$ \KwAnd \KwNot $\rn))$}
+				{
+					$\factRwP(\gamma,\redList,\delList,\rn)$\;
+				}
+				\lElse{$\factRw(\gamma,\redList,\delList)$\;}
+			}
+			\lElse{mark $\gamma$}
 		}
 		\Else
 		{
-			\lIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
-		}
-		\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
-		{
-			\uIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$  }
+			$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
+			\uIf{$(\nullfun(p_\gamma)$ \KwAnd $\rn)$}
 			{
-				add $\beta$ to \redList\;
+				\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
 			}
-		}
-		\If{$(\redList\cup\delList)\neq \emptyset$}
-		{
-			$\factRw(\gamma,\redList,\delList)$\;
+			\lElseIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+			\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
+			{
+				\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
+				{add $\beta$ to \redList}
+			}
+			\leIf{$(\redList\cup\delList)\neq \emptyset$}
+			{$\factRw(\gamma,\redList,\delList)$}
+			{mark $\gamma$}
 		}
 	}
-	
 	\caption{factorOut -- work in progress\label{algo:factor}}
 \end{algorithm2e}
+The algorithm \texttt{factorOut} is called on a given DRE, with a sub-DRE~$\rho$ of type choice as parameter.  
+%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
+%\Output{true if the DRE was rewritten; false otherwise}
+%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
+
 The algorithm \texttt{factorOut} and its subroutines use the following subroutines:
 \begin{itemize}
 	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable.
