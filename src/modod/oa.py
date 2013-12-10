@@ -41,7 +41,10 @@ class OA:
         return self._delta[q,s] if (q,s) in self._delta else 'Error'
 
     def graph(self):
-        return graph.digraph(self.nodes(), self.edges())
+        return graph.digraph(self.nodes, self.edges)
+
+    def toDOTString(self):
+        return self.graph().xdot()
 
     def isDeterministic(self):
         # All states reachable from start must be distinctly labeled.
