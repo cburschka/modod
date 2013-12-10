@@ -441,6 +441,8 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{sploff}{removeRMC}
 	\SetKwFunction{firstfun}{first}
 	\SetKwFunction{unify}{or}
+	\SetKwFunction{factorOut}{factorOut}
+
 	
 	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
 	\SetKwFunction{nullfun}{nullable}
@@ -449,82 +451,87 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{factRw}{factRw}
 	\SetKwFunction{factRwP}{factRwPlus}
 
-	%\Input{A DRE $\rho$ of type choice, a Boolean variable $\parnull$}
+	\Input{A node $\rho$ in a DRE}
 	%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
 	%\Output{true if the DRE was rewritten; false otherwise}
 	%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
 	\BlankLine
-	$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho)))$\;
-	mark all children of $\rho$ that are not a concatenation\;
-	\While{there are unmarked children of $\rho$}
+	\If{$\rho$ is a choice}
 	{
-		pick some child $\gamma$ of $\rho$ that is a concatenation\;
-		$p_\gamma\leftarrow \rmc(\gamma)$\;
-		$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
-		\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
-		{	
-			\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
-			{
-				\lIf{$L(\beta)\eqModEw L(p_\gamma)$}
-				{add $\beta$ to \delList}
-				\lElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
-				{add $\beta$ to \redList}
-			}
-			\uIf{$(\redList\cup\delList)\neq \emptyset$}
-			{
-				$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
-				$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
-				% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
-				% {
-				% 	$\factRw(\gamma,\redList,\delList)$\;
-				% }
-				% \uElseIf{$n_P=0$ \KwAnd $((\delList=\emptyset)$ $\KwOr$ $\rn)$}
-				% {
-				% 	$\factRw(\gamma,\redList,\delList)$\;
-				% }
-				% \Else
-				% {
-				% 	$\factRwP(\gamma,\redList,\delList,\rn)$\;
-				% }
-				%
-				% Diese kompaktere Version ist auf 12/134 zu finden
-				\uIf{$(n_S>0)$ \KwAnd $((n_P > 0)$ \KwOr $((\delList\neq\emptyset)$ \KwAnd \KwNot $\rn))$}
-				{
-					$\factRwP(\gamma,\redList,\delList,\rn)$\;
-				}
-				\lElse{$\factRw(\gamma,\redList,\delList)$\;}
-			}
-			\lElse{mark $\gamma$}
-		}
-		\Else
+		$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho)))$\;
+		mark all children of $\rho$ that are not a concatenation\;
+		\While{there are unmarked children of $\rho$}
 		{
-			$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
-			\uIf{$(\nullfun(p_\gamma)$ \KwAnd $\rn)$}
-			{
-				\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
+			pick some child $\gamma$ of $\rho$ that is a concatenation\;
+			$p_\gamma\leftarrow \rmc(\gamma)$\;
+			$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
+			\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
+			{	
+				\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
+				{
+					\lIf{$L(\beta)\eqModEw L(p_\gamma)$}
+					{add $\beta$ to \delList}
+					\lElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
+					{add $\beta$ to \redList}
+				}
+				\uIf{$(\redList\cup\delList)\neq \emptyset$}
+				{
+					$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
+					$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
+					% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
+					% {
+					% 	$\factRw(\gamma,\redList,\delList)$\;
+					% }
+					% \uElseIf{$n_P=0$ \KwAnd $((\delList=\emptyset)$ $\KwOr$ $\rn)$}
+					% {
+					% 	$\factRw(\gamma,\redList,\delList)$\;
+					% }
+					% \Else
+					% {
+					% 	$\factRwP(\gamma,\redList,\delList,\rn)$\;
+					% }
+					%
+					% Diese kompaktere Version ist auf 12/134 zu finden
+					\uIf{$(n_S>0)$ \KwAnd $((n_P > 0)$ \KwOr $((\delList\neq\emptyset)$ \KwAnd \KwNot $\rn))$}
+					{
+						$\factRwP(\gamma,\redList,\delList,\rn)$\;
+					}
+					\lElse{$\factRw(\gamma,\redList,\delList)$}
+				}
+				\lElse{mark $\gamma$}
 			}
-			\lElseIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
-			\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
+			\Else
 			{
-				\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
-				{add $\beta$ to \redList}
+				$F\leftarrow \{\beta\in(\children(\rho)\setminus\{\gamma\})\mid \firstfun(\beta)\subseteq \firstfun(p_\gamma)\}$\;
+				\uIf{$(\nullfun(p_\gamma)$ \KwAnd $\rn)$}
+				{
+					\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
+				}
+				\lElseIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+				\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
+				{
+					\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
+					{add $\beta$ to \redList}
+				}
+				\leIf{$(\redList\cup\delList)\neq \emptyset$}
+				{$\factRw(\gamma,\redList,\delList)$}
+				{mark $\gamma$}
 			}
-			\leIf{$(\redList\cup\delList)\neq \emptyset$}
-			{$\factRw(\gamma,\redList,\delList)$}
-			{mark $\gamma$}
 		}
+		\lIf{a child of $\rho$ was rewritten}{ensure the whole DRE is in PNF}
+		unmark all marked nodes\;
 	}
-	\caption{factorOut -- work in progress\label{algo:factor}}
+	\ForEach{$\gamma\in\children(\rho)$}
+	{
+		\lIf{$\gamma$ is not a terminal}{$\factorOut(\gamma)$}
+	}
+	\caption{\texttt{factorOut}}
 \end{algorithm2e}
-The algorithm \texttt{factorOut} is called on a given DRE, with a sub-DRE~$\rho$ of type choice as parameter.  
-%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
-%\Output{true if the DRE was rewritten; false otherwise}
-%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
-
-The algorithm \texttt{factorOut} and its subroutines use the following subroutines:
+The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
 \begin{itemize}
-	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable.
-	%\item $\nullify(\alpha)$: Takes a DRE $\alpha$. If $\alpha$ is nullable, the function returns $\alpha$; if $\alpha$ is not nullable, it returns $\alpha\rxo$.
+	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
+	\item $\parent(\alpha)$: Returns the parent of $\alpha$ (if it exists), or $\emptyset$.
+	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable. We define $\nullfun(\emptyset)$ to be false.
 	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
 	\item $\unify(A)$: Takes a Set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
 	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
@@ -559,13 +566,11 @@ The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replace
 	\gamma'&\df (\gamma_1\rxc\gamma_{C}\rxp\rxo),\\
 	\shortintertext{where}	
 	\gamma_1&\df \begin{cases}
-		\gamma_2\rxo &  \text{if $D\neq \emptyset$ and $rn$ is true,}\\
-		\gamma_2 & \text{otherwise.}
+		\unify(R_S\cup\{\gamma_2\})\rxo &  \text{if $D\neq \emptyset$ and $rn$ is true,}\\
+		\unify(R_S\cup\{\gamma_2\}) & \text{otherwise.}
 	\end{cases}\\
-	\shortintertext{with}
-	\gamma_2&\df \unify(R_S\cup\{\gamma_3\})
-	\shortintertext{where the DRE~$\gamma_3$ is defined by }
-	\gamma_3&\df \begin{cases}
+	\shortintertext{where the DRE~$\gamma_2$ is defined by }
+	\gamma_2&\df \begin{cases}
 		\gamma_{C} & \text{if $R_P=\emptyset$},\\
 		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is false},\\
 		(\unify(R_{P})\rxc\gamma_{C})&\text{otherwise}.
@@ -582,7 +587,10 @@ Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
 \begin{itemize}
 	\item\texttt{DREfromString(s)} \emph{deprecated}
 %		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
-\item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning \texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
+\item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning 
+\begin{center}
+	\texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
+\end{center}
 \item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
 
 \end{itemize}
