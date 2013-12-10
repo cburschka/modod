@@ -416,12 +416,12 @@ The three measures can be interpreted as follows.
 	\While{\S is not empty}{
 		$(\qA,\qB)\leftarrow \S.\pop()$\;
 		\ForEach{$a\in\Sigma$}{
-			$r_A\leftarrow \U.\findFun(\A.\transfun(\qA,a))$\;
-			$r_B\leftarrow \U.\findFun(\B.\transfun(\qB,a))$\;
-			\If{$\rA\neq\rB$}{
+			$r_A\leftarrow \A.\transfun(\qA,a)$\;
+			$r_B\leftarrow \B.\transfun(\qB,a)$\;
+			\If{$\U.\findFun(\rA)\neq\U.\findFun(\rB)$}{
 				$\U.\union(\rA,\rB)$\;
-				$\S.\push(\rA,\rB)$\footnote{Instead of \rA,\rB, choose representatives from the respective sets.}\;
-			}
+			 	$\S.\push(\rA,\rB)$\;
+			 }
 		}
 	}
 	$\lastSet\leftarrow \A.\lastFun\cup \B.\lastFun()$\;
