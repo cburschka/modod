@@ -170,7 +170,25 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(rx.rpn(),8)
 		self.assertEqual(rx.size(),10)
 		
-		
+	def test_dre_equality_1(self):
+		rxA = DRE.fromString('(ab|ba)+')
+		rxB = DRE.fromString('(ba|ab)+')
+		self.assertEqual(rxA,rxB)
+	
+	def test_dre_equality_2(self):
+		rxA = DRE.fromString('(a?|b+|c?)+')
+		rxB = DRE.fromString('(a|b|c)*')
+		self.assertNotEqual(rxA,rxB)
+		A = OA.fromDRE(rxA)
+		B = OA.fromDRE(rxB)
+		self.assertTrue(equivalentTo(A,B))
+
+	def test_dre_equality_3(self):
+		rxA = DRE.fromString('(a|b|c)+')
+		rxB = DRE.fromString('(a|(b|c))+')
+		self.assertNotEqual(rxA,rxB)
+		self.assertEqual(rxA,rxB.toNNF())
+
 if __name__ == '__main__':
 	unittest.main()
 
