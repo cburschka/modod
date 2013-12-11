@@ -437,7 +437,7 @@ The three measures can be interpreted as follows.
 	\caption{\equivalentToMEW\label{algo:mew}} 
 \end{algorithm2e}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Algorithm for factoring out common suffixes}\label{sec:factor}
+\subsection{Algorithm for factoring out common suffices}\label{sec:factor}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %Procedure findCommonSuffix
 % \begin{procedure}[H]
@@ -501,7 +501,7 @@ The three measures can be interpreted as follows.
 		mark all children of $\rho$ that are not a concatenation\;
 		\While{there are unmarked children of $\rho$}
 		{
-			pick some unmarked child $\gamma$ of $\rho$\;
+			choose and mark some unmarked child $\gamma$ of $\rho$\;
 			$p_\gamma\leftarrow \rmc(\gamma)$\;
 			$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
 			\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
@@ -513,7 +513,7 @@ The three measures can be interpreted as follows.
 					\ElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
 					{add $\beta$ to \redList}
 				}
-				\uIf{$(\redList\cup\delList)\neq \emptyset$}
+				\If{$(\redList\cup\delList)\neq \emptyset$}
 				{
 					$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
 					$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
@@ -537,7 +537,6 @@ The three measures can be interpreted as follows.
 					}
 					\lElse{$\factRw(\gamma,\redList,\delList)$}
 				}
-				\lElse{mark $\gamma$}
 			}
 			\Else
 			{
@@ -559,9 +558,8 @@ The three measures can be interpreted as follows.
 					\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
 					{add $\beta$ to \redList}
 				}
-				\leIf{$(\redList\cup\delList)\neq \emptyset$}
+				\lIf{$(\redList\cup\delList)\neq \emptyset$}
 				{$\factRw(\gamma,\redList,\delList)$}
-				{mark $\gamma$}
 			}
 		}
 		%$\alpha\leftarrow\unify(\{\factorOut(c)\mid c\in\children(\rho)$\})\;
