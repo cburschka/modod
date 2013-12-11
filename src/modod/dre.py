@@ -190,8 +190,8 @@ class Nary(Operator):
         return self.__class__([x._pnf1() for x in self.children])
     def _pnf4(self):
         return self.__class__([x._pnf3() for x in self.children])
-    def _size(self):
-        return 2*parentheses + (n-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
+    def _size(self, operators, parentheses):
+        return 2*parentheses + (len(self.children)-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
 
     def _count_terms(self):
         count = {}
