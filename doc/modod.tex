@@ -16,7 +16,7 @@
 \usepackage{fancyhdr}
 \usepackage{enumitem}
 \usepackage[algo2e,ruled,vlined,linesnumbered,commentsnumbered]{algorithm2e}
-\usepackage[top=5cm, bottom=3.5cm, left=2cm, right=2cm]{geometry}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
 \usepackage{hyperref}
 
 \usetikzlibrary{shapes.geometric,arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri,automata}
@@ -470,11 +470,11 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{factRw}{factRw}
 	\SetKwFunction{factRwP}{factRwPlus}
 
-	\Input{A node $\rho$ in a DRE}
+	%\Input{A node $\rho$ in a DRE}
 	%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
 	%\Output{true if the DRE was rewritten; false otherwise}
 	%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
-	\BlankLine
+	%\BlankLine
 	\If{$\rho$ is a choice}
 	{
 		$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho)))$\;
@@ -526,7 +526,14 @@ The three measures can be interpreted as follows.
 				{
 					\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$}
 				}
-				\lElseIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+				\uElseIf{$(\nullfun(\unify(F))$ \KwAnd $(\KwNot$ $\nullfun(p_{\gamma})))$}
+				{
+					\lIf{$L(\unify(F))\eqModEw L(p_\gamma)$}{$\delList\leftarrow F$} %may cause need for a ? above rho
+				}
+				\Else
+				{
+					\lIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
+				}
 				\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
 				{
 					\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
@@ -537,14 +544,21 @@ The three measures can be interpreted as follows.
 				{mark $\gamma$}
 			}
 		}
-		\lIf{a child of $\rho$ was rewritten}{ensure the whole DRE is in PNF}
+		\If{a child of $\rho$ was rewritten}
+		{
+			\If{$(\rn\;\KwAnd\;\KwNot(\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho))))$}
+			{
+				add an option node above $\rho$\; % insert new ? if needed
+			}
+			ensure the whole DRE is in PNF and well-formed\;
+		}
 		unmark all marked nodes\;
 	}
 	\ForEach{$\gamma\in\children(\rho)$}
 	{
 		\lIf{$\gamma$ is not a terminal}{$\factorOut(\gamma)$}
 	}
-	\caption{\texttt{factorOut}}
+	\caption{\texttt{factorOut(}$\rho$\texttt{)}}
 \end{algorithm2e}
 The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
 \begin{itemize}
