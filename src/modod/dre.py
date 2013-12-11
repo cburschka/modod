@@ -78,6 +78,11 @@ class DRE:
         return hash((self.__class__, self.__key__()))
     def __eq__(a, b):
         return a.__class__ is b.__class__ and a.__key__() == b.__key__()
+    def __lt__(a, b):
+        if a.__class__ != b.__class__:
+            return a.__class__.__name__ < b.__class__.__name__
+        # The key is always a tuple of orderable types.
+        return a.__key__() < b.__key__()
 
 class Terminal(DRE):
     def __init__(self, symbol):
@@ -298,4 +303,4 @@ class Choice(Nary):
         children = {x:0 for x in self.children}
         for x in self.children:
             children[x] += 1
-
+        return tuple(sorted(children.items()))
