@@ -146,8 +146,7 @@ class TestUM(unittest.TestCase):
 		self.assertTrue(equivalentToMEW(A,C))
 		self.assertTrue(equivalentToMEW(C,A))
 		self.assertFalse(equivalentTo(A,C))
-		self.assertFalse(equivalentTo(C,A))
-		
+		self.assertFalse(equivalentTo(C,A))	
 	
 	def test_UF(self):
 		import modod.uf as uf
@@ -164,6 +163,12 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(x.find(1),x.find(2))
 		self.assertNotEqual(x.find(1),x.find(3))
 		self.assertEqual(3,x.find(3))
+		
+	def test_size_1(self):
+		rx = DRE.fromString('(ab,ba,a,b)+')
+		self.assertEqual(rx.awidth(),4)
+		self.assertEqual(rx.rpn(),8)
+		self.assertEqual(rx.size(),10)
 		
 		
 if __name__ == '__main__':
