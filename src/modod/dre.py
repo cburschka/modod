@@ -74,10 +74,18 @@ class DRE:
         print(nodes)
         return nodes, edges
 
+    def __hash__(self):
+        return hash((self.__class__, self.__key__()))
+    def __eq__(a, b):
+        return b.__class__ is b.__class__ and a.__key__() == b.__key__()
+
 class Terminal(DRE):
     def __init__(self, symbol):
         self.symbol = symbol
         self.children = []
+
+    def __key__(self):
+        return self.symbol
 
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
@@ -119,6 +127,9 @@ class Unary(Operator):
         self.child = child
         self.children = [child]
 
+    def __key__(self):
+        return self.child
+
     def __str__(self):
         return '{} [{}]'.format(self.__class__.__name__, self.child)
 
@@ -149,6 +160,7 @@ class Unary(Operator):
 class Nary(Operator):
     def __init__(self, children):
         self.children = children
+
     def __str__(self):
         return self.__class__.__name__ + ' [' + ', '.join(map(str, self.children)) + ']'
     def _formula(self):
@@ -246,7 +258,9 @@ class Concatenation(Nary):
                 return False
             
             f |= x._first()
-            
+
+    def __key__(self):
+        return tuple(self.children)
 
 class Choice(Nary):
     def _label(self):
@@ -279,3 +293,9 @@ class Choice(Nary):
         if any(any(f[i] & f[j] for j in range(i+1,len(f))) for i in range(n)):
             return False
         return True
+
+    def __key__(self):
+        children = {x:0 for x in self.children}
+        for x in self.children:
+            children[x] += 1
+
