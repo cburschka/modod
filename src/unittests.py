@@ -72,6 +72,12 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(pnfrx.toString(),'(a1|b1|c1|d1|a2|b2|c2|d2)?')
 		self.assertEqual(rx,'(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?')
 
+	def test_pnf_extra_12(self):
+		rx='(((a1? | b1?)? |(c1? | d1?)?)?|((a2? | b2?)? |(c2? | d2?)?)?)?'
+		pnfnnfrx=DRE.fromString(rx).toNNF().toPNF()
+		pnfrx=DRE.fromString(rx).toPNF()
+		self.assertEqual(pnfnnfrx,pnfrx)
+
 	def test_determinism_1(self):
 		rxstr = 'a+'
 		A = OA.fromString(rxstr)
@@ -164,12 +170,18 @@ class TestUM(unittest.TestCase):
 		self.assertNotEqual(x.find(1),x.find(3))
 		self.assertEqual(3,x.find(3))
 		
-	def test_size_1(self):
+	def test_size_measures_1(self):
 		rx = DRE.fromString('(ab,ba,a,b)+')
 		self.assertEqual(rx.awidth(),4)
 		self.assertEqual(rx.rpn(),8)
 		self.assertEqual(rx.size(),10)
 		
+	def test_size_measures_2(self):
+		rx = DRE.fromString('(a,(a,b))+?')
+		self.assertEqual(rx.awidth(),3)
+		self.assertEqual(rx.rpn(),8)
+		self.assertEqual(rx.size(),7)	
+	
 	def test_dre_equality_1(self):
 		rxA = DRE.fromString('(ab|ba)+')
 		rxB = DRE.fromString('(ba|ab)+')
@@ -188,6 +200,9 @@ class TestUM(unittest.TestCase):
 		rxB = DRE.fromString('(a|(b|c))+')
 		self.assertNotEqual(rxA,rxB)
 		self.assertEqual(rxA,rxB.toNNF())
+
+	# def test_factorOut_1(self):
+	# 	rxA = DRE.fromString('((a,b)|(a,c))?')
 
 if __name__ == '__main__':
 	unittest.main()
