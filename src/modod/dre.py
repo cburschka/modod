@@ -77,7 +77,7 @@ class DRE:
     def __hash__(self):
         return hash((self.__class__, self.__key__()))
     def __eq__(a, b):
-        return b.__class__ is b.__class__ and a.__key__() == b.__key__()
+        return a.__class__ is b.__class__ and a.__key__() == b.__key__()
 
 class Terminal(DRE):
     def __init__(self, symbol):
