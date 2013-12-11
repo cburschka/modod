@@ -16,7 +16,7 @@
 \usepackage{fancyhdr}
 \usepackage{enumitem}
 \usepackage[algo2e,ruled,vlined,linesnumbered,commentsnumbered]{algorithm2e}
-\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
 \usepackage{hyperref}
 
 \usetikzlibrary{shapes.geometric,arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri,automata}
@@ -68,6 +68,9 @@
 \DeclareMathOperator{\last}{L}
 \DeclareMathOperator{\follow}{E}
 \DeclareMathOperator{\nullable}{null}
+
+\newcommand{\true}{\ensuremath{\operatorname{true}}\xspace}
+\newcommand{\false}{\ensuremath{\operatorname{false}}\xspace}
 
 \newcommand{\OAFromIndexedDRE}{\texttt{OAFromIndexedDRE}}
 \newcommand{\equivalentToMEW}{\texttt{equivalentToMEW}}
@@ -351,7 +354,7 @@ The three measures can be interpreted as follows.
 		$\aut_1\leftarrow \OAFromIndexedDRE(\delt_1)$\;
 		$\Fset\leftarrow\aut_1.\Fset$; $\Lset\leftarrow\aut_1.\Lset$; $\Eset\leftarrow\aut_1.\Eset$\; 
 		\If{\delt is an option}{
-			$\nullvar\leftarrow \text{true}$; \Return{}\;
+			$\nullvar\leftarrow \true$; \Return{}\;
 		}
 		\Else(\tcc*[h]{\delt is a plus}){
 			\lForEach{$u$ in $\aut_1.\Lset$, $v$ in $\aut_1.\Fset$}{add $(u,v)$ to \Eset}
@@ -403,7 +406,7 @@ The three measures can be interpreted as follows.
 	\SetKwInOut{Output}{output}
 	\SetKwInOut{Assert}{assert}
 	\Input{Occurrence automata \A, \B}
-	\Output{\emph{true} if $L(\A)\setminus\{\emptyword\}=L(\B)\setminus\{\emptyword\}$, \emph{false} otherwise}
+	\Output{\true if $L(\A)\setminus\{\emptyword\}=L(\B)\setminus\{\emptyword\}$, \emph{false} otherwise}
 	\Assert{\A.\nodes() and \B.\nodes are disjoint\footnote{This is something the implementation has to ensure; e.\,g.\ by renaming indices. On the other hand, it might be preferable to leave the indices of the OAs unchanged, and handle this during $\makeset$.}.}
 	\BlankLine
 	$\VA \leftarrow \A.\nodes \cup \{\A.\srcs,\A.\errs\}$\;
@@ -430,7 +433,7 @@ The three measures can be interpreted as follows.
 			\Return{\emph{false}}
 		}
 	}
-	\Return{\emph{true}}
+	\Return{\true}
 	\caption{\equivalentToMEW\label{algo:mew}} 
 \end{algorithm2e}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -460,6 +463,7 @@ The three measures can be interpreted as follows.
 	\SetKwFunction{sploff}{removeRMC}
 	\SetKwFunction{firstfun}{first}
 	\SetKwFunction{unify}{or}
+	\SetKwFunction{conc}{concatenate}
 	\SetKwFunction{factorOut}{factorOut}
 
 	
@@ -475,22 +479,38 @@ The three measures can be interpreted as follows.
 	%\Output{true if the DRE was rewritten; false otherwise}
 	%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
 	%\BlankLine
-	\If{$\rho$ is a choice}
+	\uIf{$\rho$ is a terminal}
 	{
-		$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho)))$\;
+		return $\rho$\;
+	}
+	\uElseIf{$\rho$ is a plus}
+	{
+		return $(\factorOut(\child(\rho),\false))\rxp$\;
+	}
+	\uElseIf{$\rho$ is an option}
+	{
+		 \leIf{$\child(\rho)$ is a choice}{return $(\factorOut(\child(\rho),\true)$}{return $(\factorOut(\child(\rho),\false))\rxo$}
+	}
+	\uElseIf{$\rho$ is a concatenation}
+	{
+		return $\conc(\factorOut(\sploff(\rho)),\factorOut(\rmc(\rho)))$\;
+	}
+	\Else
+	{
+		$\rn\leftarrow (\nullfun(\rho)\;\KwOr\;\parnull)$\;
 		mark all children of $\rho$ that are not a concatenation\;
 		\While{there are unmarked children of $\rho$}
 		{
-			pick some child $\gamma$ of $\rho$ that is a concatenation\;
+			pick some unmarked child $\gamma$ of $\rho$\;
 			$p_\gamma\leftarrow \rmc(\gamma)$\;
 			$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
 			\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
 			{	
 				\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
 				{
-					\lIf{$L(\beta)\eqModEw L(p_\gamma)$}
+					\uIf{$L(\beta)\eqModEw L(p_\gamma)$}
 					{add $\beta$ to \delList}
-					\lElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
+					\ElseIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))\eqModEw L(p_\gamma))$  }
 					{add $\beta$ to \redList}
 				}
 				\uIf{$(\redList\cup\delList)\neq \emptyset$}
@@ -544,29 +564,23 @@ The three measures can be interpreted as follows.
 				{mark $\gamma$}
 			}
 		}
-		\If{a child of $\rho$ was rewritten}
+		%$\alpha\leftarrow\unify(\{\factorOut(c)\mid c\in\children(\rho)$\})\;
+		\uIf{\parnull \KwAnd no child of $\rho$ is nullable}
 		{
-			\If{$(\rn\;\KwAnd\;\KwNot(\nullfun(\rho)\;\KwOr\;\nullfun(\parent(\rho))))$}
-			{
-				add an option node above $\rho$\; % insert new ? if needed
-			}
-			ensure the whole DRE is in PNF and well-formed\;
+			return $(\unify(\{\factorOut(c)\mid c\in\children(\rho)\}))\rxo$\;
 		}
-		unmark all marked nodes\;
+		\lElse{return $\unify(\{\factorOut(c)\mid c\in\children(\rho)\})$}
 	}
-	\ForEach{$\gamma\in\children(\rho)$}
-	{
-		\lIf{$\gamma$ is not a terminal}{$\factorOut(\gamma)$}
-	}
-	\caption{\texttt{factorOut(}$\rho$\texttt{)}}
+	\caption{\texttt{factorOut(}$\rho,parnull$\texttt{)}}
 \end{algorithm2e}
 The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
 \begin{itemize}
-	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
+	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or a list of children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
 	\item $\parent(\alpha)$: Returns the parent of $\alpha$ (if it exists), or $\emptyset$.
 	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable. We define $\nullfun(\emptyset)$ to be false.
 	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
-	\item $\unify(A)$: Takes a Set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
+	\item $\conc(\alpha,\beta)$: Takes two DREs $\alpha$ and $\beta$ in $\nnf$ and returns $\nnf((\alpha\rxc\beta))$. (As both DREs are in $\nnf$, it suffices to check which of them are concatenations, and concatenate the DREs or their children accordingly.) 
+	\item $\unify(A)$: Takes a set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
 	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
 	\[\sploff(\alpha)\df \begin{cases}
 		\alpha_1 & \text{ if $n=2$},\\
@@ -599,13 +613,13 @@ The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replace
 	\gamma'&\df (\gamma_1\rxc\gamma_{C}\rxp\rxo),\\
 	\shortintertext{where}	
 	\gamma_1&\df \begin{cases}
-		\unify(R_S\cup\{\gamma_2\})\rxo &  \text{if $D\neq \emptyset$ and $rn$ is true,}\\
+		\unify(R_S\cup\{\gamma_2\})\rxo &  \text{if $D\neq \emptyset$ and $rn$ is $\true$,}\\
 		\unify(R_S\cup\{\gamma_2\}) & \text{otherwise.}
 	\end{cases}\\
 	\shortintertext{where the DRE~$\gamma_2$ is defined by }
 	\gamma_2&\df \begin{cases}
 		\gamma_{C} & \text{if $R_P=\emptyset$},\\
-		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is false},\\
+		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is $\false$},\\
 		(\unify(R_{P})\rxc\gamma_{C})&\text{otherwise}.
 	\end{cases}.
 \end{align*}
@@ -620,11 +634,11 @@ Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
 \begin{itemize}
 	\item\texttt{DREfromString(s)} \emph{deprecated}
 %		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
-\item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning 
+\item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns $\true$ if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning 
 \begin{center}
 	\texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
 \end{center}
-\item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns \emph{true} if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
+\item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns $\true$ if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
 
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -690,7 +704,7 @@ Extends \texttt{DRE} by adding indices to the terminal nodes. Indices are intege
 	\item\texttt{first} set of entry nodes (successors of $\src$)
 	\item\texttt{last} set of exit nodes (predecessors of $\snk$)
 	\item\texttt{follow} Set of edges (i.\,e., tuples of nodes). Might be empty (e.\,g., if the automaton accepts only a single letter). I suggest using a dictionary that maps nodes to sets of successors. 
-	\item\texttt{nullable} True iff.\ the automaton accepts the empty word
+	\item\texttt{nullable} \true iff.\ the automaton accepts the empty word
 	\item\texttt{src} constant that symbolizes the $\src$ node of the automaton
 	\item\texttt{err} constant that symbolizes the failure node of the automaton	
 \end{itemize}
@@ -702,7 +716,7 @@ Note that set set of vertices is not modeled explicitly. Furthermore, note that 
 	\item \texttt{fromString(string)} Takes a string, converts it into a DRE, than into an indexed DRE, which is used to construct an \texttt{OccurrenceAutomaton} object, which is then returned. 
 	\item\texttt{nodes()} Returns the set of all nodes (union of \texttt{first}, \texttt{last}, and first elements of elements of \texttt{follow}). 
 	\item\texttt{labels()} Returns a set of all labels of nodes of the automaton (i.\,e., the terminals that occur in the OA).
-	\item\texttt{isDeterministic()} Returns \emph{true} if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$ such that $v_1$ and $v_2$ contain the same label.)
+	\item\texttt{isDeterministic()} Returns \true if the automaton is deterministic. (It is not deterministic if follow contains elements $(u,v_1)$ and $(u,v_2)$ such that $v_1$ and $v_2$ contain the same label.)
 	\item\texttt{delta(node,terminal)}: When called with a node $u$ and a terminal $a$, computes the set of nodes $v$ such that $\lab(v)=a$, and $(u,v)\in\mathtt{follow}$. If it is easier, assume that the automaton is deterministic. If the set is empty, return the node \texttt{err}. Also, for every terminal \texttt{a}, define \texttt{delta(err,a)=err}.
 %	\item\texttt{isComplete()} Returns \emph{true} if the automaton is complete.
 %	\item\texttt{makeComplete()} Ensures that the automaton is complete: If there exists a node $u\in\mathtt{nodes()}$ and a terminal $a$ such that no successor if $u$ is labeled with $a$, introduce a new 
