@@ -230,7 +230,11 @@ class TestUM(unittest.TestCase):
 	# 	rxA = DRE.fromString('((a,((b,c?)|c))|(b,c))')
 	# 	rxB = DRE.fromString('(a,((b,c?)|c))?')
 	# 	self.assertEqual(rxA.factorOut(),rxB)
-
+	#
+	# def test_factorOut_6(self):
+	# 	rxA = DRE.fromString('(((a1|((a2|(a3,b1)),b2)),b3)|(b1,b2,b3))') # basiert auf Bsp von S. 11/240
+	# 	rxB = DRE.fromString('((a1|((a2|(a3?,b1)),b2)),b3)')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
 
 if __name__ == '__main__':
 	unittest.main()
