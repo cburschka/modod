@@ -153,7 +153,12 @@ class TestUM(unittest.TestCase):
 		self.assertTrue(equivalentToMEW(C,A))
 		self.assertFalse(equivalentTo(A,C))
 		self.assertFalse(equivalentTo(C,A))	
-	
+		
+	def test_dre_eq_1(self):
+		rxA = DRE.fromString('(a*|b)+?')
+		rxB = DRE.fromString('(b|a+?)*')
+		self.assertEqual(rxA,rxB)
+		
 	def test_UF(self):
 		import modod.uf as uf
 		x =uf.UF()
@@ -177,10 +182,10 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(rx.size(),10)
 		
 	def test_size_measures_2(self):
-		rx = DRE.fromString('(a,(a,b))+?')
+		rx = DRE.fromString('(a,(a,b+))+?')
 		self.assertEqual(rx.awidth(),3)
 		self.assertEqual(rx.rpn(),8)
-		self.assertEqual(rx.size(),7)	
+		self.assertEqual(rx.size(),12)	
 	
 	def test_dre_equality_1(self):
 		rxA = DRE.fromString('(ab|ba)+')
@@ -202,7 +207,30 @@ class TestUM(unittest.TestCase):
 		self.assertEqual(rxA,rxB.toNNF())
 
 	# def test_factorOut_1(self):
-	# 	rxA = DRE.fromString('((a,b)|(a,c))?')
+	# 	rxA = DRE.fromString('((a,b)|(c,b))?')
+	# 	rxB = DRE.fromString('((a|b),c)?')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
+	# 
+	# def test_factorOut_2(self):
+	# 	rxA = DRE.fromString('((a,b+)|b+)')
+	# 	rxB = DRE.fromString('(a?,b+)')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
+	# 
+	# def test_factorOut_3(self):
+	# 	rxA = DRE.fromString('((a,b*)|b+)?')
+	# 	rxB = DRE.fromString('(a?,b*)')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
+	# 
+	# def test_factorOut_4(self):
+	# 	rxA = DRE.fromString('((a,b+)|(c,b*)|b+)')
+	# 	rxB = DRE.fromString('((c|(a?,b)),b*)')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
+	# 
+	# def test_factorOut_5(self):
+	# 	rxA = DRE.fromString('((a,((b,c?)|c))|(b,c))')
+	# 	rxB = DRE.fromString('(a,((b,c?)|c))?')
+	# 	self.assertEqual(rxA.factorOut(),rxB)
+
 
 if __name__ == '__main__':
 	unittest.main()
