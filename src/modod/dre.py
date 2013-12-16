@@ -193,8 +193,7 @@ class Nary(Operator):
 
     def _pnf1(self):
         return self.__class__([x._pnf1() for x in self.children])
-    def _pnf4(self):
-        return self.__class__([x._pnf3() for x in self.children])
+
     def _size(self, operators, parentheses):
         return 2*parentheses + (len(self.children)-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
 
@@ -244,6 +243,8 @@ class Concatenation(Nary):
             return self
     def _pnf3(self):
         return Concatenation([x._pnf3() for x in self.children])
+    def _pnf4(self):
+        return Concatenation([x._pnf3() for x in self.children])
 
     def _first(self):
         f = set()
@@ -284,6 +285,8 @@ class Choice(Nary):
                 return Optional(Choice(x))
         else:
             return Choice([x._pnf3() for x in self.children])
+    def _pnf4(self):
+        return self._pnf3()
 
     def _first(self):
         f = set()
