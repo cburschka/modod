@@ -155,7 +155,7 @@ class Unary(Operator):
     # def _pnf4(self):
     #     return self.__class__(self.child._pnf3())
     def _size(self, operators, parentheses):
-        return 1 + self.child._size(operators, parentheses)
+        return operators + self.child._size(operators, parentheses)
     def _count_terms(self):
         return self.child._count_terms()
 
