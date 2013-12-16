@@ -50,21 +50,28 @@ class DRE:
         return graph.digraph(nodes, edges).tikz() # TODO
 
 
-    # "Private" Methoden:
-    # p•
+    # Semi-Private Methoden (haben keine feste Spezifikation):
     def _pnf1(self):
+        '''p•'''
         pass
-    # p◦
+
     def _pnf2(self):
+        '''p◦'''
         pass
-    # p▴
+
     def _pnf3(self):
+        '''p▴'''
         pass
-    # p▵
+
     def _pnf4(self):
+        '''p▵'''
         pass
 
     def _size(self, operators, parentheses):
+        pass
+
+    def _test_empty(self):
+        '''Prüft, ob der Ausdruck "nullbar" ist (d.h. das leere Wort akzeptiert).'''
         pass
 
     def _graph(self, nodes=None, edges=None):
@@ -148,12 +155,12 @@ class Unary(Operator):
         return self.__class__(self.child._nnf())
     def _isnnf(self):
         return self.child._isnnf()
+
     def _pnf2(self):
         return self.child._pnf2()
     def _pnf3(self):
         return self.__class__(self.child._pnf3())
-    # def _pnf4(self):
-    #     return self.__class__(self.child._pnf3())
+
     def _size(self, operators, parentheses):
         return operators + self.child._size(operators, parentheses)
     def _count_terms(self):
@@ -277,7 +284,7 @@ class Concatenation(Nary):
             a, b = x._first(), x._follow()
             if f & x._first():
                 return False
-            
+
             f |= x._first()
 
     def __key__(self):
@@ -293,7 +300,7 @@ class Choice(Nary):
     def _pnf3(self):
         if self._test_empty():
             x = [x._pnf4() for x in self.children]
-            # "special"
+            # Falls eines der Elemente "special" (d.h. eine nullbare Konkatenation) ist
             if any(x.__class__ is Concatenation and x._test_empty() for x in self.children):
                 return Choice(x)
             else:
