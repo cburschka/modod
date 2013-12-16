@@ -237,10 +237,25 @@ class Concatenation(Nary):
     def _test_empty(self):
         return all(x._test_empty() for x in self.children)
     def _pnf2(self):
-        if self._test_empty():
+        # Wir unterscheiden drei Fälle:
+        # Kein, genau ein oder mehr als ein nicht-nullbares Element
+        count, last = 0, 0
+        for i,x in enumerate(self.children):
+            if not x._test_empty():
+                count, last = count + 1, i
+            if count > 1:
+                break
+
+        # Sind alle nullbar, so wird aus der Konkatenation ein Oder
+        if count == 0:
             return Choice([x._pnf2() for x in self.children])
+        # Steige in das einzigen nicht-nullbare Element ab:
+        elif count == 1:
+            return Concatenation(self.children[:last] + [self.children[last]._pnf2()] + self.children[last+1:])
+        # Sonst ändere nichts
         else:
             return self
+
     def _pnf3(self):
         return Concatenation([x._pnf3() for x in self.children])
     def _pnf4(self):
