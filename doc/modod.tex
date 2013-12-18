@@ -506,7 +506,7 @@ The three measures can be interpreted as follows.
 			$\delList\leftarrow \emptyset$; $\redList\leftarrow\emptyset$\; 
 			\uIf{($p_\gamma$ is a plus) \KwOr (($p_\gamma$ is an option \KwAnd $\child(p_\gamma)$ is a plus))}
 			{	
-				\ForEach{$v\in(\children(\rho)\setminus\{\gamma\})$}
+				\ForEach{$\beta\in(\children(\rho)\setminus\{\gamma\})$}
 				{
 					\uIf{$L(\beta)\eqModEw L(p_\gamma)$}
 					{add $\beta$ to \delList}
@@ -553,7 +553,7 @@ The three measures can be interpreted as follows.
 				{
 					\lIf{$L(\unify(F))=L(p_\gamma)$}{$\delList\leftarrow F$}
 				}
-				\ForEach{$v\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
+				\ForEach{$\beta\in(\children(\rho)\setminus(\{\gamma\}\cup\delList))$}
 				{
 					\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
 					{add $\beta$ to \redList}
