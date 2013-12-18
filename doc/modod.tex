@@ -670,6 +670,7 @@ Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
 	\item\texttt{toString()} Returns a string representation of the DRE. (Must be compatible with \texttt{DREfromString}, cf.\ Section~\ref{sec:des:mod}). Should be able to have an optional argument that states that combinations of $\rxp$ and $\rxo$ are printed as $\rxs$.
 	\item\texttt{toDOTString()} Returns a tree representation of the DRE in the DOT format that is used by GraphViz (\url{http://www.graphviz.org/}). Use \texttt{ordering=out} to preserve the order. Consider using subgraphs, to further enforce this.
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
+	\item \texttt{factorOut()} Returns the result of calling $\factorOut(\rho,\false)$, where $\rho$ is the PNF of the current DRE.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{Nary}}\label{sec:des:nary}
