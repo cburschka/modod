@@ -439,14 +439,71 @@ The three measures can be interpreted as follows.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Algorithm for factoring out common suffices}\label{sec:factor}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %Procedure findCommonSuffix
-% \begin{procedure}[H]
-% 	\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}
-% 	\SetKwData{delt}{D}
-% 	\Input{}
-% 	
-% 	\caption{findCommonSuffix}
-% \end{procedure}
+\SetKwFunction{factorOut}{factorOut}
+\SetKwFunction{parent}{parent}
+\SetKwFunction{child}{child}
+\SetKwFunction{children}{children}
+\SetKwFunction{rmc}{rmc}
+\SetKwFunction{sploff}{removeRMC}
+\SetKwFunction{firstfun}{first}
+\SetKwFunction{unify}{or}
+\SetKwFunction{conc}{concatenate}
+\SetKwFunction{nullfun}{nullable}
+\SetKwFunction{factRw}{factRw}
+\SetKwFunction{factRwP}{factRwPlus}
+The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
+\begin{itemize}
+	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or a list of children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
+	\item $\parent(\alpha)$: Returns the parent of $\alpha$ (if it exists), or $\emptyset$.
+	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable. We define $\nullfun(\emptyset)$ to be false.
+	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
+	\item $\conc(\alpha,\beta)$: Takes two DREs $\alpha$ and $\beta$ in $\nnf$ and returns $\nnf((\alpha\rxc\beta))$. (As both DREs are in $\nnf$, it suffices to check which of them are concatenations, and concatenate the DREs or their children accordingly.) 
+	\item $\unify(A)$: Takes a set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
+	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
+	\[\sploff(\alpha)\df \begin{cases}
+		\alpha_1 & \text{ if $n=2$},\\
+		(\alpha_1\rxc\ldots\rxc \alpha_{n-1})& \text{ if $n>2$.}
+	\end{cases}\]
+	\item $\factRw(\gamma,R,D)$: Takes a DRE $\gamma$, a (possibly empty) sets of DREs $R$ and $D$. The DRE $\rho$ is  rewritten in the following way: First, $\gamma$ is replaced with the DRE 
+\begin{align*}
+	\gamma'&\df (\gamma_1\rxc \rmc(\gamma)),\\
+	\shortintertext{where}
+	\gamma_1&\df \begin{cases}
+		\unify(R')\rxo & \text{ if $D\neq \emptyset$,}\\
+		\unify(R') & \text{ if $D=\emptyset$,}
+	\end{cases}
+\end{align*}
+where the set $R'$ is defined by $R'\df\{\sploff(\beta)\mid \beta\in R\cup\{\gamma\}\}$. Then, $\factRw$ deletes all elements of $R$ and $D$ from $\rho$.
+\item $\factRwP(\gamma,R,D,rn)$: Takes a DRE~$\gamma$, and (possibly empty) sets of DREs $R_S$, $R_P$, and $D$, and a Boolean value $rn$. In order to rewrite $\rho$, we first the DRE~$\gamma_{C}$ by
+\begin{align*}
+	\gamma_{C}&\df \begin{cases}
+		\child(\rmc(\gamma)) & \text{if $\rmc(\gamma)$ is not nullable,}\\ 
+		\child(\child(\rmc(\gamma))) & \text{if $\rmc(\gamma)$ is nullable,} 
+	\end{cases}\\
+\intertext{and the sets $R_S, R_P\subseteq R\cup\{\gamma\}$ by}
+	R_S&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is nullable}\},\\
+	R_P&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is not nullable}\}.
+\end{align*}
+The intuition behind this is as follows: Each nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxp\rxo)$, each non-nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxc\gamma_{C}\rxp\rxo)$.
+
+The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replaced with the DRE~$\gamma'$, which is defined by
+\begin{align*}
+	\gamma'&\df (\gamma_1\rxc\gamma_{C}\rxp\rxo),\\
+	\shortintertext{where}	
+	\gamma_1&\df \begin{cases}
+		\unify(R_S\cup\{\gamma_2\})\rxo &  \text{if $D\neq \emptyset$ and $rn$ is $\true$,}\\
+		\unify(R_S\cup\{\gamma_2\}) & \text{otherwise.}
+	\end{cases}\\
+	\shortintertext{where the DRE~$\gamma_2$ is defined by }
+	\gamma_2&\df \begin{cases}
+		\gamma_{C} & \text{if $R_P=\emptyset$},\\
+		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is $\false$},\\
+		(\unify(R_{P})\rxc\gamma_{C})&\text{otherwise}.
+	\end{cases}.
+\end{align*}
+Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
+\end{itemize}
+\vspace*{-1.2cm}
 \begin{algorithm2e}[H]
 	\SetAlgoLined
 	\SetKwInOut{Input}{input}
@@ -456,29 +513,7 @@ The three measures can be interpreted as follows.
 	\SetKwData{rn}{rn}
 	\SetKwData{delList}{deletees}
 	\SetKwData{redList}{reducees}
-	\SetKwFunction{parent}{parent}
-	\SetKwFunction{child}{child}
-	\SetKwFunction{children}{children}
-	\SetKwFunction{rmc}{rmc}
-	\SetKwFunction{sploff}{removeRMC}
-	\SetKwFunction{firstfun}{first}
-	\SetKwFunction{unify}{or}
-	\SetKwFunction{conc}{concatenate}
-	\SetKwFunction{factorOut}{factorOut}
-
-	
 	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
-	\SetKwFunction{nullfun}{nullable}
-	%\SetKwFunction{nullify}{nullify}
-
-	\SetKwFunction{factRw}{factRw}
-	\SetKwFunction{factRwP}{factRwPlus}
-
-	%\Input{A node $\rho$ in a DRE}
-	%\SideEffects{$\rho$ is rewritten to an equivalent DRE that has no children with a common suffix}
-	%\Output{true if the DRE was rewritten; false otherwise}
-	%\Assert{$\rho$ is in PNF; \parnull is true iff the parent of $\rho$ is an option}
-	%\BlankLine
 	\uIf{$\rho$ is a terminal}
 	{
 		return $\rho$\;
@@ -536,6 +571,7 @@ The three measures can be interpreted as follows.
 						$\factRwP(\gamma,\redList,\delList,\rn)$\;
 					}
 					\lElse{$\factRw(\gamma,\redList,\delList)$}
+					unmark all children of $\rho$ that are concatenations\;
 				}
 			}
 			\Else
@@ -558,8 +594,11 @@ The three measures can be interpreted as follows.
 					\lIf{$(\beta$ is a concatenation \KwAnd $L(\rmc(\beta))=L(p_\gamma))$}
 					{add $\beta$ to \redList}
 				}
-				\lIf{$(\redList\cup\delList)\neq \emptyset$}
-				{$\factRw(\gamma,\redList,\delList)$}
+				\If{$(\redList\cup\delList)\neq \emptyset$}
+				{
+					$\factRw(\gamma,\redList,\delList)$\;
+					unmark all children of $\rho$ that are concatenations\;
+				}
 			}
 		}
 		%$\alpha\leftarrow\unify(\{\factorOut(c)\mid c\in\children(\rho)$\})\;
@@ -571,58 +610,6 @@ The three measures can be interpreted as follows.
 	}
 	\caption{\texttt{factorOut(}$\rho,parnull$\texttt{)}}
 \end{algorithm2e}
-The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
-\begin{itemize}
-	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or a list of children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
-	\item $\parent(\alpha)$: Returns the parent of $\alpha$ (if it exists), or $\emptyset$.
-	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable. We define $\nullfun(\emptyset)$ to be false.
-	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
-	\item $\conc(\alpha,\beta)$: Takes two DREs $\alpha$ and $\beta$ in $\nnf$ and returns $\nnf((\alpha\rxc\beta))$. (As both DREs are in $\nnf$, it suffices to check which of them are concatenations, and concatenate the DREs or their children accordingly.) 
-	\item $\unify(A)$: Takes a set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
-	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
-	\[\sploff(\alpha)\df \begin{cases}
-		\alpha_1 & \text{ if $n=2$},\\
-		(\alpha_1\rxc\ldots\rxc \alpha_{n-1})& \text{ if $n>2$.}
-	\end{cases}\]
-	\item $\factRw(\gamma,R,D)$: Takes a DRE $\gamma$, a (possibly empty) sets of DREs $R$ and $D$. The DRE $\rho$ is  rewritten in the following way: First, $\gamma$ is replaced with the DRE 
-\begin{align*}
-	\gamma'&\df (\gamma_1\rxc \rmc(\gamma)),\\
-	\shortintertext{where}
-	\gamma_1&\df \begin{cases}
-		\unify(R')\rxo & \text{ if $D\neq \emptyset$,}\\
-		\unify(R') & \text{ if $D=\emptyset$,}
-	\end{cases}
-\end{align*}
-where the set $R'$ is defined by $R'\df\{\sploff(\beta)\mid \beta\in R\cup\{\gamma\}\}$. Then, $\factRw$ deletes all elements of $R$ and $D$ from $\rho$.
-\item $\factRwP(\gamma,R,D,rn)$: Takes a DRE~$\gamma$, and (possibly empty) sets of DREs $R_S$, $R_P$, and $D$, and a Boolean value $rn$. In order to rewrite $\rho$, we first the DRE~$\gamma_{C}$ by
-\begin{align*}
-	\gamma_{C}&\df \begin{cases}
-		\child(\rmc(\gamma)) & \text{if $\rmc(\gamma)$ is not nullable,}\\ 
-		\child(\child(\rmc(\gamma))) & \text{if $\rmc(\gamma)$ is nullable,} 
-	\end{cases}\\
-\intertext{and the sets $R_S, R_P\subseteq R\cup\{\gamma\}$ by}
-	R_S&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is nullable}\},\\
-	R_P&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is not nullable}\}.
-\end{align*}
-The intuition behind this is as follows: Each nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxp\rxo)$, each non-nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxc\gamma_{C}\rxp\rxo)$.
-
-The DRE $\rho$ is now rewritten in the following way: First, $\gamma$ is replaced with the DRE~$\gamma'$, which is defined by
-\begin{align*}
-	\gamma'&\df (\gamma_1\rxc\gamma_{C}\rxp\rxo),\\
-	\shortintertext{where}	
-	\gamma_1&\df \begin{cases}
-		\unify(R_S\cup\{\gamma_2\})\rxo &  \text{if $D\neq \emptyset$ and $rn$ is $\true$,}\\
-		\unify(R_S\cup\{\gamma_2\}) & \text{otherwise.}
-	\end{cases}\\
-	\shortintertext{where the DRE~$\gamma_2$ is defined by }
-	\gamma_2&\df \begin{cases}
-		\gamma_{C} & \text{if $R_P=\emptyset$},\\
-		(\unify(R_{P})\rxo\rxc\gamma_{C})&\text{if $R_P\neq \emptyset$, $D\neq\emptyset$, and $rn$ is $\false$},\\
-		(\unify(R_{P})\rxc\gamma_{C})&\text{otherwise}.
-	\end{cases}.
-\end{align*}
-Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
-\end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
