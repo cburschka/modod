@@ -206,46 +206,47 @@ class TestUM(unittest.TestCase):
         self.assertNotEqual(rxA,rxB)
         self.assertEqual(rxA,rxB.toNNF())
 
-    # def test_factorOut_1(self):
-    #     rxA = DRE.fromString('((a,b)|(c,b))?')
-    #     rxB = DRE.fromString('((a|b),c)?')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    # 
-    # def test_factorOut_2(self):
-    #     rxA = DRE.fromString('((a,b+)|b+)')
-    #     rxB = DRE.fromString('(a?,b+)')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    # 
-    # def test_factorOut_3(self):
-    #     rxA = DRE.fromString('((a,b*)|b+)?')
-    #     rxB = DRE.fromString('(a?,b*)')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    # 
-    # def test_factorOut_4(self):
-    #     rxA = DRE.fromString('((a,b+)|(c,b*)|b+)')
-    #     rxB = DRE.fromString('((c|(a?,b)),b*)')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    # 
-    # def test_factorOut_5(self):
-    #     rxA = DRE.fromString('((a,((b,c?)|c)?)|(b,c?)|c)?')
-    #     rxB = DRE.fromString('(a?,b?,c?)')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    #
-    # def test_factorOut_6(self):
-    #     rxA = DRE.fromString('(((a1|((a2|(a3,b1)),b2)),b3)|(b1,b2,b3))') # basiert auf Bsp von S. 11/240
-    #     rxB = DRE.fromString('((a1|((a2|(a3?,b1)),b2)),b3)')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    
-    # def test_factorOut_7(self):
-    #     rxA = DRE.fromString('((a,b+)|(b+)|(c,(a?,b+)?))?') #basiert auf Bsp von S. 12/148f
-    #     rxB = DRE.fromString('(c?,(a?,b+)?)')
-    #     rxC = DRE.fromString('((c,(a?,b+)?)|(b+)|(a,b+))?')
-    #     self.assertEqual(rxA.factorOut(),rxB)
-    #     self.assertEqual(rxC.factorOut(),rxB)
+    def test_factorOut_1(self):
+        rxA = DRE.fromString('((a,b)|(c,b))?')
+        rxB = DRE.fromString('((a|b),c)?')
+        self.assertEqual(rxA.factorOut(),rxB)
 
-	# def test_factorOut_8(self):
-	# 	rxA = DRE.fromString('((a,b+)|(c?,b*))')
-	# 	rxB = DRE.fromString('(((a,b)|c)?,b*)')
+    def test_factorOut_2(self):
+        rxA = DRE.fromString('((a,b+)|b+)')
+        rxB = DRE.fromString('(a?,b+)')
+        self.assertEqual(rxA.factorOut(),rxB)
+
+    def test_factorOut_3(self):
+        rxA = DRE.fromString('((a,b*)|b+)?')
+        rxB = DRE.fromString('(a?,b*)')
+        self.assertEqual(rxA.factorOut(),rxB)
+    
+    def test_factorOut_4(self):
+        rxA = DRE.fromString('((a,b+)|(c,b*)|b+)')
+        rxB = DRE.fromString('((c|(a?,b)),b*)')
+        self.assertEqual(rxA.factorOut(),rxB)
+    
+    def test_factorOut_5(self):
+        rxA = DRE.fromString('((a,((b,c?)|c)?)|(b,c?)|c)?')
+        rxB = DRE.fromString('(a?,b?,c?)')
+        self.assertEqual(rxA.factorOut(),rxB)
+
+    def test_factorOut_6(self):
+        rxA = DRE.fromString('(((a1|((a2|(a3,b1)),b2)),b3)|(b1,b2,b3))') # basiert auf Bsp von S. 11/240
+        rxB = DRE.fromString('((a1|((a2|(a3?,b1)),b2)),b3)')
+        self.assertEqual(rxA.factorOut(),rxB)
+    
+    def test_factorOut_7(self):
+        rxA = DRE.fromString('((a,b+)|(b+)|(c,(a?,b+)?))?') #basiert auf Bsp von S. 12/148f
+        rxB = DRE.fromString('(c?,(a?,b+)?)')
+        rxC = DRE.fromString('((c,(a?,b+)?)|(b+)|(a,b+))?')
+        self.assertEqual(rxA.factorOut(),rxB)
+        self.assertEqual(rxC.factorOut(),rxB)
+
+    def test_factorOut_8(self):
+        rxA = DRE.fromString('((a,b+)|(c?,b*))')
+        rxB = DRE.fromString('(((a,b)|c)?,b*)')
+        self.assertEqual(rxA.factorOut(),rxB)
 
 if __name__ == '__main__':
     unittest.main()
