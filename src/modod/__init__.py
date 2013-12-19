@@ -2,6 +2,7 @@ from . import grammar_extended
 from . import grammar_strict
 from . import dre_lexer
 from . import dre_indexed
+from . import dre_factor
 from . import oa
 
 # Compile the parsers (these should not be used directly outside of unit tests, normally)
