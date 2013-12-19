@@ -208,7 +208,7 @@ class TestUM(unittest.TestCase):
 
     def test_factorOut_1(self):
         rxA = DRE.fromString('((a,b)|(c,b))?')
-        rxB = DRE.fromString('((a|b),c)?')
+        rxB = DRE.fromString('((a|c),b)?')
         self.assertEqual(rxA.factorOut(),rxB)
 
     def test_factorOut_2(self):
