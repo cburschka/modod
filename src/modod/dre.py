@@ -24,6 +24,9 @@ class DRE:
     def terminalOccurrences(self):
         return self._count_terms()
 
+    # Nullbar
+    def nullable(self):
+        return self._test_empty()
 
     # Die erlaubten ersten Zeichen der Worte dieser Sprache:
     def first(self):
@@ -78,7 +81,6 @@ class DRE:
         if nodes == None:
             nodes, edges = {}, set()
         nodes[len(nodes)] = self._label()
-        print(nodes)
         return nodes, edges
 
     def __hash__(self):
