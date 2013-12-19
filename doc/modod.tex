@@ -550,8 +550,8 @@ Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
 				}
 				\If{$(\redList\cup\delList)\neq \emptyset$}
 				{
-					$n_S\leftarrow$ number of nullable elements in $\redList\cup\{\gamma\}$\;
-					$n_P\leftarrow$ number of non-nullable elements in $\redList\cup\{\gamma\}$\;
+					$n_S\leftarrow$ number of elements in $\redList\cup\{\gamma\}$ with a nullable rightmost child\;
+					$n_P\leftarrow$ number of elements in $\redList\cup\{\gamma\}$ with a non-nullable rmc\;
 					% \uIf{$n_S$=0} %s Buch 12/132 für Herleitung der Fallunterscheidung
 					% {
 					% 	$\factRw(\gamma,\redList,\delList)$\;
