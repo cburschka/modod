@@ -481,8 +481,8 @@ where the set $R'$ is defined by $R'\df\{\sploff(\beta)\mid \beta\in R\cup\{\gam
 		\child(\child(\rmc(\gamma))) & \text{if $\rmc(\gamma)$ is nullable,} 
 	\end{cases}\\
 \intertext{and the sets $R_S, R_P\subseteq R\cup\{\gamma\}$ by}
-	R_S&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is nullable}\},\\
-	R_P&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \alpha\text{ is not nullable}\}.
+	R_S&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \rmc(\alpha)\text{ is nullable}\},\\
+	R_P&\df\{\sploff(\alpha)\mid\alpha\in R\cup\{\gamma\}, \rmc(\alpha)\text{ is not nullable}\}.
 \end{align*}
 The intuition behind this is as follows: Each nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxp\rxo)$, each non-nullable $\alpha\in R$ is equivalent to $(\sploff(\alpha)\rxc \gamma_{C}\rxc\gamma_{C}\rxp\rxo)$.
 
