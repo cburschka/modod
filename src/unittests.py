@@ -227,8 +227,8 @@ class TestUM(unittest.TestCase):
 	# 	self.assertEqual(rxA.factorOut(),rxB)
 	# 
 	# def test_factorOut_5(self):
-	# 	rxA = DRE.fromString('((a,((b,c?)|c))|(b,c))')
-	# 	rxB = DRE.fromString('(a,((b,c?)|c))?')
+	# 	rxA = DRE.fromString('((a,((b,c?)|c)?)|(b,c?)|c)?')
+	# 	rxB = DRE.fromString('(a?,b?,c?)')
 	# 	self.assertEqual(rxA.factorOut(),rxB)
 	#
 	# def test_factorOut_6(self):
