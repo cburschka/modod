@@ -243,6 +243,10 @@ class TestUM(unittest.TestCase):
     #     self.assertEqual(rxA.factorOut(),rxB)
     #     self.assertEqual(rxC.factorOut(),rxB)
 
+	# def test_factorOut_8(self):
+	# 	rxA = DRE.fromString('((a,b+)|(c?,b*))')
+	# 	rxB = DRE.fromString('(((a,b)|c)?,b*)')
+
 if __name__ == '__main__':
     unittest.main()
 
