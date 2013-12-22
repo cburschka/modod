@@ -22,37 +22,37 @@ def factorOut(rho, parnull=False):
         # in a separate set of indices to keep the numbering fixed.
         rhoChildren = list(rho.children)
         undeleted = set(range(len(rhoChildren)))
-        unmarked = set(undeleted)
         # Discard rho; it will not be used again:
         rho = None
         
         # Mark everything that isn't a concatenation:
-        for i,x in enumerate(rhoChildren):
-            if not isinstance(x, dre.Concatenation):
-                unmarked.remove(i)
+        unmarked = {i for i,x in enumerate(rhoChildren) if isinstance(x, dre.Concatenation)}
 
         # Pick and mark concatenations:
         while unmarked:
             gamma = unmarked.pop()
             pgamma = rmc(rhoChildren[gamma])
             deletees, reducees = set(), set()
-            if isinstance(pgamma, dre.Plus) or (
-                isinstance(pgamma, dre.Optional) and isinstance(pgamma.child, dre.Plus)):
+
+            # Attempt to factor out a + or +? loop.
+            if isinstance(pgamma, dre.Plus) or (isinstance(pgamma, dre.Optional) and isinstance(pgamma.child, dre.Plus)):
+                # Find matching alternatives, and alternatives with a matching suffix.
                 for beta in undeleted - {gamma}:
                     if equivalenceMEW(rhoChildren[beta], pgamma):
                         deletees.add(beta)
-                    elif (isinstance(rhoChildren[beta], dre.Concatenation) and 
-                        equivalenceMEW(rmc(rhoChildren[beta]), pgamma)):
+                    elif (isinstance(rhoChildren[beta], dre.Concatenation) and equivalenceMEW(rmc(rhoChildren[beta]), pgamma)):
                         reducees.add(beta)
 
                 if reducees or deletees:
                     ns = sum(rmc(rhoChildren[x]).nullable() for x in reducees | {gamma})
                     np = len(reducees | {gamma}) - ns
+                    # If the factored-out loop is nullable in some alternatives, but not others.
                     if ns and (np or deletees and not rn):
                         factRwPlus(rhoChildren, undeleted, gamma, reducees, deletees, rn)
                     else:
                         factRw(rhoChildren, undeleted, gamma, reducees, deletees)
 
+            # Factor out other expressions.
             else:
                 # Find children whose firsts are in the firsts of gamma's rmc:
                 F = {i for i in undeleted - {gamma}
@@ -113,12 +113,15 @@ def factRw(rhoChildren, undeleted, gamma, R, D):
     undeleted -= R | D
 
 def factRwPlus(rhoChildren, undeleted, gamma, R, D, rn):
-    rmcG = rmc(rhoChildren[gamma])
-    if isinstance(rmcG, dre.Optional):
-        gammaC = rmcG.child.child
-    else:
-        gammaC = rmcG.child
+    # Get the loop body - one level below +, or two below +?:
+    gammaC = rmc(rhoChildren[gamma])
+    if isinstance(gammaC, dre.Optional):
+        gammaC = gammaC.child
+    gammaC = gammaC.child
 
+    # Split reduced expressions into two groups:
+    # Rp: expressions that must be followed by at least one loop iteration
+    # Rs: expressions that may be followed by the loop
     Rs, Rp = [], []
     for a in R | {gamma}:
         x = removeRMC(rhoChildren[a])
@@ -127,21 +130,30 @@ def factRwPlus(rhoChildren, undeleted, gamma, R, D, rn):
         else:
             Rp.append(x)
 
-    if Rp and D and not rn:
-        gamma2 = concatenate(dre.Optional(choice(Rp)), gammaC)
-    elif not Rp:
-        gamma2 = gammaC
+    # We append gammaC to a choice of Rp prefixes; the expression we will 
+    # generate will basically have this form:
+    # (Rs1|Rs2|...| ((Rp1|Rp2|...),gammaC)) (gammaC+?)
+    #               (-------gamma2-------)
+    # (--------gamma1---------------------)
+    # (Since gammaC is eliminated from at least two expressions, duplicating it
+    # once will still be cost-effective.)
+
+    if Rp:
+        # If the loop occurs without a prefix, but is not nullable on its own,
+        # make the Rp prefixes optional
+        if D and not rn:
+            gamma2 = concatenate(dre.Optional(choice(Rp)), gammaC)
+        else:
+            gamma2 = concatenate(choice(Rp), gammaC)
     else:
-        gamma2 = concatenate(choice(Rp), gammaC)
+        gamma2 = gammaC
 
     gamma1 = choice(Rs + [gamma2])
+
     if D and rn:
         gamma1 = dre.Optional(gamma1)
-        
-    gammaPrime = concatenate(gamma1, dre.Optional(dre.Plus((gammaC))))
 
-
-    rhoChildren[gamma] = gammaPrime
+    rhoChildren[gamma] = concatenate(gamma1, dre.Optional(dre.Plus((gammaC))))
     undeleted -= R | D
 
 def equivalence(a, b):
