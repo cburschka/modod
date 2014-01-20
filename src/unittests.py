@@ -246,6 +246,10 @@ class TestUM(unittest.TestCase):
     def test_factorOut_8(self):
         rxA = DRE.fromString('((a,b+)|(c?,b*))')
         rxB = DRE.fromString('(((a,b)|c)?,b*)')
+        x = rxA.factorOut()
+        open('_tmp.A.dot', 'w').write(rxA.toDOTString())
+        open('_tmp.x.dot', 'w').write(x.toDOTString())
+        open('_tmp.B.dot', 'w').write(rxB.toDOTString())
         self.assertEqual(rxA.factorOut(),rxB)
 
 if __name__ == '__main__':
