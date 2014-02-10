@@ -8,7 +8,7 @@ import time
 import xml.etree.cElementTree as ET
 import modod
 
-from soa import SingleOccurrenceAutomaton
+from modod.soa import SingleOccurrenceAutomaton
 
 
 parser = argparse.ArgumentParser(description="This tool takes a list of XMLfiles and computes an element type definition for every element in the files. (If you want to compute this for only some elements, use the -e flag. If you want to exclude elements that have empty definitions, use the -s flag.)",epilog="TODO: Further info")

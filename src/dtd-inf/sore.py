@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3
 import argparse
-from soa import SingleOccurrenceAutomaton 
 import modod
+from modod.soa import SingleOccurrenceAutomaton 
 
 def pretty(regex):
 	# Test:
