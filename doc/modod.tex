@@ -616,10 +616,12 @@ Finally, $\factRwP$ deletes all elements of $R$ and $D$ from $\rho$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 This section contains three algorithms that implement rewriting rules for DREs with $\rxp$. For these DREs, certain non-obvious rewriting steps are possible. The three rules are called P1,~P2, and~P4, and are explained in the corresponding sections further down.
 
-The three algorithms use the following subroutine:
+The three algorithms use the following subroutine in addition to subroutines from Section~\ref{sec:factor}:
 \begin{itemize}
 	\item $\conc((\alpha_1,\ldots,\alpha_n)$: Takes a list of DREs $(\alpha_1,\ldots,\alpha_n)$, $n\geq 1$. If $n=1$, $\alpha_n$ is returned. Otherwise, $\conc$ returns a concatenation, with $\children(\conc(\alpha_1,\ldots,\alpha_n)=(\alpha_1,\ldots,\alpha_n)$.
 \end{itemize}
+
+Note that these rules do not preserve~PNF. Later, we shall define an outer control structure (probably called the \emph{plus rewriting loop}), which shall be responsible for calling the three rules and for maintaining PNF.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Rule P1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -757,6 +759,10 @@ Rule~P2 is supposed to handle this and similar cases.
 \end{algorithm2e}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Rule P3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+There is no rule~P3. The numbering 1, 2, 4 is due to historical reasons.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Rule P4}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TODO: Explain rule~P4.
@@ -768,7 +774,7 @@ TODO: Explain rule~P4.
 \subsection{Module}\label{sec:des:mod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{itemize}
-	\item\texttt{DREfromString(s)} \emph{deprecated}
+	\item\texttt{DREfromString(s)} \emph{Deprecated.} Use \texttt{DRE.fromString(s)}.
 %		\item\texttt{compareDREs(DRE, DRE)}  takes DREs $\alpha$ and $\beta$ and decides which of the four possible cases $L(\alpha)=L(\beta)$, $L(\alpha)\subset L(\beta)$, $L(\alpha)\supset L(\beta)$, or $L(\alpha)\incomp L(\beta)$ holds. (The symbol $\incomp$ denotes incomparability of sets.)  It is probably reasonable to use the appropriate automata for OAs.
 \item\texttt{equivalentTo(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns $\true$ if $A$ and $B$ are equivalent (i.\,e., $L(A)=L(B)$). Implement by returning 
 \begin{center}
