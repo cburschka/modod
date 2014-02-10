@@ -455,6 +455,7 @@ The three measures can be interpreted as follows.
 \SetKwFunction{rmc}{rmc}
 \SetKwFunction{sploff}{removeRMC}
 \SetKwFunction{firstfun}{first}
+\SetKwFunction{termfun}{terminals}
 \SetKwFunction{unify}{or}
 \SetKwFunction{concat}{concatenate}
 \SetKwFunction{conc}{conc}
@@ -775,8 +776,26 @@ There is no rule~P3. The numbering 1, 2, 4 is due to historical reasons.
 \subsubsection{Rule P4}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \SetKw{projfirst}{projfirst}
+\SetKwData{parnull}{parnull}
 
-TODO: Explain rule~P4. TODO: Example.
+
+TODO: Explain rule~P4.
+
+TODO:
+\begin{align*}
+		& ((a \ror b) \rxc b\rxp\rxo)\rxo\\
+\equiv	& ((a \rxc b\rxp\rxo) \ror (b \rxc b\rxp\rxo))\rxo\\
+\equiv	& ((a \rxc b\rxp\rxo) \ror b\rxp)\rxo\\
+\equiv	& ((a \rxc b\rxp\rxo) \ror b\rxp\rxo)\\
+\equiv	& (a\rxo \rxc b\rxp\rxo). 
+\end{align*}
+The same principle can be used to construct more involved examples that need to consider multiple children of a concatenation node, e.\,g.
+\begin{equation*}
+	((a \ror b) \rxc c \rxc d \rxc (b \rxc c \rxc d)\rxp\rxo)\rxo \equiv 
+	((a \rxc c \rxc d)\rxo \rxc (b \rxc c \rxc d)\rxp\rxo).
+\end{equation*}
+
+\texttt{ruleP4()} has two parameters: First, the DRE $\rho$; and second, the optional parameter $\parnull$, which defaults to $\false$.
 
 Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. We define the function $\projfirst_A$ as follows:
 \begin{align*}
@@ -800,8 +819,50 @@ Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. 
 \end{align*}
 Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}.
 
-TODO: algorithm for P4
+\begin{algorithm2e}[H]
+	\SetAlgoLined
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{SideEffects}{side effects}
+	\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}	
+	\SetKwData{changed}{changed}
+	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
 
+	\lIf{$\rho$ is a terminal}
+		{\Return $\rho$}
+	\lElseIf{$\rho$ is an option}
+		{\Return \texttt{ruleP4(}$\child(\rho),\true$\texttt{)}$\rxo$}
+	\lElseIf{$\rho$ is a plus}
+		{\Return \texttt{ruleP4(}$\child(\rho),\false$\texttt{)}$\rxp$}
+	\uElseIf{$\rho$ is a choice}
+	{
+		$n\leftarrow (\parnull\ \KwOr\ \nullfun(\rho))$\;
+		\Return $\unify(\{\mathtt{ruleP4(}\alpha_i\mathtt{)}\mid \alpha_i\in\children(\rho)\})$\;
+	}
+	\Else
+	{
+		$n\leftarrow |\children(\rho)|$\;
+		$c\leftarrow \children(\rho)$\;
+		assume $c=(\rho_1,\ldots,\rho_n)$\;
+		\If{(\parnull) \KwAnd ($\rho_n$ is an option) \KwAnd ($\child(\rho_n)$ is a plus)}
+		{
+			$\alpha\leftarrow \child(\rho_n)$\;
+			$\beta\leftarrow \conc(\rho_1,\ldots,\rho_{n-1})$\;
+			$A\leftarrow \firstfun(\alpha)$\; 
+			$\beta_A\leftarrow \projfirst_{A}(\beta)$\;			
+			\If{$L(\alpha)=L(\beta_A)$}
+			{
+				$\overline{A}\leftarrow (\termfun(\rho)\setminus A)$\; 
+				$\beta_{\overline{A}}\leftarrow \projfirst_{\overline{A}}(\beta)$\;
+				\Return $(\mathtt{ruleP4}(\beta_{\overline{A}},\true)\rxo \rxc \mathtt{ruleP4}(\alpha,\true)\rxo)$\;
+			}
+		}
+		\Return $(\mathtt{ruleP4}(\rho_{1})\rxc \ldots \rxc \mathtt{ruleP4}(\rho_{n}))$\;
+	}
+	% 	\Return the result of mapping \texttt{ruleP4()} with $(\parnull\leftarrow \false)$ to the children of $\rho$ (concatenate the results)\;
+
+
+	\caption{\texttt{ruleP4(}$\rho,parnull$\texttt{)}}
+\end{algorithm2e}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
