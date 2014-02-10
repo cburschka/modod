@@ -131,6 +131,15 @@ We allow the use of additional parentheses, as well as the omission of parenthes
 
 A regular expression $\alpha$ is \emph{nullable} if $\emptyword\in L(\alpha)$.
 
+\paragraph{Extended Syntax} In some cases, we extended the syntax of regular expressions with $\emptyword$ and $\emptyset$. With the exception of the expressions for the languages $\{\emptyword\}$ and $\emptyset$, all regular expressions that use one (or both) of these symbols can be rewritten into an expression without these symbols in the following way:
+\begin{align*}
+	\emptyword \rxo &\df \emptyword, & \emptyset \rxo &\df \emptyword,\\
+	\emptyword \rxp &\df \emptyword, & \emptyset \rxp &\df \emptyset,\\
+	(\emptyword \ror \alpha)\df(\alpha \ror \emptyword)&\df \alpha, & (\emptyset \ror \alpha)\df(\alpha \ror \emptyset) &\df \alpha,\\
+	(\emptyword \rxc \alpha)\df(\alpha \rxc \emptyword)&\df \alpha, & (\emptyset \rxc \alpha)\df(\alpha \rxc \emptyset) &\df \emptyset.
+\end{align*}
+The equivalencies for concatenations are extended canonically to the $n$-ary case.
+
 \paragraph{Parse Tree:} Regular Expressions can be parsed canonically. Furthermore, there is a one-to-one relation between parse trees and regular expressions. Hence, we sometimes discuss regular expressions by discussing the parse trees.
 
 \paragraph{Occurrence Automata:} An \emph{occurrence automaton} (short: \emph{OA}, introduced by Bex et al.~\cite{bex:kore}) is a tuple $\mathcal{A}=(V,E,\Sigma,\lab)$, where 
@@ -459,7 +468,7 @@ The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no child
 	\item $\nullfun(\alpha)$: Takes a DRE $\alpha$ and returns whether it is nullable. We define $\nullfun(\emptyset)$ to be false.
 	\item $\rmc(\alpha)$: Takes a concatenation $\alpha$ and returns its rightmost child.
 	\item $\concat(\alpha,\beta)$: Takes two DREs $\alpha$ and $\beta$ in $\nnf$ and returns $\nnf((\alpha\rxc\beta))$. (As both DREs are in $\nnf$, it suffices to check which of them are concatenations, and concatenate the DREs or their children accordingly.) 
-	\item $\unify(A)$: Takes a set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$.
+	\item $\unify(A)$: Takes a set $A=\{\alpha_1,\ldots,\alpha_n\}$ of DREs. If $n=1$, it returns $\alpha_1$, if $n\geq 2$, it returns $(\alpha_1\ror\ldots\ror\alpha_n)$. (If $\emptyset$ is present, do not use it in the choice, and adjust $n$ accordingly.)
 	\item $\sploff(\alpha)$: Takes a concatenation $\alpha$. If $\alpha=(\alpha_1\rxc\ldots\rxc \alpha_n)$, this function is defined as
 	\[\sploff(\alpha)\df \begin{cases}
 		\alpha_1 & \text{ if $n=2$},\\
@@ -765,7 +774,34 @@ There is no rule~P3. The numbering 1, 2, 4 is due to historical reasons.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Rule P4}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\SetKw{projfirst}{projfirst}
+
 TODO: Explain rule~P4.
+
+Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. We define the function $\projfirst_A$ as follows:
+\begin{align*}
+	\projfirst_A(a)&\df 
+		\begin{cases}
+			a & \text{ if $a\in A$,}\\
+			\emptyset & \text{ if $a\notin A$,}
+		\end{cases}\\
+	\projfirst_A(\beta\rxo)&\df \projfirst_A(\beta)\rxo,\\
+	\projfirst_A(\beta\rxp)&\df 
+		\begin{cases}
+			\beta^\rxp & \text{if $\firstfun(\beta)\subseteq A$,}\\
+			\emptyset  & \text{else,}
+		\end{cases}\\
+	\projfirst_{A}((\beta_1\ror\cdots\ror\beta_n))&\df \unify(\{\projfirst_A(\beta_i)\mid 1\leq i \leq n\})\\
+	\projfirst_{A}((\beta_1\rxc\cdots\rxc\beta_n))&\df
+		\begin{cases}
+			\projfirst_{A}(\beta_1)\rxc\conc(\beta_2\ldots\beta_n) & \text{ if $\emptyword\notin L(\beta_1)$,}\\
+			\projfirst_{A}(\beta_1)\rxc\projfirst_{A}(\conc(\beta_2\ldots\beta_n)) & \text{ if $\emptyword\in L(\beta_1)$}.
+		\end{cases}
+\end{align*}
+Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}.
+
+
+% siehe 12.162
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
