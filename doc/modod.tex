@@ -665,7 +665,7 @@ Nonetheless, it is still possible to handle these cases with a comparatively str
 		{
 			\uIf{$\rho_{i}$ is an option \KwAnd $\child(\rho_{i})$ is a plus}
 			{
-				$\alpha\leftarrow \child(\rho_{i})$ \tcp*[r]{Hence, $\rho_i=\alpha\rxp\rxo$}
+				$\alpha\leftarrow \child(\child(\rho_{i}))$ \tcp*[r]{Hence, $\rho_i=\alpha\rxp\rxo$}
 				$j\leftarrow (i-1)$\;
 				$\changed\leftarrow \false$\;
 				\While{$(\KwNot\; \changed)$ \KwAnd $(j\geq 1)$}
@@ -732,7 +732,7 @@ Rule~P2 is supposed to handle this and similar cases.
 			$\changed\leftarrow\false$\;
 			\If{$\rho_{i}$ is an option \KwAnd $\child(\rho_{i})$ is a plus}
 			{
-				$\alpha\leftarrow \child(\rho_{i})$ \tcp*[r]{Hence, $\rho_{i}=\alpha\rxp\rxo$}
+				$\alpha\leftarrow \child(\child(\rho_{i}))$ \tcp*[r]{Hence, $\rho_{i}=\alpha\rxp\rxo$}
 				\If{$\rho_{i-1}$ is an option \KwAnd $\child(\rho_{i-1})$ is a concatenation}
 				{
 					$\beta\leftarrow \child(\rho_{i-1})$;
@@ -903,6 +903,8 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 	\Return $\rho_{new}$\;
 	\caption{\texttt{rewritePlus(}$\rho$\texttt{)}}
 \end{algorithm2e}
+Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could simply write
+\[\rho_{new}\leftarrow \pnf(\mathtt{ruleP4(\pnf(\mathtt{ruleP2(\pnf(\mathtt{ruleP1(\rho_{old})}))}),\false)}).\]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
@@ -951,7 +953,7 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 	\item\texttt{toDOTString()} Returns a tree representation of the DRE in the DOT format that is used by GraphViz (\url{http://www.graphviz.org/}). Use \texttt{ordering=out} to preserve the order. Consider using subgraphs, to further enforce this.
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
 	\item \texttt{factorOut()} Returns the result of calling $\factorOut(\rho,\false)$, where $\rho$ is the PNF of the current DRE.
-	\item \texttt{rewritePlus()} Returns the result of calling $\rewritePlus(\rho)$, where $\rho$ is the PNF of the current DRE.
+	\item \texttt{rewritePlus()} Returns the result of calling $\mathtt{rewritePlus}(\rho)$, where $\rho$ is the PNF of the current DRE.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{Nary}}\label{sec:des:nary}
