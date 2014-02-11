@@ -954,6 +954,7 @@ Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could 
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
 	\item \texttt{factorOut()} Returns the result of calling $\factorOut(\rho,\false)$, where $\rho$ is the PNF of the current DRE.
 	\item \texttt{rewritePlus()} Returns the result of calling $\mathtt{rewritePlus}(\rho)$, where $\rho$ is the PNF of the current DRE.
+	\item \texttt{simplify()} Returns the result of calling $\mathtt{rewritePlus}(\factorOut(\pnf(\rho),\false))$, where $\rho$ is the current DRE.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{Nary}}\label{sec:des:nary}
