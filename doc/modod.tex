@@ -135,7 +135,7 @@ A regular expression $\alpha$ is \emph{nullable} if $\emptyword\in L(\alpha)$.
 \begin{align*}
 	\emptyword \rxo &\to \emptyword, & \emptyset \rxo &\to \emptyword,\\
 	\emptyword \rxp &\to \emptyword, & \emptyset \rxp &\to \emptyset,\\
-	(\emptyword \ror \alpha)\to\alpha,\ (\alpha \ror \emptyword)&\to \alpha, & (\emptyset \ror \alpha)\to\alpha,\ (\alpha \ror \emptyset) &\to \alpha,\\
+	(\emptyword \ror \alpha)\to\alpha\rxo,\ (\alpha \ror \emptyword)&\to \alpha\rxo, & (\emptyset \ror \alpha)\to\alpha,\ (\alpha \ror \emptyset) &\to \alpha,\\
 	(\emptyword \rxc \alpha)\to\alpha,\ (\alpha \rxc \emptyword)&\to \alpha, & (\emptyset \rxc \alpha)\to\emptyset,\ (\alpha \rxc \emptyset) &\to \emptyset.
 \end{align*}
 The equivalencies for concatenations are extended canonically to the $n$-ary case.
