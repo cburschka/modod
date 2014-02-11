@@ -815,12 +815,10 @@ Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. 
 			\projfirst_{A}(\beta_1)\rxc\projfirst_{A}(\conc(\beta_2\ldots\beta_n)) & \text{ if $\emptyword\in L(\beta_1)$}.
 		\end{cases}
 \end{align*}
-Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}.
+Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}. Furthermore, if $A\supseteq\term(\alpha)$, $\projfirst_{A}(\alpha)$ holds by definition.
 
-Let
+Let $\alpha\df ((a\rxo \rxc b) \ror c )$. Then
 \begin{align*}
-	\alpha&\df ((a\rxo \rxc b) \ror c ).\\
-	\shortintertext{Then}
 	\projfirst_{\{a\}}(\alpha)&=\emptyset, &
 	\projfirst_{\{b\}}(\alpha)&=\emptyset, &
 	\projfirst_{\{c\}}(\alpha)&=c,\\
@@ -829,8 +827,14 @@ Let
 	\projfirst_{\{b,c\}}(\alpha)&=c,\\
 	\projfirst_{\{a,b,c\}}(\alpha)&=\alpha. & & & &
 \end{align*}
-
-TODO: Note: Default call of \texttt{ruleP4()} is with $\parnull=\false$.
+Furthermore, let $\beta\df (((a\rxo \rxc b)\rxp \ror c) \rxc d)$. Then
+\begin{align*}
+	\projfirst_{\{a\}}(\beta)&=\projfirst_{\{b\}}(\beta)=\projfirst_{\{d\}}(\beta)=\emptyset,\\
+	\projfirst_{\{c\}}(\beta)&=\projfirst_{\{a,c\}}(\beta)=\projfirst_{\{b,c\}}(\beta)=(c \rxc d),\\
+	\projfirst_{\{a,b\}}(\beta)&=((a\rxo \rxc b)\rxp \rxc d),\\
+	\projfirst_{\{a,b,c\}}(\beta)&=\beta.
+\end{align*}
+As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not change if $d$ is added to or removed from the set $A$.
 
 \begin{algorithm2e}[H]
 	\SetAlgoLined
