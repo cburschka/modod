@@ -631,7 +631,7 @@ The three algorithms use the following subroutine in addition to subroutines fro
 	\item $\conc((\alpha_1,\ldots,\alpha_n)$: Takes a list of DREs $(\alpha_1,\ldots,\alpha_n)$, $n\geq 1$. If $n=1$, $\alpha_n$ is returned. Otherwise, $\conc$ returns a concatenation, with $\children(\conc(\alpha_1,\ldots,\alpha_n)=(\alpha_1,\ldots,\alpha_n)$.
 \end{itemize}
 
-Note that these rules do not preserve~PNF. Later, we shall define an outer control structure (probably called the \emph{plus rewriting loop}), which shall be responsible for calling the three rules and for maintaining PNF.
+Note that these rules do not preserve~PNF. Later, we shall define an outer control structure (probably called the \emph{plus rewriting loop}, cf.\ Section~\ref{sec:prl}), which shall be responsible for calling the three rules and for maintaining PNF.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Rule P1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -659,22 +659,22 @@ Nonetheless, it is still possible to handle these cases with a comparatively str
 	{
 		$n\leftarrow |\children(\rho)|$\;
 		$c\leftarrow \children(\rho)$\;
-		assume $c=(\alpha_1,\ldots,\alpha_n)$\;
+		assume $c=(\rho_1,\ldots,\rho_n)$\;
 		$i\leftarrow n$\;
 		\While{$i \geq 2$}
 		{
-			\uIf{$\alpha_{i}$ is an option \KwAnd $\child(\alpha_{i})$ is a plus}
+			\uIf{$\rho_{i}$ is an option \KwAnd $\child(\rho_{i})$ is a plus}
 			{
-				$\beta\leftarrow \child(\alpha_{i})$ \tcp*[r]{Hence, $\alpha_i=\beta\rxp\rxo$}
+				$\alpha\leftarrow \child(\rho_{i})$ \tcp*[r]{Hence, $\rho_i=\alpha\rxp\rxo$}
 				$j\leftarrow (i-1)$\;
 				$\changed\leftarrow \false$\;
 				\While{$(\KwNot\; \changed)$ \KwAnd $(j\geq 1)$}
 				{
-					$\gamma \leftarrow \conc(\alpha_{j},\ldots,\alpha_{i-1})$\;
-					\uIf{$L(\gamma)=L(\beta)$}
+					$\beta \leftarrow \conc(\rho_{j},\ldots,\rho_{i-1})$\;
+					\uIf{$L(\beta)=L(\alpha)$}
 					{
-						replace position $i$ in $c$ with $\beta\rxp$\tcp*[r]{replace $\alpha_i$ with $\beta\rxp$} 
-						replace positions $j$ to $(i-1)$ in $c$ with $\emptyword$\tcp*[r]{consider those deleted} 
+						replace position $i$ in $c$ with $\alpha\rxp$\tcp*[r]{replace $\rho_i$ with $\alpha\rxp$} 
+						replace positions $j$ to $(i-1)$ in $c$ with $\emptyword$\tcp*[r]{delete $\rho_j$ to $\rho_{i-1}$} 
 						$\changed\leftarrow \true$\;
 					}
 					\lElse{$j\leftarrow (j-1)$}
@@ -725,28 +725,28 @@ Rule~P2 is supposed to handle this and similar cases.
 	{
 		$n\leftarrow |\children(\rho)|$\;
 		$c\leftarrow \children(\rho)$\;
-		assume $c=(\alpha_1,\ldots,\alpha_n)$\;
+		assume $c=(\rho_1,\ldots,\rho_n)$\;
 		$i\leftarrow n$\;
 		\While{$i \geq 2$}
 		{
 			$\changed\leftarrow\false$\;
-			\If{$\alpha_{i}$ is an option \KwAnd $\child(\alpha_{i})$ is a plus}
+			\If{$\rho_{i}$ is an option \KwAnd $\child(\rho_{i})$ is a plus}
 			{
-				$\beta\leftarrow \child(\alpha_{i})$ \tcp*[r]{Hence, $\alpha_i=\beta\rxp\rxo$}
-				\If{$\alpha_{i-1}$ is an option \KwAnd $\child(\alpha_{i-1})$ is a concatenation}
+				$\alpha\leftarrow \child(\rho_{i})$ \tcp*[r]{Hence, $\rho_{i}=\alpha\rxp\rxo$}
+				\If{$\rho_{i-1}$ is an option \KwAnd $\child(\rho_{i-1})$ is a concatenation}
 				{
-					$\gamma\leftarrow \child(\alpha_{i-1})$;
-					$m\leftarrow |\children(\gamma)|$\;
-					assume $\children(\gamma)=(\gamma_1,\ldots,\gamma_m)$\;
+					$\beta\leftarrow \child(\rho_{i-1})$;
+					$m\leftarrow |\children(\beta)|$\;
+					assume $\children(\beta)=(\beta_{1},\ldots,\beta_{m})$\;
 					$j\leftarrow m$\;
 					\While{$(j\geq 1)$ \KwAnd $(\KwNot\;\changed)$}
 					{
-						$\delta\leftarrow\conc(\gamma_j,\ldots,\gamma_m)$\;
-						\uIf{$L(\delta)=L(\beta)$}
+						$\gamma\leftarrow\conc(\beta_{j},\ldots,\beta_{m})$\;
+						\uIf{$L(\gamma)=L(\alpha)$}
 						{
-							$\gamma'\leftarrow \conc(\gamma_{1},\ldots,\gamma_{j-1})$\;
+							$\delta\leftarrow \conc(\beta_{1},\ldots,\beta_{j-1})$\;
 							replace position $(i-1)$ in $c$ with $\emptyword$\;
-							replace position $i$ in $c$ with $(\gamma'\rxo \rxc\beta\rxp)\rxo$\;
+							replace position $i$ in $c$ with $(\delta\rxo \rxc\alpha\rxp)\rxo$\;
 							$\changed\leftarrow\true$\;
 						}
 						\lElse{$j\leftarrow (j-1)$}
@@ -754,7 +754,7 @@ Rule~P2 is supposed to handle this and similar cases.
 				}
 
 			}
-			\lIf{\changed}{$i\leftarrow(i-2)$}
+			\lIf(\tcp*[f]{Skip over deleted child}){\changed}{$i\leftarrow(i-2)$}
 			\lElse{$i\leftarrow(i-1)$}
 		}
 		remove all $\emptyword$ from $c$\;
@@ -795,8 +795,6 @@ The same principle can be used to construct more involved examples that need to 
 	((a \rxc c \rxc d)\rxo \rxc (b \rxc c \rxc d)\rxp\rxo).
 \end{equation*}
 
-\texttt{ruleP4()} has two parameters: First, the DRE $\rho$; and second, the optional parameter $\parnull$, which defaults to $\false$.
-
 Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. We define the function $\projfirst_A$ as follows:
 \begin{align*}
 	\projfirst_A(a)&\df 
@@ -819,6 +817,10 @@ Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. 
 \end{align*}
 Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}.
 
+TODO: Examples for \projfirst
+
+TODO: Note: Default call of \texttt{ruleP4()} is with $\parnull=\false$.
+
 \begin{algorithm2e}[H]
 	\SetAlgoLined
 	\SetKwInOut{Input}{input}
@@ -838,7 +840,7 @@ Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained f
 		$n\leftarrow (\parnull\ \KwOr\ \nullfun(\rho))$\;
 		\Return $\unify(\{\mathtt{ruleP4(}\alpha_i\mathtt{)}\mid \alpha_i\in\children(\rho)\})$\;
 	}
-	\Else
+	\Else(\tcc*[f]{$\rho$ is a concatenation})
 	{
 		$n\leftarrow |\children(\rho)|$\;
 		$c\leftarrow \children(\rho)$\;
@@ -849,20 +851,44 @@ Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained f
 			$\beta\leftarrow \conc(\rho_1,\ldots,\rho_{n-1})$\;
 			$A\leftarrow \firstfun(\alpha)$\; 
 			$\beta_A\leftarrow \projfirst_{A}(\beta)$\;			
-			\If{$L(\alpha)=L(\beta_A)$}
+			\If(\tcc*[f]{In particular, $L(\beta_{A})\neq \emptyset$ must hold}){$L(\alpha)=L(\beta_A)$}
 			{
 				$\overline{A}\leftarrow (\termfun(\rho)\setminus A)$\; 
 				$\beta_{\overline{A}}\leftarrow \projfirst_{\overline{A}}(\beta)$\;
 				\Return $(\mathtt{ruleP4}(\beta_{\overline{A}},\true)\rxo \rxc \mathtt{ruleP4}(\alpha,\true)\rxo)$\;
 			}
 		}
-		\Return $(\mathtt{ruleP4}(\rho_{1})\rxc \ldots \rxc \mathtt{ruleP4}(\rho_{n}))$\;
+		\Return $\conc(\mathtt{ruleP4}(\rho_{1},\false)\rxc \ldots \rxc \mathtt{ruleP4}(\rho_{n},\false))$\;
 	}
 	% 	\Return the result of mapping \texttt{ruleP4()} with $(\parnull\leftarrow \false)$ to the children of $\rho$ (concatenate the results)\;
-
-
 	\caption{\texttt{ruleP4(}$\rho,parnull$\texttt{)}}
 \end{algorithm2e}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Plus Rewriting Loop}\label{sec:prl}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm2e}[H]
+	\SetAlgoLined
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{SideEffects}{side effects}
+	\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}	
+	\SetKwData{changed}{changed}
+	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
+
+	$\rho_{new}\leftarrow \rho$\;
+
+	\Repeat{$\rho_{new}=\rho_{old}$}
+	{
+		$\rho_{old}\leftarrow \rho_{new}$\;
+		$\rho_{1}\leftarrow \pnf(\mathtt{ruleP1(\rho_{old})})$\;
+		$\rho_{2}\leftarrow \pnf(\mathtt{ruleP2(\rho_{1})})$\;
+		$\rho_{new}\leftarrow \pnf(\mathtt{ruleP4(\rho_{old},\false)})$\;
+	}
+	\Return $\rho_{new}$\;
+	\caption{\texttt{rewritePlus(}$\rho$\texttt{)}}}
+\end{algorithm2e}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -877,7 +903,6 @@ Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained f
 	\texttt{equivalentToMEW(A,B) and (A.nullable()==B.nullable())}.
 \end{center}
 \item\texttt{equivalentToMEW(OccurrenceAutomaton A, OccurrenceAutomaton B)} Returns $\true$ if $A$ and $B$ are equivalent, modulo the empty word (i.\,e., $L(A)\setminus\{\emptyword\}=L(B)\setminus\{\emptyword\}$). See Algorithm~\ref{algo:mew} in Section~\ref{sec:mew}.
-
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{DRE}}\label{sec:des:dre}
