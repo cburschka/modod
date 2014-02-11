@@ -161,5 +161,3 @@ def equivalence(a, b):
 
 def equivalenceMEW(a, b):
     return oa.OA.fromDRE(a).equivalentToMEW(oa.OA.fromDRE(b))
-
-dre.DRE.factorOut = factorOut
