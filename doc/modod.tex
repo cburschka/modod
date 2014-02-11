@@ -133,10 +133,10 @@ A regular expression $\alpha$ is \emph{nullable} if $\emptyword\in L(\alpha)$.
 
 \paragraph{Extended Syntax} In some cases, we extended the syntax of regular expressions with $\emptyword$ and $\emptyset$. With the exception of the expressions for the languages $\{\emptyword\}$ and $\emptyset$, all regular expressions that use one (or both) of these symbols can be rewritten into an expression without these symbols in the following way:
 \begin{align*}
-	\emptyword \rxo &\df \emptyword, & \emptyset \rxo &\df \emptyword,\\
-	\emptyword \rxp &\df \emptyword, & \emptyset \rxp &\df \emptyset,\\
-	(\emptyword \ror \alpha)\df(\alpha \ror \emptyword)&\df \alpha, & (\emptyset \ror \alpha)\df(\alpha \ror \emptyset) &\df \alpha,\\
-	(\emptyword \rxc \alpha)\df(\alpha \rxc \emptyword)&\df \alpha, & (\emptyset \rxc \alpha)\df(\alpha \rxc \emptyset) &\df \emptyset.
+	\emptyword \rxo &\to \emptyword, & \emptyset \rxo &\to \emptyword,\\
+	\emptyword \rxp &\to \emptyword, & \emptyset \rxp &\to \emptyset,\\
+	(\emptyword \ror \alpha)\to\alpha,\ (\alpha \ror \emptyword)&\to \alpha, & (\emptyset \ror \alpha)\to\alpha,\ (\alpha \ror \emptyset) &\to \alpha,\\
+	(\emptyword \rxc \alpha)\to\alpha,\ (\alpha \rxc \emptyword)&\to \alpha, & (\emptyset \rxc \alpha)\to\emptyset,\ (\alpha \rxc \emptyset) &\to \emptyset.
 \end{align*}
 The equivalencies for concatenations are extended canonically to the $n$-ary case.
 
