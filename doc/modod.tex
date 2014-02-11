@@ -817,7 +817,18 @@ Let $\alpha$ be a DRE over some alphabet $\Sigma$, and let $A\subseteq \Sigma$. 
 \end{align*}
 Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}.
 
-TODO: Examples for \projfirst
+Let
+\begin{align*}
+	\alpha&\df ((a\rxo \rxc b) \ror c ).\\
+	\shortintertext{Then}
+	\projfirst_{\{a\}}(\alpha)&=\emptyset, &
+	\projfirst_{\{b\}}(\alpha)&=\emptyset, &
+	\projfirst_{\{c\}}(\alpha)&=c,\\
+	\projfirst_{\{a,b\}}(\alpha)&=(a\rxo \rxc b), &
+	\projfirst_{\{a,c\}}(\alpha)&=c, &
+	\projfirst_{\{b,c\}}(\alpha)&=c,\\
+	\projfirst_{\{a,b,c\}}(\alpha)&=\alpha. & & & &
+\end{align*}
 
 TODO: Note: Default call of \texttt{ruleP4()} is with $\parnull=\false$.
 
