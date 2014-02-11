@@ -883,10 +883,10 @@ TODO: Note: Default call of \texttt{ruleP4()} is with $\parnull=\false$.
 		$\rho_{old}\leftarrow \rho_{new}$\;
 		$\rho_{1}\leftarrow \pnf(\mathtt{ruleP1(\rho_{old})})$\;
 		$\rho_{2}\leftarrow \pnf(\mathtt{ruleP2(\rho_{1})})$\;
-		$\rho_{new}\leftarrow \pnf(\mathtt{ruleP4(\rho_{old},\false)})$\;
+		$\rho_{new}\leftarrow \pnf(\mathtt{ruleP4(\rho_{2},\false)})$\;
 	}
 	\Return $\rho_{new}$\;
-	\caption{\texttt{rewritePlus(}$\rho$\texttt{)}}}
+	\caption{\texttt{rewritePlus(}$\rho$\texttt{)}}
 \end{algorithm2e}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
