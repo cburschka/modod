@@ -28,7 +28,7 @@ dre.DRE.fromString = DREfromString
 oa.OA.fromString = lambda string : oa.OA.fromDRE(dre.DRE.fromString(string))
 oa.OA.fromDRE = lambda tree : oa.OA.fromIndexedDRE(dre_indexed.IndexedDRE.fromDRE(tree))
 
-# Extra functions:
+# Attach submodule functions to DRE class:
 
 dre.DRE.rewritePlus = dre_rewritep.rewritePlus
 dre.DRE.factorOut = dre_factor.factorOut

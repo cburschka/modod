@@ -3,7 +3,7 @@ import unittest
 from modod.dre import DRE
 from modod.oa import OA
 from modod import equivalentTo, equivalentToMEW
-from modod.dre_rewritep import ruleP1, ruleP2, ruleP4, projfirst
+from modod.dre_rewritep import ruleP1, ruleP2, ruleP4, pf
 
 class TestUM(unittest.TestCase):
  
@@ -278,15 +278,15 @@ class TestUM(unittest.TestCase):
         rxB = DRE.fromString('((a,c,d)?,(b,c,d)*)')
         self.assertEqual(ruleP4(rxA),rxB)
 
-    def test_projfirst_1(self):
+    def test_pf_1(self):
         rxA = DRE.fromString('(a?,b)|c')
-        self.assertEqual(projfirst({'a'}, rxA), DRE.fromString('ab'))
-        self.assertEqual(projfirst({'b'}, rxA), DRE.fromString('b'))
-        self.assertEqual(projfirst({'c'}, rxA), DRE.fromString('c'))
-        self.assertEqual(projfirst({'a', 'b'}, rxA), DRE.fromString('a?,b'))
-        self.assertEqual(projfirst({'a', 'c'}, rxA), DRE.fromString('c'))
-        self.assertEqual(projfirst({'b', 'c'}, rxA), DRE.fromString('c'))
-        self.assertEqual(projfirst({'a', 'b', 'c'}, rxA), rxA)
+        self.assertEqual(pf({'a'}, rxA), DRE.fromString('ab'))
+        self.assertEqual(pf({'b'}, rxA), DRE.fromString('b'))
+        self.assertEqual(pf({'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(pf({'a', 'b'}, rxA), DRE.fromString('a?,b'))
+        self.assertEqual(pf({'a', 'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(pf({'b', 'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(pf({'a', 'b', 'c'}, rxA), rxA)
 
 if __name__ == '__main__':
     unittest.main()

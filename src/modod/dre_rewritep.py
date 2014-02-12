@@ -28,8 +28,10 @@ def ruleP1(rho):
 
     elif isinstance(rho, dre.Nary):
         return rho.__class__([ruleP1(x) for x in rho.children])
-    else:
+    elif isinstance(rho, dre.Unary):
         return rho.__class__(ruleP1(rho.child))
+    else:
+        return rho
 
 def ruleP2(rho):
     if isinstance(rho, dre.Concatenation):
@@ -44,7 +46,7 @@ def ruleP2(rho):
                     for j in range(len(b) - 1, -1, -1):
                         if conc(b[j:]).equivalentTo(a):
                             d = conc([dre.Optional(conc(b[:j])), dre.Plus(a)])
-                            c = c[:i-1] + dre.Optional(d) + c[i+1:]
+                            c = c[:i-1] + [dre.Optional(d)] + c[i+1:]
                             i -= 1
                             break
             i -= 1
@@ -52,8 +54,10 @@ def ruleP2(rho):
     
     elif isinstance(rho, dre.Nary):
         return rho.__class__([ruleP2(x) for x in rho.children])
-    else:
+    elif isinstance(rho, dre.Unary):
         return rho.__class__(ruleP2(rho.child))
+    else:
+        return rho
 
 def ruleP4(rho, nullable = False):
     if isinstance(rho, dre.Terminal):
@@ -69,11 +73,11 @@ def ruleP4(rho, nullable = False):
         if nullable and isStar(rho.children[-1]):
             a = rho.children[-1].child.child
             b = conc(rho.children[:-1])
-            A = first(a)
-            bA = projfirst(A, b)
+            A = a.first()
+            bA = pf(A, b)
             if bA and bA.equivalentTo(a):
-                An = term(rho) - A
-                bAn = projfirst(An, b)
+                An = rho.terminals() - A
+                bAn = pf(An, b)
                 a = dre.Optional(ruleP4(a))
                 return dre.Concatenation([dre.Optional(ruleP4(bAn)), a]) if bAn else a
         return conc([ruleP4(x) for x in rho.children])
@@ -85,32 +89,27 @@ def choice(children):
     return dre.Choice(children) if len(children) > 1 else children[0]
 
 # Returns a DRE, None (empty set) or '' (empty word).
-def projfirst(a, rho):
+def pf(a, rho):
     if isinstance(rho, dre.Optional):
-        e = projfirst(a, rho.child)
+        e = pf(a, rho.child)
         # None? and ''? are immediately reduced to ''.
         return dre.Optional(e) if e else ''
+
     elif isinstance(rho, dre.Concatenation):
-        c = []
-        for i, x in enumerate(rho.children):
-            x = projfirst(a, x)
-            if x === None:
-                # A concatenation containing None is reduced to None.
-                return None
-            elif x === '':
-                # '' is immediately removed from the concatenation.
-                continue
+        b1, bn = rho.children[0], conc(rho.children[1:])
+        if b1.nullable():
+            c = pf(a, bn)
+            if c == None:
+                return conc([pf(a, rlo(b1)), bn])
             else:
-                c.append(x)
-            # Keep projecting as long as the prefix remains nullable.
-            if not x.nullable():
-                c += rho.children[i+1:]
-                break
-        return conc(c)
+                return conc([pf(a, b1), c])
+        else:
+            return conc([pf(a, b1), bn])
+            
     elif isinstance(rho, dre.Choice):
-        c = [projfirst(a, x) for x in rho.children]
+        c = [pf(a, x) for x in rho.children]
         # Reduce None and ''.
-        d = [x for x if x]
+        d = [x for x in c if x]
         if d:
             d = choice(d)
             # Add ? if '' was reduced.
@@ -121,6 +120,16 @@ def projfirst(a, rho):
     else:
         # Plus and Terminal:
         return rho if rho.first() <= a else None
+
+def rlo(rho):
+    if isinstance(rho, dre.Optional):
+        return rho.child
+    elif isinstance(rho, dre.Choice):
+        return dre.Choice([rlo(x) for x in rho.children])
+    elif isinstance(rho, dre.Concatenation):
+        return dre.Concatenation([rlo(rho.children[0])] + rho.children[1:])
+    else:
+        return rho
 
 def isStar(rho):
     return isinstance(rho, dre.Optional) and isinstance(rho.child, dre.Plus)
