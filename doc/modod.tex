@@ -877,7 +877,7 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 		assume $c=(\rho_1,\ldots,\rho_n)$\;
 		\If{(\parnull) \KwAnd ($\rho_n$ is an option) \KwAnd ($\child(\rho_n)$ is a plus)}
 		{
-			$\alpha\leftarrow \child(\rho_n)$\;
+			$\alpha\leftarrow \child(\child(\rho_{n}))$\;
 			$\beta\leftarrow \conc(\rho_1,\ldots,\rho_{n-1})$\;
 			$A\leftarrow \firstfun(\alpha)$\; 
 			$\beta_A\leftarrow \projfirst_{A}(\beta)$\;			
@@ -885,7 +885,7 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 			{
 				$\overline{A}\leftarrow (\termfun(\rho)\setminus \firstfun(\beta_A))$\; % notwendig wegen rlo in pf 
 				$\beta_{\overline{A}}\leftarrow \projfirst_{\overline{A}}(\beta)$\;
-				\Return $(\mathtt{ruleP4}(\beta_{\overline{A}},\true)\rxo \rxc \mathtt{ruleP4}(\alpha,\true)\rxo)$\;
+				\Return $(\mathtt{ruleP4}(\beta_{\overline{A}},\true)\rxo \rxc \mathtt{ruleP4}(\alpha\rxp,\true)\rxo)$\;
 			}
 		}
 		\Return $\conc(\mathtt{ruleP4}(\rho_{1},\false)\rxc \ldots \rxc \mathtt{ruleP4}(\rho_{n},\false))$\;
