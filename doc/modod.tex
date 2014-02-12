@@ -462,6 +462,8 @@ The three measures can be interpreted as follows.
 \SetKwFunction{nullfun}{nullable}
 \SetKwFunction{factRw}{factRw}
 \SetKwFunction{factRwP}{factRwPlus}
+Warning: This algorithm does not preserve PNF.
+
 The algorithm \factorOut rewrites a DRE into an equivalent DRE that has no children with a common suffix. It  uses the following subroutines:
 \begin{itemize}
 	\item $\child(\alpha)$, $\children(\alpha)$: Return the child or a list of children of $\alpha$. (We ensure that \child is used only on unary DREs, and \children only on $n$-ary DREs.)
@@ -775,7 +777,9 @@ There is no rule~P3. The numbering 1, 2, 4 is due to historical reasons.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Rule P4}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\SetKw{projfirst}{projfirst}
+\SetKw{projfirst}{pf}
+\SetKw{rlo}{rlo}
+
 \SetKwData{parnull}{parnull}
 
 
@@ -795,7 +799,7 @@ The same principle can be used to construct more involved examples that need to 
 	((a \rxc c \rxc d)\rxo \rxc (b \rxc c \rxc d)\rxp\rxo).
 \end{equation*}
 
-Let $\Sigma$ be an alphabet, and let $A\subseteq \Sigma$. We define the function $\projfirst_A$ from and to DREs over $\Sigma$ as follows:
+Let $\Sigma$ be an alphabet, and let $A\subseteq \Sigma$. We define the function $\projfirst_A$ (\emph{\textbf{p}roject \textbf{f}irst}) from and to DREs over $\Sigma$ as follows:
 \begin{align*}
 	\projfirst_A(a)&\df 
 		\begin{cases}
@@ -812,19 +816,30 @@ Let $\Sigma$ be an alphabet, and let $A\subseteq \Sigma$. We define the function
 	\projfirst_{A}((\beta_1\rxc\cdots\rxc\beta_n))&\df
 		\begin{cases}
 			\projfirst_{A}(\beta_1)\rxc\conc(\beta_2\ldots\beta_n) & \text{ if $\emptyword\notin L(\beta_1)$,}\\
-			\projfirst_{A}(\beta_1)\rxc\projfirst_{A}(\conc(\beta_2\ldots\beta_n)) & \text{ if $\emptyword\in L(\beta_1)$}.
+			\projfirst_{A}(\rlo(\beta_1))\rxc\conc(\beta_2\ldots\beta_n) & \text{ if $\emptyword\in L(\beta_1)$, $\projfirst_{A}(\conc(\beta_2\ldots\beta_n))=\emptyset$}\\
+			\projfirst_{A}(\beta_1)\rxc\projfirst_{A}(\conc(\beta_2\ldots\beta_n)) & \text{ if $\emptyword\in L(\beta_1)$, $\projfirst_{A}(\conc(\beta_2\ldots\beta_n))\neq\emptyset$},
 		\end{cases}
+\end{align*}
+where the auxiliary function $\rlo$ (\emph{\textbf{r}emove \textbf{l}eftmost \textbf{o}ption}) is defined by
+\begin{align*}
+	\rlo(a)&\df a \text{ for all $a\in\Sigma$},\\
+	\rlo(\alpha\rxo)&\df \alpha,\\
+	\rlo(\alpha\rxp)&\df \alpha\rxp,\\
+	\rlo((\beta_1\ror\cdots\ror\beta_n))&\df (\rlo(\beta_1)\ror\cdots\ror\rlo(\beta_n)),\\
+	\rlo((\beta_1\rxc\beta_2\rxc\cdots\rxc\beta_n))&\df (\rlo(\beta_1)\rxc\beta_2\rxc\cdots\rxc\beta_n).
 \end{align*}
 Note that we assume $\emptyset$ and $\emptyword$ to be eliminated as explained for the  extended syntax of (D)REs (with $\emptyset$ and $\emptyword$), see Section~\ref{sec:dredef}. Furthermore, if $A\supseteq\term(\alpha)$, $\projfirst_{A}(\alpha)=\alpha$ holds by definition.
 
+Note to Dominik: See 12.170f for further examples. (TODO: Include them here.)
+
 Let $\alpha\df ((a\rxo \rxc b) \ror c )$. Then
 \begin{align*}
-	\projfirst_{\{a\}}(\alpha)&=\emptyset, &
-	\projfirst_{\{b\}}(\alpha)&=\emptyset, &
+	\projfirst_{\{a\}}(\alpha)&=(a\rxc b), &
+	\projfirst_{\{b\}}(\alpha)&=b, &
 	\projfirst_{\{c\}}(\alpha)&=c,\\
 	\projfirst_{\{a,b\}}(\alpha)&=(a\rxo \rxc b), &
-	\projfirst_{\{a,c\}}(\alpha)&=c, &
-	\projfirst_{\{b,c\}}(\alpha)&=c,\\
+	\projfirst_{\{a,c\}}(\alpha)&=((a\rxc b)\ror c), &
+	\projfirst_{\{b,c\}}(\alpha)&=(b\ror c),\\
 	\projfirst_{\{a,b,c\}}(\alpha)&=\alpha. & & & &
 \end{align*}
 Furthermore, let $\beta\df (((a\rxo \rxc b)\rxp \ror c) \rxc d)$. Then
@@ -868,7 +883,7 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 			$\beta_A\leftarrow \projfirst_{A}(\beta)$\;			
 			\If(\tcc*[f]{In particular, $L(\beta_{A})\neq \emptyset$ must hold}){$L(\alpha)=L(\beta_A)$}
 			{
-				$\overline{A}\leftarrow (\termfun(\rho)\setminus A)$\; 
+				$\overline{A}\leftarrow (\termfun(\rho)\setminus \firstfun(\beta_A))$\; % notwendig wegen rlo in pf 
 				$\beta_{\overline{A}}\leftarrow \projfirst_{\overline{A}}(\beta)$\;
 				\Return $(\mathtt{ruleP4}(\beta_{\overline{A}},\true)\rxo \rxc \mathtt{ruleP4}(\alpha,\true)\rxo)$\;
 			}
@@ -954,7 +969,7 @@ Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could 
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
 	\item \texttt{factorOut()} Returns the result of calling $\factorOut(\rho,\false)$, where $\rho$ is the PNF of the current DRE.
 	\item \texttt{rewritePlus()} Returns the result of calling $\mathtt{rewritePlus}(\rho)$, where $\rho$ is the PNF of the current DRE.
-	\item \texttt{simplify()} Returns the result of calling $\mathtt{rewritePlus}(\factorOut(\pnf(\rho),\false))$, where $\rho$ is the current DRE.
+	\item \texttt{simplify()} Returns the result of calling $\mathtt{rewritePlus}(\pnf(\factorOut(\pnf(\rho),\false)))$, where $\rho$ is the current DRE.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{Nary}}\label{sec:des:nary}
