@@ -71,11 +71,11 @@ def ruleP4(rho, nullable = False):
         return choice([ruleP4(x, n) for x in rho.children])
     else:
         if nullable and isStar(rho.children[-1]):
-            a = rho.children[-1].child.child
+            a = rho.children[-1].child
             b = conc(rho.children[:-1])
             A = a.first()
             bA = pf(A, b)
-            if bA and bA.equivalentTo(a):
+            if bA and bA.equivalentTo(a.child):
                 An = rho.terminals() - A
                 bAn = pf(An, b)
                 a = dre.Optional(ruleP4(a))
@@ -96,15 +96,23 @@ def pf(a, rho):
         return dre.Optional(e) if e else ''
 
     elif isinstance(rho, dre.Concatenation):
-        b1, bn = rho.children[0], conc(rho.children[1:])
-        if b1.nullable():
-            c = pf(a, bn)
-            if c == None:
-                return conc([pf(a, rlo(b1)), bn])
+        b = [rho.children[0], conc(rho.children[1:])]
+        if b[0].nullable():
+            c = pf(a, b[1])
+            if c is None:
+                b[0] = rlo(b[0])
+            elif c is '':
+                del b[1]
             else:
-                return conc([pf(a, b1), c])
-        else:
-            return conc([pf(a, b1), bn])
+                b[1] = c
+
+        b[0] = pf(a, b[0])
+        if b[0] is None:
+            return None
+        elif b[0] is '':
+            del b[0]
+        return conc(b) if b else ''
+        
             
     elif isinstance(rho, dre.Choice):
         c = [pf(a, x) for x in rho.children]

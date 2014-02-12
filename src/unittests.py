@@ -271,21 +271,22 @@ class TestUM(unittest.TestCase):
     def test_rewriteP4_1(self):
         rxA = DRE.fromString('((a|b),b*)?')
         rxB = DRE.fromString('(a?,b*)')
-        self.assertEqual(ruleP4(rxA),rxB)
+        self.assertEqual(ruleP4(rxA).toPNF(),rxB)
 
     def test_rewriteP4_2(self):
         rxA = DRE.fromString('((a|b),c,d,(b,c,d)*)?')
         rxB = DRE.fromString('((a,c,d)?,(b,c,d)*)')
-        self.assertEqual(ruleP4(rxA),rxB)
+        x = ruleP4(rxA).toPNF()
+        self.assertEqual(ruleP4(rxA).toPNF(),rxB)
 
     def test_pf_1(self):
         rxA = DRE.fromString('(a?,b)|c')
-        self.assertEqual(pf({'a'}, rxA), DRE.fromString('ab'))
+        self.assertEqual(pf({'a'}, rxA), DRE.fromString('a,b'))
         self.assertEqual(pf({'b'}, rxA), DRE.fromString('b'))
         self.assertEqual(pf({'c'}, rxA), DRE.fromString('c'))
         self.assertEqual(pf({'a', 'b'}, rxA), DRE.fromString('a?,b'))
-        self.assertEqual(pf({'a', 'c'}, rxA), DRE.fromString('c'))
-        self.assertEqual(pf({'b', 'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(pf({'a', 'c'}, rxA), DRE.fromString('(a,b)|c'))
+        self.assertEqual(pf({'b', 'c'}, rxA), DRE.fromString('b|c'))
         self.assertEqual(pf({'a', 'b', 'c'}, rxA), rxA)
 
 if __name__ == '__main__':
