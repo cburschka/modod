@@ -75,7 +75,7 @@ def ruleP4(rho, nullable = False):
             b = conc(rho.children[:-1])
             A = a.first()
             bA = pf(A, b)
-            if bA and bA.equivalentTo(a.child):
+            if bA.equivalentTo(a.child):
                 An = rho.terminals() - A
                 bAn = pf(An, b)
                 a = dre.Optional(ruleP4(a))
@@ -88,46 +88,31 @@ def conc(children):
 def choice(children):
     return dre.Choice(children) if len(children) > 1 else children[0]
 
-# Returns a DRE, None (empty set) or '' (empty word).
+# Returns a DRE with fully eliminated empty symbols.
 def pf(a, rho):
     if isinstance(rho, dre.Optional):
-        e = pf(a, rho.child)
-        # None? and ''? are immediately reduced to ''.
-        return dre.Optional(e) if e else ''
+        return dre.Optional(pf(a, rho.child)).eliminateEmpty()
 
     elif isinstance(rho, dre.Concatenation):
-        b = [rho.children[0], conc(rho.children[1:])]
-        if b[0].nullable():
-            c = pf(a, b[1])
-            if c is None:
-                b[0] = rlo(b[0])
-            elif c is '':
-                del b[1]
+        b, c = rho.children[0], conc(rho.children[1:])
+        if b.nullable():
+            d = pf(a, c)
+            # If b is nullable and c projects to the empty set, then
+            # remove the leftmost option from b to make it not-nullable.
+            if isinstance(d, dre.EmptySet):
+                return conc([pf(a, rlo(b)), c]).eliminateEmpty()
             else:
-                b[1] = c
-
-        b[0] = pf(a, b[0])
-        if b[0] is None:
-            return None
-        elif b[0] is '':
-            del b[0]
-        return conc(b) if b else ''
-        
-            
-    elif isinstance(rho, dre.Choice):
-        c = [pf(a, x) for x in rho.children]
-        # Reduce None and ''.
-        d = [x for x in c if x]
-        if d:
-            d = choice(d)
-            # Add ? if '' was reduced.
-            return dre.Optional(d) if '' in c else d
+                return conc([pf(a, b), d]).eliminateEmpty()
         else:
-            # Reduce empty choice to None.
-            return None
+            return conc([pf(a, b), c]).eliminateEmpty()
+
+
+    elif isinstance(rho, dre.Choice):
+        return dre.Choice([pf(a, x) for x in rho.children]).eliminateEmpty()
+
     else:
         # Plus and Terminal:
-        return rho if rho.first() <= a else None
+        return rho if rho.first() <= a else dre.EmptySet()
 
 def rlo(rho):
     if isinstance(rho, dre.Optional):

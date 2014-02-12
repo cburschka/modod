@@ -17,6 +17,10 @@ class DRE:
         return self._pnf1()._nnf()._pnf3()._nnf()
     def isInPNF(self):
         pass #TODO
+    def eliminateEmpty(self):
+        return self._eliminateEmpty() if self.containsEmpty() else self
+    def containsEmpty(self):
+        return False
 
     # Menge der Terminalsymbole und deren Anzahl:
     def terminals(self):
@@ -87,6 +91,8 @@ class DRE:
         return hash((self.__class__, self.__key__()))
     def __eq__(a, b):
         return a.__class__ is b.__class__ and a.__key__() == b.__key__()
+    def __key__(a, b):
+        return self.__class__
     def __lt__(a, b):
         if a.__class__ != b.__class__:
             return a.__class__.__name__ < b.__class__.__name__
@@ -171,6 +177,10 @@ class Unary(Operator):
     def _first(self):
         return self.child._first()
 
+    def containsEmpty(self):
+        return isinstance(self.child, Empty) or self.child.containsEmpty()
+
+
 class Nary(Operator):
     def __init__(self, children):
         self.children = children
@@ -216,6 +226,9 @@ class Nary(Operator):
                     count[t] = c
         return count
 
+    def containsEmpty(self):
+        return any(isinstance(x, Empty) or x.containsEmpty() for x in self.children)
+
 class Optional(Unary):
     def _label(self):
         return '?'
@@ -226,7 +239,9 @@ class Optional(Unary):
         return x if self.child._test_empty() else Optional(x)
     def _pnf4(self):
         return self.child._pnf3()
-
+    def _eliminateEmpty(self):
+        x = self.child.eliminateEmpty()
+        return Optional(x) if x else EmptyWord()
 
 class Plus(Unary):
     def _label(self):
@@ -238,7 +253,9 @@ class Plus(Unary):
         return Optional(Plus(x)) if self.child._test_empty() else Plus(x)
     def _pnf4(self):
         return Plus(self.child._pnf3())
-
+    def _eliminateEmpty(self):
+        x = self.child.eliminateEmpty()
+        return x and Plus(x)
 
 class Concatenation(Nary):
     def _label(self):
@@ -292,6 +309,19 @@ class Concatenation(Nary):
     def __key__(self):
         return tuple(self.children)
 
+    def _eliminateEmpty(self):
+        a = [x.eliminateEmpty() for x in self.children]
+        if any(isinstance(x, EmptySet) for x in a):
+            return EmptySet()
+        b = [x for x in a if x]
+        if len(b) == 0:
+            return EmptyWord()
+        elif len(b) == 1:
+            return b[0]
+        else:
+            return Concatenation(b)
+
+
 class Choice(Nary):
     def _label(self):
         return '|'
@@ -331,3 +361,29 @@ class Choice(Nary):
         for x in self.children:
             children[x] += 1
         return tuple(sorted(children.items()))
+
+    def _eliminateEmpty(self):
+        a = [x.eliminateEmpty() for x in self.children]
+        if all(isinstance(x, EmptySet) for x in a):
+            return EmptySet()
+        b = [x for x in a if x]
+        if len(b) == 0:
+            return EmptyWord()
+        elif len(b) == 1:
+            return b[0]
+        elif any(isinstance(x, EmptyWord) for x in a):
+            return Optional(Choice(b))
+        else:
+            return Choice(b)
+
+class Empty(DRE):
+    def __bool__(self):
+        return False
+
+class EmptySet(Empty):
+    def _formula(self):
+        return '{}'
+
+class EmptyWord(Empty):
+    def _formula(self):
+        return 'ε'
