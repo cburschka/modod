@@ -3,6 +3,7 @@ import unittest
 from modod.dre import DRE
 from modod.oa import OA
 from modod import equivalentTo, equivalentToMEW
+from modod.dre_rewritep import ruleP1, ruleP2, ruleP4, projfirst
 
 class TestUM(unittest.TestCase):
  
@@ -246,14 +247,47 @@ class TestUM(unittest.TestCase):
     def test_factorOut_8(self):
         rxA = DRE.fromString('((a,b+)|(c?,b*))')
         rxB = DRE.fromString('(((a,b)|c)?,b*)')
-        x = rxA.factorOut()
-        open('_tmp.A.dot', 'w').write(rxA.toDOTString())
-        open('_tmp.x.dot', 'w').write(x.toDOTString())
-        open('_tmp.B.dot', 'w').write(rxB.toDOTString())
-        self.assertEqual(rxA.factorOut(),rxB)
+        #x = rxA.factorOut()
+        #open('_tmp.A.dot', 'w+').write(rxA.toDOTString())
+        #open('_tmp.x.dot', 'w+').write(x.toDOTString())
+        #open('_tmp.B.dot', 'w+').write(rxB.toDOTString())
+        self.assertEqual(rxA.factorOut().toPNF(),rxB)
+
+    def test_rewriteP1_1(self):
+        rxA = DRE.fromString('a,b,c,(b,c)*,d')
+        rxB = DRE.fromString('a,(b,c)+,d')
+        self.assertEqual(ruleP1(rxA),rxB)
+
+    def test_rewriteP1_2(self):
+        rxA = DRE.fromString('a,b,b*,(a,b+)*')
+        rxB = DRE.fromString('(a,b+)+')
+        self.assertEqual(ruleP1(rxA),rxB)
+
+    def test_rewriteP2_1(self):
+        rxA = DRE.fromString('(a,b)?,b*')
+        rxB = DRE.fromString('(a?,b+)?')
+        self.assertEqual(ruleP2(rxA),rxB)
+
+    def test_rewriteP4_1(self):
+        rxA = DRE.fromString('((a|b),b*)?')
+        rxB = DRE.fromString('(a?,b*)')
+        self.assertEqual(ruleP4(rxA),rxB)
+
+    def test_rewriteP4_2(self):
+        rxA = DRE.fromString('((a|b),c,d,(b,c,d)*)?')
+        rxB = DRE.fromString('((a,c,d)?,(b,c,d)*)')
+        self.assertEqual(ruleP4(rxA),rxB)
+
+    def test_projfirst_1(self):
+        rxA = DRE.fromString('(a?,b)|c')
+        self.assertEqual(projfirst({'a'}, rxA), DRE.fromString('ab'))
+        self.assertEqual(projfirst({'b'}, rxA), DRE.fromString('b'))
+        self.assertEqual(projfirst({'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(projfirst({'a', 'b'}, rxA), DRE.fromString('a?,b'))
+        self.assertEqual(projfirst({'a', 'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(projfirst({'b', 'c'}, rxA), DRE.fromString('c'))
+        self.assertEqual(projfirst({'a', 'b', 'c'}, rxA), rxA)
 
 if __name__ == '__main__':
     unittest.main()
-
-
 
