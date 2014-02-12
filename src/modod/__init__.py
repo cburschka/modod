@@ -19,6 +19,12 @@ def DREfromString(string, strict=False):
     else:
         return _parserExt.parse(_lexerExt.lex(string)).dre()
 
+def _DRE_simplify(rho):
+    old, new = None, rho
+    while old != new:
+        old, new = new, new.factorOut().rewritePlus().toPNF()
+    return new
+
 # Raise comparators to main module namespace (cf. specification)
 equivalentToMEW = oa.OA.equivalentToMEW
 equivalentTo = oa.OA.equivalentTo
@@ -33,3 +39,4 @@ oa.OA.fromDRE = lambda tree : oa.OA.fromIndexedDRE(dre_indexed.IndexedDRE.fromDR
 dre.DRE.rewritePlus = dre_rewritep.rewritePlus
 dre.DRE.factorOut = dre_factor.factorOut
 dre.DRE.equivalentTo = lambda a, b: oa.OA.fromDRE(a).equivalentTo(oa.OA.fromDRE(b))
+dre.DRE.simplify = _DRE_simplify
