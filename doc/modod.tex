@@ -939,9 +939,9 @@ Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could 
 	{	
 		$\rho_{old}\leftarrow \rho_{new}$\;
 		
-		\Repeat{$\rho_{fn}=\rho_{fo}$}
+		\Repeat{$\rho_{fold}=\rho_{new}$}
 		{
-			$\rho_{fo}\leftarrow \rho_{new}$\;
+			$\rho_{fold}\leftarrow \rho_{new}$\;
 			$\rho_{new}\leftarrow \pnf(\factorOut(\rho_{new},\false))$\;
 		}
 		$\rho_{new}\leftarrow \pnf(\mathtt{rewritePlus(\rho_{new})})$\;
