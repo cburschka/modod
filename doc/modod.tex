@@ -921,6 +921,35 @@ As $d$ is not an element of $\firstfun(\beta)$, $\projfirst_{A}(\beta)$ does not
 Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could simply write
 \[\rho_{new}\leftarrow \pnf(\mathtt{ruleP4(\pnf(\mathtt{ruleP2(\pnf(\mathtt{ruleP1(\rho_{old})}))}),\false)}).\]
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Simplification Loop}\label{sec:simpl}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm2e}[H]
+	\SetAlgoLined
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{SideEffects}{side effects}
+	\SetKwInOut{Output}{output}\SetKwInOut{Assert}{assert}	
+	\SetKwData{changed}{changed}
+	\SetKw{KwOr}{or}\SetKw{KwAnd}{and}\SetKw{KwNot}{not}
+
+	$\rho_{new}\leftarrow \pnf(\rho)$\;
+
+	\Repeat{$\rho_{new}=\rho_{old}$}
+	{	
+		$\rho_{old}\leftarrow \rho_{new}$\;
+		
+		\Repeat{$\rho_{fn}=\rho_{fo}$}
+		{
+			$\rho_{fo}\leftarrow \rho_{new}$\;
+			$\rho_{new}\leftarrow \pnf(\factorOut(\rho_{new},\false))$\;
+		}
+		$\rho_{new}\leftarrow \pnf(\mathtt{rewritePlus(\rho_{new})})$\;
+	}
+	\Return $\rho_{new}$\;
+	\caption{\texttt{simplify(}$\rho$\texttt{)}}
+\end{algorithm2e}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Specification}\label{sec:spec}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -969,7 +998,7 @@ Of course, instead of explicitly computing $\rho_{1}$ and $\rho_{2}$, one could 
 	\item \emph{Really, really optional:} \texttt{toTikZString()} Returns a tree representation of the DRE as a TikZ tree (\url{http://sourceforge.net/projects/pgf/}).
 	\item \texttt{factorOut()} Returns the result of calling $\factorOut(\rho,\false)$, where $\rho$ is the PNF of the current DRE.
 	\item \texttt{rewritePlus()} Returns the result of calling $\mathtt{rewritePlus}(\rho)$, where $\rho$ is the PNF of the current DRE.
-	\item \texttt{simplify()} Returns the result of calling $\mathtt{rewritePlus}(\pnf(\factorOut(\pnf(\rho),\false)))$, where $\rho$ is the current DRE.
+	\item \texttt{simplify()} Returns the result of calling $\mathtt{simplify}(\rho)$ (cf.\ Section~\ref{sec:simpl}), where $\rho$ is the current DRE.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texttt{Nary}}\label{sec:des:nary}
