@@ -289,6 +289,12 @@ class TestUM(unittest.TestCase):
         self.assertEqual(pf({'b', 'c'}, rxA), DRE.fromString('b|c'))
         self.assertEqual(pf({'a', 'b', 'c'}, rxA), rxA)
 
+    def test_simplify_1(self):
+        rxA = DRE.fromString('((a?,b?|c?,d?),e,((a,b?|c,d?),e)*)?')
+        rxB = DRE.fromString('((b|d)?,e)?,((a,b?|c,d?),e)*')
+        self.assertEqual(rxA.simplify(),rxB)
+
+
 if __name__ == '__main__':
     unittest.main()
 
