@@ -223,7 +223,7 @@ class Nary(Operator):
                 children.extend(nf.children)
             else:
                 children.append(nf)
-        return self.__class__(children)
+        return self.__class__(children) if len(children) > 1 else children[0]
 
     def _isnnf(self):
         return all(self.__class__ != x.__class__ and x._isnnf() for x in self.children)
