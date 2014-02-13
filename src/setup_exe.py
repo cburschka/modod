@@ -10,7 +10,8 @@ setup(
     options = {"build_exe": {'packages': ['modod', 'parser']}},
     executables = [
       Executable('dtd-inf/sore.py'),
-      Executable('dtd-inf/dtd.py')
+      Executable('dtd-inf/dtd.py'),
+      Executable('simplify.py')
     ]
     )
 

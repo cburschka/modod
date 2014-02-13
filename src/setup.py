@@ -4,6 +4,13 @@ from setuptools import setup
 
 setup(
     name='modod',
-    version='0.1',
+    version='0.2.1',
     description='Regular expression optimizer',
-    packages=['modod', 'parser'])
+    packages=['modod', 'parser'],
+    include=['main_simplify', 'graph'],
+    entry_points={
+        'console_scripts': [
+            'simplify = main_simplify:main'
+        ]
+    }
+    )
