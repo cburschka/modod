@@ -24,17 +24,17 @@ class DRE:
 
     # Menge der Terminalsymbole und deren Anzahl:
     def terminals(self):
-        return set(self._count_terms().keys())
+        return set(self.terminalOccurrences().keys())
     def terminalOccurrences(self):
-        return self._count_terms()
+        pass
 
     # Nullbar
     def nullable(self):
-        return self._test_empty()
+        pass
 
     # Die erlaubten ersten Zeichen der Worte dieser Sprache:
     def first(self):
-        return self._first()
+        pass
 
     # size: Anzahl Terminalzeichen, Operatoren, Klammern
     def size(self):
@@ -48,7 +48,7 @@ class DRE:
 
     # Ausgabe:
     def toString(self):
-        return self._formula()
+        pass
     def toDOTString(self):
         nodes, edges = self._graph()
         return graph.digraph(nodes, edges).xdot()
@@ -77,7 +77,7 @@ class DRE:
     def _size(self, operators, parentheses):
         pass
 
-    def _test_empty(self):
+    def nullable(self):
         '''Prüft, ob der Ausdruck "nullbar" ist (d.h. das leere Wort akzeptiert).'''
         pass
 
@@ -110,7 +110,7 @@ class Terminal(DRE):
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
 
-    def _formula(self):
+    def toString(self):
         return self.symbol
     def _label(self):
         return self.symbol
@@ -118,7 +118,7 @@ class Terminal(DRE):
         return self
     def _isnnf(self):
         return True
-    def _test_empty(self):
+    def nullable(self):
         return False
 
     def _pnf1(self):
@@ -133,10 +133,10 @@ class Terminal(DRE):
     def _size(self, operators, parentheses):
         return 1
 
-    def _count_terms(self):
+    def terminalOccurrences(self):
         return {self.symbol : 1}
 
-    def _first(self):
+    def first(self):
         return {self.symbol}
 
 class Operator(DRE):
@@ -157,8 +157,8 @@ class Unary(Operator):
         nodes, edges = DRE._graph(self, nodes, edges)
         edges.add((len(nodes)-1, len(nodes)))
         return self.child._graph(nodes, edges)
-    def _formula(self):
-        return self.child._formula() + self._label()
+    def toString(self):
+        return self.child.toString() + self._label()
     def _nnf(self):
         return self.__class__(self.child._nnf())
     def _isnnf(self):
@@ -171,11 +171,11 @@ class Unary(Operator):
 
     def _size(self, operators, parentheses):
         return operators + self.child._size(operators, parentheses)
-    def _count_terms(self):
-        return self.child._count_terms()
+    def terminalOccurrences(self):
+        return self.child.terminalOccurrences()
 
-    def _first(self):
-        return self.child._first()
+    def first(self):
+        return self.child.first()
 
     def containsEmpty(self):
         return isinstance(self.child, Empty) or self.child.containsEmpty()
@@ -187,8 +187,8 @@ class Nary(Operator):
 
     def __str__(self):
         return self.__class__.__name__ + ' [' + ', '.join(map(str, self.children)) + ']'
-    def _formula(self):
-        return '(' + self._label().join(x._formula() for x in self.children) + ')'
+    def toString(self):
+        return '(' + self._label().join(x.toString() for x in self.children) + ')'
     def _graph(self, nodes=None, edges=None):
         nodes, edges = DRE._graph(self, nodes, edges)
         i = len(nodes) - 1
@@ -216,10 +216,10 @@ class Nary(Operator):
     def _size(self, operators, parentheses):
         return 2*parentheses + (len(self.children)-1)*operators + sum(x._size(operators, parentheses) for x in self.children)
 
-    def _count_terms(self):
+    def terminalOccurrences(self):
         count = {}
         for x in self.children:
-            for t,c in x._count_terms().items():
+            for t,c in x.terminalOccurrences().items():
                 if t in count:
                     count[t] += c
                 else:
@@ -232,11 +232,11 @@ class Nary(Operator):
 class Optional(Unary):
     def _label(self):
         return '?'
-    def _test_empty(self):
+    def nullable(self):
         return True
     def _pnf1(self):
         x = self.child._pnf1()
-        return x if self.child._test_empty() else Optional(x)
+        return x if self.child.nullable() else Optional(x)
     def _pnf4(self):
         return self.child._pnf3()
     def _eliminateEmpty(self):
@@ -246,11 +246,11 @@ class Optional(Unary):
 class Plus(Unary):
     def _label(self):
         return '+'
-    def _test_empty(self):
-        return self.child._test_empty()
+    def nullable(self):
+        return self.child.nullable()
     def _pnf1(self):
         x = self.child._pnf1()._pnf2()
-        return Optional(Plus(x)) if self.child._test_empty() else Plus(x)
+        return Optional(Plus(x)) if self.child.nullable() else Plus(x)
     def _pnf4(self):
         return Plus(self.child._pnf3())
     def _eliminateEmpty(self):
@@ -260,14 +260,14 @@ class Plus(Unary):
 class Concatenation(Nary):
     def _label(self):
         return ','
-    def _test_empty(self):
-        return all(x._test_empty() for x in self.children)
+    def nullable(self):
+        return all(x.nullable() for x in self.children)
     def _pnf2(self):
         # Wir unterscheiden drei Fälle:
         # Kein, genau ein oder mehr als ein nicht-nullbares Element
         count, last = 0, 0
         for i,x in enumerate(self.children):
-            if not x._test_empty():
+            if not x.nullable():
                 count, last = count + 1, i
             if count > 1:
                 break
@@ -287,11 +287,11 @@ class Concatenation(Nary):
     def _pnf4(self):
         return Concatenation([x._pnf3() for x in self.children])
 
-    def _first(self):
+    def first(self):
         f = set()
         for x in self.children:
-            f |= x._first()
-            if not x._test_empty():
+            f |= x.first()
+            if not x.nullable():
                 break
         return f
 
@@ -300,11 +300,11 @@ class Concatenation(Nary):
             return False
         f = set()
         for x in self.children:
-            a, b = x._first(), x._follow()
-            if f & x._first():
+            a, b = x.first(), x._follow()
+            if f & x.first():
                 return False
 
-            f |= x._first()
+            f |= x.first()
 
     def __key__(self):
         return tuple(self.children)
@@ -325,15 +325,15 @@ class Concatenation(Nary):
 class Choice(Nary):
     def _label(self):
         return '|'
-    def _test_empty(self):
-        return any(x._test_empty() for x in self.children)
+    def nullable(self):
+        return any(x.nullable() for x in self.children)
     def _pnf2(self):
         return Choice([x._pnf2() for x in self.children])
     def _pnf3(self):
-        if self._test_empty():
+        if self.nullable():
             x = [x._pnf4() for x in self.children]
             # Falls eines der Elemente "special" (d.h. eine nullbare Konkatenation) ist
-            if any(x.__class__ is Concatenation and x._test_empty() for x in self.children):
+            if any(x.__class__ is Concatenation and x.nullable() for x in self.children):
                 return Choice(x)
             else:
                 return Optional(Choice(x))
@@ -342,16 +342,16 @@ class Choice(Nary):
     def _pnf4(self):
         return self._pnf3()
 
-    def _first(self):
+    def first(self):
         f = set()
         for x in self.children:
-            f |= x._first()
+            f |= x.first()
         return f
 
     def _deterministic(self):
         if not all(x._deterministic() for x in self.children):
             return False
-        f = [x._first() for x in self.children]
+        f = [x.first() for x in self.children]
         if any(any(f[i] & f[j] for j in range(i+1,len(f))) for i in range(n)):
             return False
         return True
@@ -381,9 +381,9 @@ class Empty(DRE):
         return False
 
 class EmptySet(Empty):
-    def _formula(self):
+    def toString(self):
         return '{}'
 
 class EmptyWord(Empty):
-    def _formula(self):
+    def toString(self):
         return 'ε'
