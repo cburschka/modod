@@ -17,18 +17,22 @@ class DRE:
         return self._pnf1()._nnf()._pnf3()._nnf()
     def isInPNF(self):
         pass #TODO
+
+    # Reduce all empty-set and empty-word symbols in this expression.
     def eliminateEmpty(self):
         return self._eliminateEmpty() if self.containsEmpty() else self
+    # Check if this has empty-set or empty-word as a real subexpression.
     def containsEmpty(self):
         return False
 
-    # Menge der Terminalsymbole und deren Anzahl:
+    # Set of terminals.
     def terminals(self):
         return set(self.terminalOccurrences().keys())
+    # Count how often each terminal occurs.
     def terminalOccurrences(self):
         pass
 
-    # Nullbar
+    # Check if this expression accepts the empty word.
     def nullable(self):
         pass
 
