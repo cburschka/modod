@@ -31,6 +31,12 @@ class DRE:
     # Count how often each terminal occurs.
     def terminalOccurrences(self):
         pass
+    # Split terminals into characters
+    def splitTerminals(self):
+        pass
+    # Join concatenations of terminals into one.
+    def joinTerminals(self):
+        return self
 
     # Check if this expression accepts the empty word.
     def nullable(self):
@@ -143,6 +149,9 @@ class Terminal(DRE):
     def first(self):
         return {self.symbol}
 
+    def splitTerminals(self):
+        return self if len(self.symbol) == 1 else Concatenation([Terminal(x) for x in self.symbol])
+
 class Operator(DRE):
     pass
 
@@ -183,7 +192,12 @@ class Unary(Operator):
 
     def containsEmpty(self):
         return isinstance(self.child, Empty) or self.child.containsEmpty()
-
+    def splitTerminals(self):
+        x = self.child.splitTerminals()
+        return self if x is self.child else self.__class__(x)
+    def joinTerminals(self):
+        x = self.child.joinTerminals()
+        return self if x is self.child else self.__class__(x)
 
 class Nary(Operator):
     def __init__(self, children):
@@ -232,6 +246,13 @@ class Nary(Operator):
 
     def containsEmpty(self):
         return any(isinstance(x, Empty) or x.containsEmpty() for x in self.children)
+
+    def splitTerminals(self):
+        x = [x.splitTerminals() for x in self.children]
+        return self if x == self.children else self.__class__(x)
+    def joinTerminals(self):
+        x = [x.joinTerminals() for x in self.children]
+        return self if x == self.children else self.__class__(x)
 
 class Optional(Unary):
     def _label(self):
@@ -325,6 +346,10 @@ class Concatenation(Nary):
         else:
             return Concatenation(b)
 
+    def joinTerminals(self):
+        if all(isinstance(x, Terminal) for x in self.children):
+            return Terminal(''.join(x.symbol for x in self.children))
+        return Nary.joinTerminals(self)
 
 class Choice(Nary):
     def _label(self):
