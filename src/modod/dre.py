@@ -410,6 +410,20 @@ class Choice(Nary):
         else:
             return Choice(b)
 
+    def _formula(self):
+        if all(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
+            symbols = sorted(x.symbol for x in self.children)
+            start, symbols = symbols[0], symbols[1:]
+            runs = [[start]]
+            for x in symbols:
+                if ord(runs[-1][-1]) + 1 == ord(x):
+                    runs[-1].append(x)
+                else:
+                    runs.append([x])
+            runs = [(r[0] + '-' + r[-1]) if len(r) > 2 else ''.join(r) for r in runs]
+            return '[{0}]'.format(''.join(runs))
+        return Nary._formula(self)
+
 class Empty(DRE):
     def __bool__(self):
         return False
