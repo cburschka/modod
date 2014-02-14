@@ -268,6 +268,11 @@ class Optional(Unary):
         x = self.child.eliminateEmpty()
         return Optional(x) if x else EmptyWord()
 
+    def _formula(self):
+        if isinstance(self.child, Plus):
+            return self.child.child._formula() + '*'
+        return Unary._formula(self)
+
 class Plus(Unary):
     def _label(self):
         return '+'
