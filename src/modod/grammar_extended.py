@@ -63,17 +63,35 @@ class Expr3(gs.Expr):
 class Star(parser.symbol.Term):
     pass
 
+class SquareOpen(parser.symbol.Term):
+    pass
+class SquareClose(parser.symbol.Term):
+    pass
+class CharGroup(gs.Expr):
+    def dre(self):
+        x = self.production[1].symbol
+        z = []
+        for i in range(1, len(x)-1):
+            if x[i] == '-':
+                z += [chr(a) for a in range(ord(x[i-1]), ord(x[i+1])+1)]
+            else:
+                z.append(x[-1])
+        if len(x) > 1 and x[-2] != '-':
+            z += x[-2:]
+        return dre.Choice([dre.Terminal(a) for a in z])
+
 def build_grammar():
     productions = {
         gs.Expr : {(Choice,), (Expr2,)},
         Expr2 : {(Concat,), (Expr3,)},
-        Expr3 : {(Paren,), (Optional,), (Plus,), (OptPlus,), (gs.TermExpr,)},
+        Expr3 : {(Paren,), (Optional,), (Plus,), (OptPlus,), (gs.TermExpr,), (CharGroup,)},
         Paren : {(tokens.LeftParen, gs.Expr, tokens.RightParen),},
         Choice : {(Expr2, tokens.Pipe, Expr2, gs.ChoiceRep)},
         gs.ChoiceRep : {(tokens.Pipe, Expr2, gs.ChoiceRep), ()},
         Concat : {(Expr3, ConcatDelim, Expr3, gs.ConcatRep)},
         gs.ConcatRep : {(ConcatDelim, Expr3, gs.ConcatRep), ()},
         OptPlus : {(Expr3, Star)},
+        CharGroup : {(SquareOpen, tokens.Terminal, SquareClose)},
         Plus : {(Expr3, tokens.PlusSign)},
         Optional : {(Expr3, tokens.Question)},
         ConcatDelim : {(tokens.Comma,), ()},
@@ -85,5 +103,7 @@ def build_grammar():
 def build_lexer():
     table = tokens.table.copy()
     table['*'] = Star
+    table['['] = SquareOpen
+    table[']'] = SquareClose
 
     return lexer.lexer(table, tokens.Terminal)
