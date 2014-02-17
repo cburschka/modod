@@ -18,6 +18,9 @@ class DRE:
     def isInPNF(self):
         pass #TODO
 
+    def label(self):
+        return self._label
+
     # Reduce all empty-set and empty-word symbols in this expression.
     def eliminateEmpty(self):
         return self._eliminateEmpty() if self.containsEmpty() else self
@@ -88,7 +91,7 @@ class DRE:
     def _graph(self, nodes=None, edges=None):
         if nodes == None:
             nodes, edges = {}, set()
-        nodes[len(nodes)] = self._label()
+        nodes[len(nodes)] = self.label()
         return nodes, edges
 
     def __hash__(self):
@@ -116,7 +119,7 @@ class Terminal(DRE):
 
     def toString(self):
         return self.symbol
-    def _label(self):
+    def label(self):
         return self.symbol
     def _nnf(self):
         return self
@@ -162,7 +165,7 @@ class Unary(Operator):
         edges.add((len(nodes)-1, len(nodes)))
         return self.child._graph(nodes, edges)
     def toString(self):
-        return self.child.toString() + self._label()
+        return self.child.toString() + self.label()
     def _nnf(self):
         return self.__class__(self.child._nnf())
     def _isnnf(self):
@@ -191,7 +194,7 @@ class Nary(Operator):
     def __str__(self):
         return self.__class__.__name__ + ' [' + ', '.join(map(str, self.children)) + ']'
     def toString(self):
-        return '(' + self._label().join(x.toString() for x in self.children) + ')'
+        return '(' + self.label().join(x.toString() for x in self.children) + ')'
     def _graph(self, nodes=None, edges=None):
         nodes, edges = DRE._graph(self, nodes, edges)
         i = len(nodes) - 1
@@ -233,8 +236,8 @@ class Nary(Operator):
         return any(isinstance(x, Empty) or x.containsEmpty() for x in self.children)
 
 class Optional(Unary):
-    def _label(self):
-        return '?'
+    _label = '?'
+
     def nullable(self):
         return True
     def _pnf1(self):
@@ -246,14 +249,14 @@ class Optional(Unary):
         x = self.child.eliminateEmpty()
         return Optional(x) if x else EmptyWord()
 
-    def _formula(self):
+    def toString(self):
         if isinstance(self.child, Plus):
-            return self.child.child._formula() + '*'
-        return Unary._formula(self)
+            return self.child.child.toString() + '*'
+        return Unary.toString(self)
 
 class Plus(Unary):
-    def _label(self):
-        return '+'
+    _label = '+'
+
     def nullable(self):
         return self.child.nullable()
     def _pnf1(self):
@@ -266,8 +269,8 @@ class Plus(Unary):
         return x and Plus(x)
 
 class Concatenation(Nary):
-    def _label(self):
-        return ','
+    _label = ','
+
     def nullable(self):
         return all(x.nullable() for x in self.children)
     def _pnf2(self):
@@ -330,8 +333,8 @@ class Concatenation(Nary):
             return Concatenation(b)
 
 class Choice(Nary):
-    def _label(self):
-        return '|'
+    _label = '|'
+
     def nullable(self):
         return any(x.nullable() for x in self.children)
     def _pnf2(self):
