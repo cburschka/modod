@@ -11,7 +11,7 @@ class SingleOccurrenceAutomaton:
 
     def setEdges(self,edgeblob):
         self.succ = edgeblob
-    
+
     def nodeList(self):
         #returns a list of all nodes of the SOA
         # assumes that soa is strongly connected, snk always reachable
@@ -20,21 +20,21 @@ class SingleOccurrenceAutomaton:
             nl += [s]
         nl += [SingleOccurrenceAutomaton.snk]
         return nl
-    
+
     def addString(self,string):
         w = [SingleOccurrenceAutomaton.src]
         for a in string:
             w += [a]
         w += [SingleOccurrenceAutomaton.snk]
         self.addWord(w)
-    
+
     def addWord(self,word):
         for i in range(0,len(word)-1):
             if word[i] not in self.succ:
                 self.succ[word[i]] = [word[i+1]]
             elif word[i+1] not in self.succ[word[i]]:
                 self.succ[word[i]] = self.succ[word[i]]+[word[i+1]]
-    
+
     def toDotString(self):
         dotString = 'digraph untitled {\n'
         for node in self.succ:
@@ -45,7 +45,7 @@ class SingleOccurrenceAutomaton:
                 dotString += str(self.identifier(node))+'->'+self.identifier(t)+';\n'
         dotString += '}'
         return dotString
-    
+
     def contractSCLC(self):
         nl = self.nodeList()
         sclcMon, sclcPlu = self.stronglyConnectedLoopedComponents()
@@ -68,7 +68,7 @@ class SingleOccurrenceAutomaton:
             if n not in sclcNodes:
                 ncNodes += [n]
                 nodeToComp[n] = n
-        #now we have a list of all nodes that do not belong to a sclc, 
+        #now we have a list of all nodes that do not belong to a sclc,
         #of all nodes that do belong to a sclc
         #and one for each of the two types of sclcs
         # next step: generate a gSOA
@@ -83,8 +83,8 @@ class SingleOccurrenceAutomaton:
         gsoa = SingleOccurrenceAutomaton()
         gsoa.setEdges(newEdges)
         return gsoa
-        
-    
+
+
     def stronglyConnectedLoopedComponents(self):
         """
         returns a tuple consisiting of a list of single-element sclcs, and a list of multiple element scls
@@ -98,7 +98,7 @@ class SingleOccurrenceAutomaton:
             elif (c[0] not in [self.src,self.snk]) and (c[0] in self.succ[c[0]]):
                 sclcMon += [c[0]]
         return sclcMon, sclcPlu
-    
+
     def strongly_connected_components(self):
         """
         Tarjan's Algorithm (named for its discoverer, Robert Tarjan) is a graph theory algorithm
@@ -185,12 +185,12 @@ class SingleOccurrenceAutomaton:
             return self.identifier(node)+'[shape=\"point\"];\n'
         else:
             return self.identifier(node)+'[shape=\"rectangle\",label=\"'+self.labelify(node)+'\"];\n'
-    
+
     def chare(self):
         gen = generalizedSingleOccurrenceAutomaton()
         gen.setEdges(self.contractSCLC().succ)
         return gen.chare()
-        
+
     def contract(self,contractees,label):
         if dbmode:
             print('Contracting',contractees,'in',self.succ,'to',label)
@@ -243,7 +243,7 @@ class SingleOccurrenceAutomaton:
         if dbmode:
             print('Extract created',result.succ)
         return result
-        
+
     def first(self):
         """returns all vertices v such that the only predecessor of v is the source"""
         cand = {}
@@ -261,7 +261,7 @@ class SingleOccurrenceAutomaton:
         if dbmode:
             print("First set is",f)
         return f
-    
+
     def addEpsilon(self):
         firsts = self.first()
         newT = []
@@ -278,7 +278,7 @@ class SingleOccurrenceAutomaton:
                 else:
                     self.succ[epsNode]+=[t]
         self.succ[self.src]=newT
-    
+
     def reach(self,start):
         """returns set of all nodes that are reachable from <start>"""
         checkNodes=[start]
@@ -295,7 +295,7 @@ class SingleOccurrenceAutomaton:
                             newNodes+=[t]
             checkNodes=newNodes
         return reachable
-    
+
     def reachableAvoiding(self,start,end,avoid):
         """returns true iff <end> can be reached from <start> without passing nodes from <avoid>"""
         checkNodes = [start]
@@ -314,7 +314,7 @@ class SingleOccurrenceAutomaton:
         # if dbmode:
         #     print('And the result for',end,' is:',success)
         return success
-    
+
     def exclusive(self,node):
         if dbmode:
             print('Computing exclusive for',node)
@@ -329,7 +329,7 @@ class SingleOccurrenceAutomaton:
         if dbmode:
             print('Exclusives are',res)
         return res
-            
+
     def bend(self):
         if dbmode:
             print("Calling bend on"+str(self.succ))
@@ -351,7 +351,7 @@ class SingleOccurrenceAutomaton:
                     ssr=True
                 elif t not in visited:
                     visited += [t]
-                    toBeChecked += [t]                        
+                    toBeChecked += [t]
             if ssr==True:
                 W = W + [n]
         if dbmode:
@@ -360,7 +360,7 @@ class SingleOccurrenceAutomaton:
         # bend transitions from elements of W to succ of src
         newSucc = {}
         for n in self.succ:
-            if n not in W: 
+            if n not in W:
                 newSucc[n] = self.succ[n]
             else:
                 for t in self.succ[n]:
@@ -376,7 +376,7 @@ class SingleOccurrenceAutomaton:
         self.setEdges(newSucc)
         if dbmode:
             print('Bending created',self.succ)
-        
+
     def sore(self):
         if dbmode:
             print('Creating sore for',self.succ)
@@ -430,7 +430,7 @@ class SingleOccurrenceAutomaton:
                     if lprime != '':
                         l = l +',('+lprime+')'
                     return l
-                else: 
+                else:
                     # try to find v in firstSet with self.exclusive(v)!=[v]
                     v = None
                     for c in firstSet:
@@ -469,7 +469,7 @@ class SingleOccurrenceAutomaton:
                             elif labV== 'epsilon0':
                                 lab = '('+labU+')?'
                             else:
-                                lab = '('+labU+'|'+labV+')' 
+                                lab = '('+labU+'|'+labV+')'
                             self.contract([maxU,maxV],lab)
                             #return(self.sore())
                         else:
@@ -516,7 +516,7 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
             return "src"
         elif node==self.snk:
             return "snk"
-        
+
         if isinstance(node,str):
             nodestr = node
         else:
@@ -528,18 +528,18 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
         if self.plussed.get(node,False):
             nodestr+='+'
         return nodestr
-        
+
     def getTopolSort(self):
         # eigentlich sollte das gleich beim Tarjan erledigt werden, bin aber zu faul
-        result = []                          
+        result = []
         visited = {}
-        def visit(node):                         
-            if not visited.get(node,False):                
-                visited[node] = True             
+        def visit(node):
+            if not visited.get(node,False):
+                visited[node] = True
                 if node in self.succ:
-                    for child in self.succ[node]:     
+                    for child in self.succ[node]:
                         visit(child)
-                result.append(node)              
+                result.append(node)
         visit(self.src)
         result.reverse()
         return result
@@ -564,7 +564,7 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
             if lvl[node] not in self.level:
                 self.level[lvl[node]]=[node]
             else:
-                self.level[lvl[node]]+=[node]    
+                self.level[lvl[node]]+=[node]
         self.lnum = len(self.level)-1
         #determine skiplevels: should be more efficient (check every edge only once)
         for l in range(1,self.lnum):
@@ -578,7 +578,7 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
     def getTrivials(self,l):
         res=list(filter(lambda x: self.trivial.get(x,False),self.level[l]))
         return res
-    
+
     def chare(self):
         self.constructLevelOrder()
         res = ''
@@ -600,9 +600,9 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
                 if self.skip[l] or (len(B)>0):
                     res += '?'
             if l < self.lnum-1:
-                res += ', ' # comma between levels to highlight poss of switching        
+                res += ', ' # comma between levels to highlight poss of switching
         return res.replace('+?','*')
-        
+
 
 # soa.addString("acab")
 # soa.addString("ac")
@@ -620,6 +620,6 @@ class generalizedSingleOccurrenceAutomaton(SingleOccurrenceAutomaton):
 # soa = SingleOccurrenceAutomaton()
 # soa.addString("bca")
 # soa.addString("bada")
-# 
+#
 # elt='BOB'
-# 
+#

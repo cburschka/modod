@@ -27,7 +27,7 @@ class UF:
         for i,x in enumerate(self.list):
             sets[self._find(i)].add(x)
         return sets.values()
-        
+
     def __str__(self):
         return ', '.join(map(str, self.export_sets()))
 

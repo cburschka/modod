@@ -25,11 +25,11 @@ class OA:
             self.follow,
             {('Start', 'Accept')} if self.nullable else set()
         )
-        
+
         self.sigma = {
-            x for (x,i) in 
-            self.first | self.last | 
-            {x for (x,y) in self.follow} | 
+            x for (x,i) in
+            self.first | self.last |
+            {x for (x,y) in self.follow} |
             {y for (x,y) in self.follow}
         }
 
@@ -73,7 +73,7 @@ class OA:
         elif isinstance(node, dre.Unary):
             oa = OA.fromIndexedNode(node.child)
             first, last = oa.first, oa.last
-            
+
             if isinstance(node, dre.Optional):
                 follow = oa.follow
                 nullable = True
@@ -83,7 +83,7 @@ class OA:
 
         elif isinstance(node, dre.Nary):
             oas = list(map(OA.fromIndexedNode, node.children))
-            
+
             # Take the edges of all sub-automata
             follow = set.union(*(x.follow for x in oas))
 
@@ -92,7 +92,7 @@ class OA:
                 first = set.union(*(x.first for x in oas))
                 last = set.union(*(x.last for x in oas))
                 nullable = any(x.nullable for x in oas)
-                
+
             elif isinstance(node, dre.Concatenation):
                 null = lambda x:x.nullable
                 # Union of firsts and lasts as long until a non-nullable is reached
@@ -106,7 +106,7 @@ class OA:
                     last |= x.last
                     if not x.nullable:
                         break
-                
+
                 # Add edges between sub-automata
                 for i in range(len(oas)-1):
                     follow |= set(itertools.product(oas[i].last, oas[i+1].first))
@@ -123,7 +123,7 @@ class OA:
         Sigma = A.sigma | B.sigma
 
         Stack = None
-        U = uf.UF(VA | VB)     
+        U = uf.UF(VA | VB)
         U.union(('A', 'Start'), ('B', 'Start'))
         Stack = (('A', 'Start'), ('B', 'Start')), Stack
         while Stack is not None:

@@ -24,7 +24,7 @@ def factorOut(rho, parnull=False):
         undeleted = set(range(len(rhoChildren)))
         # Discard rho; it will not be used again:
         rho = None
-        
+
         # Mark everything that isn't a concatenation:
         unmarked = {i for i,x in enumerate(rhoChildren) if isinstance(x, dre.Concatenation)}
 
@@ -76,7 +76,7 @@ def factorOut(rho, parnull=False):
                 if deletees or reducees:
                     factRw(rhoChildren, undeleted, gamma, reducees, deletees)
             unmarked &= undeleted
-            
+
         rho = choice([factorOut(rhoChildren[i]) for i in undeleted])
         if parnull and not rho.nullable():
             rho = dre.Optional(rho)
@@ -85,7 +85,7 @@ def factorOut(rho, parnull=False):
 def rmc(a):
     assert isinstance(a, dre.Concatenation)
     return a.children[-1]
-    
+
 def removeRMC(a):
     assert isinstance(a, dre.Concatenation)
     return dre.Concatenation(a.children[:-1]) if len(a.children) > 2 else a.children[0]
@@ -130,7 +130,7 @@ def factRwPlus(rhoChildren, undeleted, gamma, R, D, rn):
         else:
             Rp.append(x)
 
-    # We append gammaC to a choice of Rp prefixes; the expression we will 
+    # We append gammaC to a choice of Rp prefixes; the expression we will
     # generate will basically have this form:
     # (Rs1|Rs2|...| ((Rp1|Rp2|...),gammaC)) (gammaC+?)
     #               (-------gamma2-------)

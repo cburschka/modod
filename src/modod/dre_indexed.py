@@ -5,7 +5,7 @@ class IndexedDRE:
         self.root = root
         self.nodes = list(self.root._dfs())
         self.leaves = [node for node in self.nodes if node.__class__ is Terminal]
-        
+
         for i in range(len(self.nodes) - 1):
             self.nodes[i].l2rdf = self.nodes[i+1]
         for i in range(len(self.nodes)):
@@ -58,7 +58,7 @@ class Unary(IndexedNode, dre.Unary):
     def __init__(self, node, parent):
         IndexedNode.__init__(self, node, parent)
         self.child = self.children[0]
-        
+
 class Plus(Unary, dre.Plus):
     pass
 class Optional(Unary, dre.Optional):

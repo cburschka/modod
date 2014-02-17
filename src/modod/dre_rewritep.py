@@ -51,7 +51,7 @@ def ruleP2(rho):
                             break
             i -= 1
         return conc([ruleP2(x) for x in c])
-    
+
     elif isinstance(rho, dre.Nary):
         return rho.__class__([ruleP2(x) for x in rho.children])
     elif isinstance(rho, dre.Unary):
