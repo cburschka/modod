@@ -23,4 +23,4 @@ class digraph:
         )
 
 def esc(string):
-    return str(string).replace('"', '\\"')
+    return str(string).replace('\\', '\\\\').replace('"', '\\"')
