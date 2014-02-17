@@ -386,7 +386,7 @@ class Choice(Nary):
         else:
             return Choice(b)
 
-    def _formula(self):
+    def toString(self):
         if all(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
             symbols = sorted(x.symbol for x in self.children)
             start, symbols = symbols[0], symbols[1:]
@@ -398,7 +398,7 @@ class Choice(Nary):
                     runs.append([x])
             runs = [(r[0] + '-' + r[-1]) if len(r) > 2 else ''.join(r) for r in runs]
             return '[{0}]'.format(''.join(runs))
-        return Nary._formula(self)
+        return Nary.toString(self)
 
 class Empty(DRE):
     def __bool__(self):
