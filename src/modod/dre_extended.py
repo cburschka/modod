@@ -30,6 +30,12 @@ def reduceNary(rho):
             return rho.__class__(x)
     return rho
 
+def reduceChoiceNary(rho):
+    a, b = None, rho
+    while a != b:
+        a, b = b, reduceChoice(reduceNary(b))
+    return a
+
 def containsEmptySymbol(rho):
     return isinstance(rho, dre.Operator) and any(isinstance(gamma, Empty) or containsEmptySymbol(gamma) for gamma in rho.children)
 

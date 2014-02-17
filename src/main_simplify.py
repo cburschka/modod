@@ -1,4 +1,5 @@
 import modod, modod.dre
+import modod.dre as ext
 from modod.dre import DRE
 import argparse
 
@@ -9,6 +10,7 @@ def main():
     parser.add_argument("--graph",metavar="DOT_FILE", help="Dump the graphs in DOT format into DOT_FILE.n.(in|out).dot")
     parser.add_argument("--letters", help="Interpret terminal symbols (abc) as letter sequences (a,b,c).", action="store_true")
     parser.add_argument("--chargroup", help="Attempt to print single-letter choices as character groups.", choices=['none', 'complete', 'all'], default='complete')
+    parser.add_argument("--join", help="Remove duplicate choice expressions", action="store_true")
     args=parser.parse_args()
     if args.letters:
         modod._lexerExt.letters = True
@@ -28,6 +30,8 @@ def main():
     f = ['{b}', '{a} -> {b}'][args.verbose]
     for i,a in enumerate(expressions):
         b = a.simplify()
+        if args.join:
+            b = ext.reduceChoiceNary(b)
         print (f.format(a=a.toString(), b=b.toString()))
         if args.graph:
             x = open('{0}.{1}.in.dot'.format(args.graph, i+1), 'w+')
