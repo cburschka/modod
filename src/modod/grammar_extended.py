@@ -75,9 +75,10 @@ class CharGroup(gs.Expr):
             if x[i] == '-':
                 z += [chr(a) for a in range(ord(x[i-1]), ord(x[i+1])+1)]
             else:
-                z.append(x[-1])
+                z.append(x[i-1])
         if len(x) > 1 and x[-2] != '-':
             z += x[-2:]
+        assert z, 'Empty character group.'
         return dre.Choice([dre.Terminal(a) for a in z])
 
 def build_grammar():
