@@ -32,13 +32,13 @@ def main():
     for i,a in enumerate(expressions):
         b = a.simplify(args.steps)
         if args.steps:
-            print (a.toString())
             for j, (step, x) in enumerate(b):
-                print(step, x.toString())
+                print('#{} {:10} {}'.format(j, step, x.toString()))
                 if args.graph:
                     y = open('{0}.{1}.{2}.dot'.format(args.graph, i+1, j+1), 'w+')
                     y.write(x.toDOTString())
                     y.close()
+            print()
             b = x
         else:
             if args.join:

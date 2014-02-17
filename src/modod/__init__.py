@@ -36,19 +36,22 @@ def _DRE_simplify(rho, steps=False):
         return x
 
 def _DRE_simplify_steps(rho):
+    fns = [
+      ('pnf', lambda x: x.toPNF()),
+      ('ruleP1', dre_rewritep.ruleP1),
+      ('ruleP2', dre_rewritep.ruleP2),
+      ('ruleP4', dre_rewritep.ruleP4),
+      ('factor', dre_factor.factorOut)
+    ]
+
     old, new = None, rho
+    yield 'input', rho
     while old != new:
         old = new
-        mid, new = new, new.factorOut()
-        if mid != new:
-            yield ('factor', new)
-        mid, new = new, new.rewritePlus()
-        if mid != new:
-            yield ('plus', new)
-        mid, new = new, new.toPNF()
-        if mid != new:
-            yield ('pnf', new)
-    yield ('final', new)
+        for label, fn in fns:
+            mid, new = new, fn(new)
+            if mid != new:
+                yield label, new
 
 # Raise comparators to main module namespace (cf. specification)
 equivalentToMEW = oa.OA.equivalentToMEW
