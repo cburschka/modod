@@ -8,10 +8,16 @@ def main():
     parser.add_argument("-v","--verbose",help="Print the parsed expressions",action="store_true")
     parser.add_argument("--graph",metavar="DOT_FILE", help="Dump the graphs in DOT format into DOT_FILE.n.(in|out).dot")
     parser.add_argument("--letters", help="Interpret terminal symbols (abc) as letter sequences (a,b,c).", action="store_true")
+    parser.add_argument("--chargroup", help="Attempt to print single-letter choices as character groups.", choices=['none', 'complete', 'all'], default='complete')
     args=parser.parse_args()
     if args.letters:
         modod._lexerExt.letters = True
         modod.dre.Concatenation._label = ''
+    modod.charGroup = {
+        'none': modod.CHARGROUP_NONE,
+        'complete': modod.CHARGROUP_COMPLETE,
+        'all': modod.CHARGROUP_PARTIAL
+    }[args.chargroup]
     def lineReader():
         try:
             while True:

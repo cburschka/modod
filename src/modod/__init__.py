@@ -12,6 +12,12 @@ _parserExt = grammar_extended.build_grammar().slr1()
 _lexerStrict = dre_lexer.build_lexer()
 _parserStrict = grammar_strict.build_grammar().slr1()
 
+CHARGROUP_NONE = 0
+CHARGROUP_COMPLETE = 1
+CHARGROUP_PARTIAL = 2
+
+charGroup = CHARGROUP_COMPLETE
+
 # Parsing function
 def DREfromString(string, strict=False):
     if strict:

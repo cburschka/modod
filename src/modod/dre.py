@@ -1,4 +1,5 @@
 import graph
+import modod
 
 class DRE:
 
@@ -387,8 +388,8 @@ class Choice(Nary):
             return Choice(b)
 
     def toString(self):
-        if all(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
-            symbols = sorted(x.symbol for x in self.children)
+        if modod.charGroup >= modod.CHARGROUP_COMPLETE and all(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
+            symbols = sorted({x.symbol for x in self.children})
             start, symbols = symbols[0], symbols[1:]
             runs = [[start]]
             for x in symbols:
@@ -398,7 +399,12 @@ class Choice(Nary):
                     runs.append([x])
             runs = [(r[0] + '-' + r[-1]) if len(r) > 2 else ''.join(r) for r in runs]
             return '[{0}]'.format(''.join(runs))
-        return Nary.toString(self)
+        elif modod.charGroup >= modod.CHARGROUP_PARTIAL and 2 <= sum(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
+            letters = sorted({c for c in self.children if isinstance(c, Terminal) and len(c.symbol) == 1})
+            nonterms = [c for c in self.children if not (isinstance(c, Terminal) and len(c.symbol) == 1)]
+            return Nary.toString(Choice(nonterms + [Choice(letters)]))
+        else:
+            return Nary.toString(self)
 
 class Empty(DRE):
     def __bool__(self):
