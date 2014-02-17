@@ -16,7 +16,7 @@ def main():
     expressions = map(DRE.fromString, args.expressions or lineReader())
     f = ['{b}', '{a} -> {b}'][args.verbose]
     for i,a in enumerate(expressions):
-        b = a.splitTerminals().simplify().joinTerminals()
+        b = a.simplify()
         print (f.format(a=a.toString(), b=b.toString()))
         if args.graph:
             x = open('{0}.{1}.in.dot'.format(args.graph, i+1), 'w+')
