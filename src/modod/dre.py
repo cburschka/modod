@@ -22,13 +22,6 @@ class DRE:
     def label(self):
         return self._label
 
-    # Reduce all empty-set and empty-word symbols in this expression.
-    def eliminateEmpty(self):
-        return self._eliminateEmpty() if self.containsEmpty() else self
-    # Check if this has empty-set or empty-word as a real subexpression.
-    def containsEmpty(self):
-        return False
-
     # Set of terminals.
     def terminals(self):
         return set(self.terminalOccurrences().keys())
@@ -152,6 +145,9 @@ class Operator(DRE):
 
 class Unary(Operator):
     def __init__(self, child):
+        if type(child) is list:
+            assert len(child) == 1, 'Unary operator takes exactly one operand.'
+            child = child[0]
         self.child = child
         self.children = [child]
 
@@ -185,11 +181,10 @@ class Unary(Operator):
     def first(self):
         return self.child.first()
 
-    def containsEmpty(self):
-        return isinstance(self.child, Empty) or self.child.containsEmpty()
-
 class Nary(Operator):
     def __init__(self, children):
+        if type(children) is not list:
+            children = [children]
         self.children = children
 
     def __str__(self):
@@ -233,9 +228,6 @@ class Nary(Operator):
                     count[t] = c
         return count
 
-    def containsEmpty(self):
-        return any(isinstance(x, Empty) or x.containsEmpty() for x in self.children)
-
 class Optional(Unary):
     _label = '?'
 
@@ -246,9 +238,6 @@ class Optional(Unary):
         return x if self.child.nullable() else Optional(x)
     def _pnf4(self):
         return self.child._pnf3()
-    def _eliminateEmpty(self):
-        x = self.child.eliminateEmpty()
-        return Optional(x) if x else EmptyWord()
 
     def toString(self):
         if modod.printStar and isinstance(self.child, Plus):
@@ -265,9 +254,6 @@ class Plus(Unary):
         return Optional(Plus(x)) if self.child.nullable() else Plus(x)
     def _pnf4(self):
         return Plus(self.child._pnf3())
-    def _eliminateEmpty(self):
-        x = self.child.eliminateEmpty()
-        return x and Plus(x)
 
 class Concatenation(Nary):
     _label = ','
@@ -321,18 +307,6 @@ class Concatenation(Nary):
     def __key__(self):
         return tuple(self.children)
 
-    def _eliminateEmpty(self):
-        a = [x.eliminateEmpty() for x in self.children]
-        if any(isinstance(x, EmptySet) for x in a):
-            return EmptySet()
-        b = [x for x in a if x]
-        if len(b) == 0:
-            return EmptyWord()
-        elif len(b) == 1:
-            return b[0]
-        else:
-            return Concatenation(b)
-
 class Choice(Nary):
     _label = '|'
 
@@ -373,20 +347,6 @@ class Choice(Nary):
             children[x] += 1
         return tuple(sorted(children.items()))
 
-    def _eliminateEmpty(self):
-        a = [x.eliminateEmpty() for x in self.children]
-        if all(isinstance(x, EmptySet) for x in a):
-            return EmptySet()
-        b = [x for x in a if x]
-        if len(b) == 0:
-            return EmptyWord()
-        elif len(b) == 1:
-            return b[0]
-        elif any(isinstance(x, EmptyWord) for x in a):
-            return Optional(Choice(b))
-        else:
-            return Choice(b)
-
     def toString(self):
         if modod.charGroup >= modod.CHARGROUP_COMPLETE and all(isinstance(x, Terminal) and len(x.symbol) == 1 for x in self.children):
             symbols = sorted({x.symbol for x in self.children})
@@ -405,15 +365,3 @@ class Choice(Nary):
             return Nary.toString(Choice(nonterms + [Choice(letters)]))
         else:
             return Nary.toString(self)
-
-class Empty(DRE):
-    def __bool__(self):
-        return False
-
-class EmptySet(Empty):
-    def toString(self):
-        return '{}'
-
-class EmptyWord(Empty):
-    def toString(self):
-        return 'ε'

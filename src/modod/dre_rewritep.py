@@ -1,4 +1,5 @@
-from . import dre
+from modod import dre
+from modod import dre_extended as ext
 
 def rewritePlus(rho):
     old, new = None, rho
@@ -91,7 +92,7 @@ def choice(children):
 # Returns a DRE with fully eliminated empty symbols.
 def pf(a, rho):
     if isinstance(rho, dre.Optional):
-        return dre.Optional(pf(a, rho.child)).eliminateEmpty()
+        return ext.eliminateEmptySymbol(dre.Optional(pf(a, rho.child)))
 
     elif isinstance(rho, dre.Concatenation):
         b, c = rho.children[0], conc(rho.children[1:])
@@ -99,20 +100,21 @@ def pf(a, rho):
             d = pf(a, c)
             # If b is nullable and c projects to the empty set, then
             # remove the leftmost option from b to make it not-nullable.
-            if isinstance(d, dre.EmptySet):
-                return conc([pf(a, rlo(b)), c]).eliminateEmpty()
+            if isinstance(d, ext.EmptySet):
+                e = conc([pf(a, rlo(b)), c])
             else:
-                return conc([pf(a, b), d]).eliminateEmpty()
+                e = conc([pf(a, b), d])
         else:
-            return conc([pf(a, b), c]).eliminateEmpty()
-
+            e = conc([pf(a, b), c])
 
     elif isinstance(rho, dre.Choice):
-        return dre.Choice([pf(a, x) for x in rho.children]).eliminateEmpty()
+        e = dre.Choice([pf(a, x) for x in rho.children])
 
     else:
         # Plus and Terminal:
-        return rho if rho.first() <= a else dre.EmptySet()
+        return rho if rho.first() <= a else ext.EmptySet()
+        
+    return ext.eliminateEmptySymbol(e)
 
 def rlo(rho):
     if isinstance(rho, dre.Optional):

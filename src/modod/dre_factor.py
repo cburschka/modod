@@ -103,7 +103,7 @@ def choice(z):
             children.extend(x.children)
         else:
             children.append(x)
-    return dre.Choice(tuple(children)) if len(children) > 1 else children[0]
+    return dre.Choice(children) if len(children) > 1 else children[0]
 
 def factRw(rhoChildren, undeleted, gamma, R, D):
     gammaOne = choice([removeRMC(rhoChildren[beta]) for beta in R | {gamma}])
