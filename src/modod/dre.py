@@ -251,7 +251,7 @@ class Optional(Unary):
         return Optional(x) if x else EmptyWord()
 
     def toString(self):
-        if isinstance(self.child, Plus):
+        if modod.printStar and isinstance(self.child, Plus):
             return self.child.child.toString() + '*'
         return Unary.toString(self)
 

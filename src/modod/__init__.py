@@ -17,6 +17,7 @@ CHARGROUP_COMPLETE = 1
 CHARGROUP_PARTIAL = 2
 
 charGroup = CHARGROUP_COMPLETE
+printStar = True
 
 # Parsing function
 def DREfromString(string, strict=False):

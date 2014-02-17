@@ -1,9 +1,13 @@
 import unittest
 
+import modod
 from modod.dre import DRE
 from modod.oa import OA
 from modod import equivalentTo, equivalentToMEW
 from modod.dre_rewritep import ruleP1, ruleP2, ruleP4, pf
+
+modod.charGroup = modod.CHARGROUP_NONE
+modod.printStar = False
 
 class TestUM(unittest.TestCase):
  
