@@ -11,6 +11,7 @@ def main():
     parser.add_argument("--letters", help="Interpret terminal symbols (abc) as letter sequences (a,b,c).", action="store_true")
     parser.add_argument("--chargroup", help="Attempt to print single-letter choices as character groups.", choices=['none', 'complete', 'all'], default='complete')
     parser.add_argument("--join", help="Remove duplicate choice expressions", action="store_true")
+    parser.add_argument("--steps", help="Print individual steps.", action="store_true")
     args=parser.parse_args()
     if args.letters:
         modod._lexerExt.letters = True
@@ -29,10 +30,20 @@ def main():
     expressions = map(DRE.fromString, args.expressions or lineReader())
     f = ['{b}', '{a} -> {b}'][args.verbose]
     for i,a in enumerate(expressions):
-        b = a.simplify()
-        if args.join:
-            b = ext.reduceChoiceNary(b)
-        print (f.format(a=a.toString(), b=b.toString()))
+        b = a.simplify(args.steps)
+        if args.steps:
+            print (a.toString())
+            for j, (step, x) in enumerate(b):
+                print(step, x.toString())
+                if args.graph:
+                    y = open('{0}.{1}.{2}.dot'.format(args.graph, i+1, j+1), 'w+')
+                    y.write(x.toDOTString())
+                    y.close()
+            b = x
+        else:
+            if args.join:
+                b = ext.reduceChoiceNary(b)
+            print (f.format(a=a.toString(), b=b.toString()))
         if args.graph:
             x = open('{0}.{1}.in.dot'.format(args.graph, i+1), 'w+')
             y = open('{0}.{1}.out.dot'.format(args.graph, i+1), 'w+')

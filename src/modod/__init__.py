@@ -26,11 +26,29 @@ def DREfromString(string, strict=False):
     else:
         return _parserExt.parse(_lexerExt.lex(string)).dre()
 
-def _DRE_simplify(rho):
+def _DRE_simplify(rho, steps=False):
+    if steps:
+        return _DRE_simplify_steps(rho)
+    else:
+        x = rho
+        for step, gamma in _DRE_simplify_steps(rho):
+            x = gamma
+        return x
+
+def _DRE_simplify_steps(rho):
     old, new = None, rho
     while old != new:
-        old, new = new, new.factorOut().rewritePlus().toPNF()
-    return new
+        old = new
+        mid, new = new, new.factorOut()
+        if mid != new:
+            yield ('factor', new)
+        mid, new = new, new.rewritePlus()
+        if mid != new:
+            yield ('plus', new)
+        mid, new = new, new.toPNF()
+        if mid != new:
+            yield ('pnf', new)
+    yield ('final', new)
 
 # Raise comparators to main module namespace (cf. specification)
 equivalentToMEW = oa.OA.equivalentToMEW
