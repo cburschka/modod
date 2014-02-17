@@ -49,7 +49,7 @@ class DRE:
 
     # Ausgabe:
     def toString(self):
-        pass
+        return self.label()
     def toDOTString(self):
         nodes, edges = self._graph()
         return graph.digraph(nodes, edges).xdot()
@@ -111,8 +111,6 @@ class Terminal(DRE):
     def __str__(self):
         return 'Terminal ["{}"]'.format(self.symbol)
 
-    def toString(self):
-        return self.symbol
     def label(self):
         return self.symbol
     def _nnf(self):

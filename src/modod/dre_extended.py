@@ -5,12 +5,19 @@ class Empty(dre.DRE):
         return False
 
 class EmptySet(Empty):
-    def toString(self):
-        return 'Ø'
+    _label = 'Ø'
 
 class EmptyWord(Empty):
-    def toString(self):
-        return 'ε'
+    _label = 'ε'
+
+class Hole(dre.DRE):
+    _label = '•'
+
+def expressionComplete(rho):
+    if isinstance(rho, dre.Operator):
+        return all(map(expressionComplete, rho.children))
+    else:
+        return not isinstance(rho, Hole)
 
 def reduceChoice(rho):
     if isinstance(rho, dre.Operator):
