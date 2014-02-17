@@ -14,12 +14,15 @@ import string
 #
 #     Ohne char_filter werden alle Zeichen, die nicht Whitespace oder Meta-Symbol
 #     sind, und nicht einem "\" folgen, als Teil eines Terminalsymbols gelesen.
+#
+#     Ist letters=True, so wird jedes einzelne Terminal-Zeichen zu einem Symbol.
 class lexer:
-    def __init__(self, meta, terminal, char_filter=None):
+    def __init__(self, meta, terminal, char_filter=None, letters=False):
         assert not (set(meta.keys()) & set(string.whitespace)), 'Whitespace characters cannot be meta characters.'
         self.meta = meta
         self.terminal = terminal
         self.filter = char_filter
+        self.letters = letters
 
     def lex(self, s):
         tokens = []
@@ -46,6 +49,9 @@ class lexer:
                 bs = False
                 # So füge es dem aktuellen Terminalsymbol hinzu.
                 term += c
+                if self.letters:
+                    tokens.append(self.terminal(term))
+                    term = ''
             else:
                 raise LexError(i, c)
 

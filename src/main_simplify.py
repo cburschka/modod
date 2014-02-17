@@ -1,3 +1,4 @@
+import modod, modod.dre
 from modod.dre import DRE
 import argparse
 
@@ -6,7 +7,11 @@ def main():
     parser.add_argument("expressions",help="The expressions to simplify",nargs="*")
     parser.add_argument("-v","--verbose",help="Print the parsed expressions",action="store_true")
     parser.add_argument("--graph",metavar="DOT_FILE", help="Dump the graphs in DOT format into DOT_FILE.n.(in|out).dot")
+    parser.add_argument("--letters", help="Interpret terminal symbols (abc) as letter sequences (a,b,c).", action="store_true")
     args=parser.parse_args()
+    if args.letters:
+        modod._lexerExt.letters = True
+        modod.dre.Concatenation._label = ''
     def lineReader():
         try:
             while True:
