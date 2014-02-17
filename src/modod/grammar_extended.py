@@ -67,9 +67,21 @@ class SquareOpen(parser.symbol.Term):
     pass
 class SquareClose(parser.symbol.Term):
     pass
+class TermRep(parser.symbol.NonTerm):
+    def children(self):
+        if self.production:
+            yield self.production[0]
+            for child in self.production[1].children():
+                yield child
+
 class CharGroup(gs.Expr):
+    def children(self):
+        yield self.production[1]
+        for child in self.production[2].children():
+            yield child
+
     def dre(self):
-        x = self.production[1].symbol
+        x = ''.join(x.symbol for x in self.children())
         z = []
         for i in range(1, len(x)-1):
             if x[i] == '-':
@@ -92,7 +104,8 @@ def build_grammar():
         Concat : {(Expr3, ConcatDelim, Expr3, gs.ConcatRep)},
         gs.ConcatRep : {(ConcatDelim, Expr3, gs.ConcatRep), ()},
         OptPlus : {(Expr3, Star)},
-        CharGroup : {(SquareOpen, tokens.Terminal, SquareClose)},
+        CharGroup : {(SquareOpen, tokens.Terminal, TermRep, SquareClose)},
+        TermRep : {(tokens.Terminal, TermRep), ()},
         Plus : {(Expr3, tokens.PlusSign)},
         Optional : {(Expr3, tokens.Question)},
         ConcatDelim : {(tokens.Comma,), ()},
