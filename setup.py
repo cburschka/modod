@@ -7,6 +7,7 @@ setup(
     version='0.2.1',
     description='Regular expression optimizer',
     packages=['modod', 'parser'],
+    package_dir={'': 'src'},
     include=['main_simplify', 'graph'],
     entry_points={
         'console_scripts': [
