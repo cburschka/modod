@@ -16,6 +16,7 @@ parser.add_argument("files",help="the XML file(s) from which the element type de
 
 parser.add_argument("-a","--automaton",help="for every element E, the inferred SOA is written to the file AUTPREFIX E.dot in the dot-format of Graphviz",dest="autprefix",type=str,nargs="?",default="")
 parser.add_argument("-c","--chare",help="infer a chain regular expression, instead of a single occurrence regular expression",action="store_true")
+parser.add_argument("-co","--counts",help="disply how often elements occur",dest="counts",action="store_true")
 parser.add_argument("-d","--dre",help="write output as deterministic regular expression, instead of an element type declaration",action="store_true")
 parser.add_argument("-e","--elements",help="determines for which element names an element type declaration is inferred",dest="elements",nargs="+",default=[])
 #parser.add_argument("-f","--force",help="necessary if no list of elements is provided",action="store_true")
@@ -25,7 +26,7 @@ parser.add_argument("-t","--timestamps",help=argparse.SUPPRESS,action="store_tru
 parser.add_argument("-u","--ugly",help="do not use prettification algorithm",action="store_true")
 parser.add_argument("-v","--verbose",help=argparse.SUPPRESS,dest="verbose",action="store_true")
 # parser.add_argument("-t","--timestamps",help="show timestamps for important tasks",action="store_true")
-# parser.add_argument("-v","--verbose",help="print additional information and time stamps",dest="verbose",action="store_true")
+#parser.add_argument("-v","--verbose",help="print additional information",dest="verbose",action="store_true")
 parser.add_argument("-we","--write-elements",help="for every element E, write the inferred DTD/regular expression to a file WPREFIX E.WSUFFIX (definable by -wp,-ws)",action="store_true",dest="writeElements")
 parser.add_argument("-wep","--write-prefix",help="sets WPREFIXe (for -we), default empty",action="store_true",dest="writeprefix",default="")
 parser.add_argument("-wes","--write-suffix",help="sets WPREFIXe (for -we), default .dtd",action="store_true",dest="writesuffix",default=".dtd")
@@ -73,6 +74,7 @@ for f in filenames:
 
 # generate the SOAs
 soas = {}
+scount = {}
 
 for fn in filenames:
 	tmessage('Parsing XML file'+fn)
@@ -83,12 +85,14 @@ for fn in filenames:
 		if (found.tag in elementnames) or allElts:
 			if found.tag not in soas:
 				soas[found.tag] = SingleOccurrenceAutomaton()
+				scount[found.tag] = 0
 				
 			word = [SingleOccurrenceAutomaton.src]
 			for child in found:
 				word = word + [child.tag]
 			word = word + [SingleOccurrenceAutomaton.snk]
 			soas[found.tag].addWord(word)
+			scount[found.tag] = scount[found.tag] + 1
 			message("Added "+str(word)+" to "+str(found.tag))
 
 tmessage('Finished XML processing')
@@ -97,6 +101,9 @@ tmessage('Finished XML processing')
 for elt in soas:
 	if elt not in soas:
 		soas[elt] = SingleOccurrenceAutomaton()
+		scount[elt] = 0
+	if args.counts:
+		print(elt, scount[elt])
 
 # process the SOAs		
 for elt in soas:
