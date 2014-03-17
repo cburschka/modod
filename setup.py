@@ -13,5 +13,11 @@ setup(
         'console_scripts': [
             'simplify = main_simplify:main'
         ]
-    }
+    },
+    scripts=[
+      'src/dtd-inf/dtd.py',
+      'src/dtd-inf/sore.py',
+      'dtd.py',
+      'sore.py'
+    ]
     )
