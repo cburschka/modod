@@ -1,4 +1,5 @@
-import modod, graph
+import modod
+from graph import graph
 import modod.indexed_dre
 
 cases = [

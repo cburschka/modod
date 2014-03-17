@@ -1,5 +1,5 @@
 import modod
-import graph
+from graph import graph
 
 cases = [
    #format: input expected comment

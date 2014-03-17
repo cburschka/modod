@@ -1,5 +1,5 @@
 import modod
-import graph
+from graph import graph
 
 cases = [
     '(a|(a|b),b,(b c(b|af)))',

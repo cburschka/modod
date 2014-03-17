@@ -1,6 +1,6 @@
 from . import dre_indexed, dre
 import itertools
-import graph
+from graph import graph
 from . import uf
 
 class OA:

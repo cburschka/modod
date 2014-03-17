@@ -1,4 +1,4 @@
-import graph
+from graph import graph
 import modod
 
 class DRE:
