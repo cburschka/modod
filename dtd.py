@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # This file provides a simple way of running dtd.py
 # without building or installing the software.
