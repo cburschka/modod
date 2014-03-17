@@ -1,10 +1,10 @@
-from . import grammar_extended
-from . import grammar_strict
-from . import dre_lexer
-from . import dre_indexed
-from . import dre_factor
-from . import dre_rewritep
-from . import oa
+from modod import grammar_extended
+from modod import grammar_strict
+from modod import dre_lexer
+from modod import dre_indexed
+from modod import dre_factor
+from modod import dre_rewritep
+from modod import oa
 
 # Compile the parsers (these should not be used directly outside of unit tests, normally)
 _lexerExt = grammar_extended.build_lexer()
