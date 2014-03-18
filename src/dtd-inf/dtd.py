@@ -11,15 +11,16 @@ import modod
 from modod.soa import SingleOccurrenceAutomaton
 
 
-parser = argparse.ArgumentParser(description="This tool takes a list of XMLfiles and computes an element type definition for every element in the files. (If you want to compute this for only some elements, use the -e flag. If you want to exclude elements that have empty definitions, use the -s flag.)",epilog="TODO: Further info")
+parser = argparse.ArgumentParser(description="This tool takes a list of XMLfiles and computes a DTD.",epilog="Default is inferring an element type definition for every element in the files. If you want to compute this for only some elements, use the -e flag. If you want to exclude elements that have empty definitions, use the -s flag. If you just want a DTD and do not care about the theoretic background of this tool, you should ignore the flags  -a, -co, -n, -t, -v, -we, -wep, and -wes.")
 parser.add_argument("files",help="the XML file(s) from which the element type declarations are to be inferred",nargs="+")
 
 parser.add_argument("-a","--automaton",help="for every element E, the inferred SOA is written to the file AUTPREFIX E.dot in the dot-format of Graphviz",dest="autprefix",type=str,nargs="?",default="")
-parser.add_argument("-c","--chare",help="infer a chain regular expression, instead of a single occurrence regular expression",action="store_true")
+parser.add_argument("-c","--chare",help="infer a chain regular expression, instead of a single occurrence regular expression (the former are flatter than the latter)",action="store_true")
 parser.add_argument("-co","--counts",help="disply how often elements occur",dest="counts",action="store_true")
-parser.add_argument("-d","--dre",help="write output as deterministic regular expression, instead of an element type declaration",action="store_true")
+parser.add_argument("-d","--dre",help="write output as deterministic regular expression, instead of an element type declaration (also activates -j)",action="store_true")
 parser.add_argument("-e","--elements",help="determines for which element names an element type declaration is inferred",dest="elements",nargs="+",default=[])
 #parser.add_argument("-f","--force",help="necessary if no list of elements is provided",action="store_true")
+parser.add_argument("-j","--just-elements",help="do not put the DOCTYPE declaration around the element tags",dest="justelements",action="store_true")
 parser.add_argument("-n","--no-inference",help="do not infer element type declarations (only useful if -a is used as well)",dest="noinference",action="store_true")
 parser.add_argument("-s","--skip-empty",help="do not display declarations of elements that have no childer",dest="skipempty",action="store_true")
 parser.add_argument("-t","--timestamps",help=argparse.SUPPRESS,action="store_true")
@@ -61,6 +62,7 @@ ugly=args.ugly
 verbose = args.verbose
 writeprefix = args.writeprefix
 writesuffix = args.writesuffix
+writeWrapper = ((not args.justelements) and (not args.dre)) # if we do not write the DOCTYPE stuff, DREs make no sense.	
 
 startTime = time.time()
 
@@ -76,12 +78,19 @@ for f in filenames:
 soas = {}
 scount = {}
 
+rootName = ''
+
 for fn in filenames:
 	tmessage('Parsing XML file'+fn)
 	root = ET.parse(fn)
+	if writeWrapper:
+		if (rootName == ''):
+			rootName=root.getroot().tag
+		elif (rootName!=root.getroot().tag):
+			sys.exit('Root names in XML documents do not match. If this does not matter to you, use the -j flag.')
+	
 	tmessage('Starting iterating the tree')
 	for found in root.iter():
-#	for found in itertools.chain(root.findall('.'),root.findall('.//*')):
 		if (found.tag in elementnames) or allElts:
 			if found.tag not in soas:
 				soas[found.tag] = SingleOccurrenceAutomaton()
@@ -106,10 +115,10 @@ for elt in soas:
 		print(elt, scount[elt])
 
 # process the SOAs		
+sores = {}
 for elt in soas:
 	if args.noinference:
-		print("You chose not to infer, so that's all.")
-		sys.exit()
+		sys.exit('You chose not to infer, so we are done.')
 
 	if (args.autprefix != ''):
 		if args.autprefix==None:
@@ -134,16 +143,33 @@ for elt in soas:
 	if sore[-1:]!=')':
 		sore = '('+sore+')'
 
-	if not args.dre:
+	if (not args.dre):
 		sore = '<!ELEMENT '+elt+' '+sore+'>'
 
-	print(sore)
-	
+	sores[elt]=sore
+
+if writeWrapper:
+	print('<!DOCTYPE ['+rootName)
+	# preferential treatment of the root element, looks nicer
+	print(sores[rootName])
+	if args.writeElements:
+		fn = writeprefix+rootName+writesuffix
+		soreFile = open(fn,'w')
+		soreFile.write(sores[rootName])
+		soreFile.close()
+		message(elt+" written to file.")
+	del sores[rootName]
+
+for elt in sores:
+	print(sores[elt])
 	if args.writeElements:
 		fn = writeprefix+elt+writesuffix
 		soreFile = open(fn,'w')
-		soreFile.write(sore)
+		soreFile.write(sores[elt])
 		soreFile.close()
 		message(elt+" written to file.")
+
+if writeWrapper:
+	print(']>')
 
 tmessage('Done.')
