@@ -11,7 +11,7 @@ import modod
 from modod.soa import SingleOccurrenceAutomaton
 
 
-parser = argparse.ArgumentParser(description="This tool takes a list of XMLfiles and computes a DTD.",epilog="Default is inferring an element type definition for every element in the files. If you want to compute this for only some elements, use the -e flag. If you want to exclude elements that have empty definitions, use the -s flag. See the readme file for hidden arguments.")
+parser = argparse.ArgumentParser(description="This tool takes a list of XML files and computes a DTD.",epilog="Default is inferring an element type definition for every element in the files. If you want to compute this for only some elements, use the -e flag. If you want to exclude elements that have empty definitions, use the -s flag. See the readme file for hidden arguments.")
 parser.add_argument("files",help="the XML file(s) from which the element type declarations are to be inferred",nargs="+")
 
 parser.add_argument("-a","--automaton",help=argparse.SUPPRESS,dest="autprefix",type=str,nargs="?",default="")

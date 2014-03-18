@@ -3,7 +3,7 @@ usage: dtd.py [-h] [-a [AUTPREFIX]] [-c] [-co] [-d]
               [-wes]
               files [files ...]
 
-This tool takes a list of XMLfiles and computes a DTD.
+This tool takes a list of XML files and computes a DTD.
 
 positional arguments:
   files                 the XML file(s) from which the element type
