@@ -20,6 +20,7 @@ parser.add_argument("-c","--chare",help="infer a chain regular expression (CHARE
 parser.add_argument("-o","--outfile",help="write result to OUTFILE",dest="outfilename")
 parser.add_argument("-s","--space",help="use space as concatenation symbol (instead of comma)",action="store_true")
 parser.add_argument("-u","--ugly",help="do not use prettification algorithm",action="store_true")
+parser.add_argument("--chargroup", help="Attempt to print single-letter choices as character groups.", choices=['none', 'complete', 'all'], default='complete')
 
 args=parser.parse_args()
 
@@ -29,6 +30,11 @@ soafilename=args.soafilename
 space=args.space
 ugly=args.ugly
 words=args.words
+modod.charGroup = {
+    'none': modod.CHARGROUP_NONE,
+    'complete': modod.CHARGROUP_COMPLETE,
+    'all': modod.CHARGROUP_PARTIAL
+}[args.chargroup]
 
 soa = SingleOccurrenceAutomaton()
 
