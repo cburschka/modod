@@ -17,6 +17,9 @@ setup(
     scripts=[
       'src/dtd-inf/dtd.py',
       'src/dtd-inf/sore.py',
+      'src/simplify.py',
+      'src/main_simplify.py',
+      'simplify.php',
       'dtd.py',
       'sore.py'
     ]
