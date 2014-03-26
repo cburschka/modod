@@ -23,9 +23,13 @@ def main():
     }[args.chargroup]
     def lineReader():
         try:
-            while True:
-                yield input()
+            line = input().strip()
+            while line:
+                yield line
+                line = input().strip()
         except EOFError:
+            pass
+        except KeyboardInterrupt:
             pass
     expressions = map(DRE.fromString, args.expressions or lineReader())
     f = ['{b}', '{a} -> {b}'][args.verbose]
