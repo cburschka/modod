@@ -7,7 +7,7 @@ class Nary(NonTerm):
     def children(self):
         yield self.production[1]
         yield self.production[3]
-        # TODO: Python 3.3+ erlaubt 'yield from'.
+        # TODO: Python 3.3+ has 'yield from'.
         for x in self.production[4].children():
             yield x
     def dre(self):

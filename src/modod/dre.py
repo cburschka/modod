@@ -4,16 +4,16 @@ import modod
 class DRE:
 
     ##############################################################
-    # Spezifikation
+    # Specification
     ##############################################################
 
-    # Nary-Normal-Form: kein Nary-Operator enthält ein Kind gleichen Typs.
+    # Nary Normal Form: no nary Operator contains a child of its type.
     def toNNF(self):
         return self._nnf()
     def isInNNF(self):
         return self._isnnf()
 
-    # Plus-Normal-Form
+    # Plus Normal Form
     def toPNF(self):
         return self._pnf1()._nnf()._pnf3()._nnf()
     def isInPNF(self):
@@ -33,21 +33,21 @@ class DRE:
     def nullable(self):
         pass
 
-    # Die erlaubten ersten Zeichen der Worte dieser Sprache:
+    # All accepted start characters in this language:
     def first(self):
         pass
 
-    # size: Anzahl Terminalzeichen, Operatoren, Klammern
+    # size: Number of terminals + operators + parentheses
     def size(self):
         return self._size(operators=True, parentheses=True)
-    # syn/rpn: Anzahl Terminalzeichen, Operatoren
+    # syn/rpn: Number of terminals + operators
     def rpn(self):
         return self._size(operators=True, parentheses=False)
-    # aw/awidth: Anzahl Terminalzeichen
+    # aw/awidth: Number of terminals
     def awidth(self):
         return self._size(operators=False, parentheses=False)
 
-    # Ausgabe:
+    # Output:
     def toString(self):
         return self.label()
     def toDOTString(self):
@@ -58,7 +58,7 @@ class DRE:
         return graph.digraph(nodes, edges).tikz() # TODO
 
 
-    # Semi-Private Methoden (haben keine feste Spezifikation):
+    # Semi-private methods (not in the specification):
     def _pnf1(self):
         '''p•'''
         pass
@@ -200,7 +200,7 @@ class Nary(Operator):
         children = []
         for x in self.children:
             nf = x._nnf()
-            # Direkter Nachfolger gleichen Typs:
+            # Absorb child of the same type:
             if nf.__class__ == self.__class__:
                 children.extend(nf.children)
             else:
@@ -259,8 +259,8 @@ class Concatenation(Nary):
     def nullable(self):
         return all(x.nullable() for x in self.children)
     def _pnf2(self):
-        # Wir unterscheiden drei Fälle:
-        # Kein, genau ein oder mehr als ein nicht-nullbares Element
+        # Distinguish three cases:
+        # Zero, one oder more than one non-nullable element.
         count, last = 0, 0
         for i,x in enumerate(self.children):
             if not x.nullable():
@@ -268,13 +268,13 @@ class Concatenation(Nary):
             if count > 1:
                 break
 
-        # Sind alle nullbar, so wird aus der Konkatenation ein Oder
+        # If all are nullable, the plus concatenation becomes a plus choice:
         if count == 0:
             return Choice([x._pnf2() for x in self.children])
-        # Steige in das einzigen nicht-nullbare Element ab:
+        # Descend into the only non-nullable element:
         elif count == 1:
             return Concatenation(self.children[:last] + [self.children[last]._pnf2()] + self.children[last+1:])
-        # Sonst ändere nichts
+        # Otherwise, change nothing.
         else:
             return self
 
@@ -315,7 +315,7 @@ class Choice(Nary):
     def _pnf3(self):
         if self.nullable():
             x = [x._pnf4() for x in self.children]
-            # Falls eines der Elemente "special" (d.h. eine nullbare Konkatenation) ist
+            # If any of the elements are "special" (ie. a nullable concatenation):
             if any(x.__class__ is Concatenation and x.nullable() for x in self.children):
                 return Choice(x)
             else:

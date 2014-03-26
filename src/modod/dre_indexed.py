@@ -44,7 +44,7 @@ class IndexedNode(dre.DRE):
             for y in x._dfs():
                 yield y
 
-    # Baum-Traversierung.
+    # Tree traversal.
     def getParent(self):
         return self.context.parent
     def leftSibling(self):

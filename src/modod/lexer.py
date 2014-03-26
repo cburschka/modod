@@ -1,21 +1,24 @@
 import string
 
-# Der Lexer erkennt zwei Sorten Symbole:
-#   - Beliebig viele Meta-Symbole, die aus je einem Zeichen bestehen.
-#     meta ist ein dictionary von Character zu Symbol.
-#   - Genau ein Terminal-Symbol, das aus beliebigen Zeichen bestehen kann.
-#     Whitespace und Metazeichen beenden ein Terminal-Symbol, wenn sie nicht
-#     einem "\" folgen.
+# The lexer knows two classes of symbols:
+#   - any number of meta-symbols, which match a single meta-character each.
+#     this argument is a dictionary mapping meta-characters to symbol classes.
 #
-# Optional: char_filter (Character -> Bool), gibt aus, ob ein Zeichen
-#     (der keinem Meta-Symbol zugeordnet ist) Teil eines Terminalsymbols sein
-#     darf. Tritt ein Zeichen x auf, das weder Whitespace, noch Meta-Symbol,
-#     noch erlaubtes Zeichen ist, so schlägt die lexikalische Analyse fehl.
+#   - exactly one terminal symbol, which matches a run of any characters
+#     but ends as soon as a meta-character or a whitespace character
+#     (not escaped with "\") is encountered.
+#     whitespace characters delimit a sequence of multiple terminal symbols.
 #
-#     Ohne char_filter werden alle Zeichen, die nicht Whitespace oder Meta-Symbol
-#     sind, und nicht einem "\" folgen, als Teil eines Terminalsymbols gelesen.
+#     this argument is a single symbol class.
 #
-#     Ist letters=True, so wird jedes einzelne Terminal-Zeichen zu einem Symbol.
+#   - optional: char_filter (character -> bool) determines if a character is
+#     allowed in a terminal symbol. A character that neither matches a
+#     meta-symbol, nor is whitespace, nor allowed in terminals, will cause the
+#     lexical analysis to fail.
+#
+#   - optional: with letters=True, each terminal character becomes a terminal
+#     symbol. This has the same effect as adding spaces between every character
+#     of the input.
 class lexer:
     def __init__(self, meta, terminal, char_filter=None, letters=False):
         assert not (set(meta.keys()) & set(string.whitespace)), 'Whitespace characters cannot be meta characters.'
@@ -26,30 +29,32 @@ class lexer:
 
     def lex(self, s):
         tokens = []
-        term = ''
-        bs = False
+        term = ''  # The current terminal character run.
+        bs = False # The last character was a backslash.
 
-        # Das Leerzeichen beendet ein Terminalsymbol am Ende des Inputs.
+        # This space terminates a terminal symbol at the end of the input.
         s += ' '
 
         for i, c in enumerate(s):
-            # Wird ein Meta- oder Whitespace-Zeichen gefunden:
+            # We found an unescaped backslash.
             if not bs and c == '\\':
                 bs = True
+            # We found an unescaped meta or whitespace character.
             elif not bs and (c in self.meta or c in string.whitespace):
-                # So beende ggf. das aktuelle Terminalsymbol
+                # Append the current terminal symbol (if any):
                 if term:
                     tokens.append(self.terminal(term))
                     term = ''
-                # Füge das Meta-Symbol ein
+                # Append the meta symbol (if any):
                 if c in self.meta:
                     tokens.append(self.meta[c]())
-            # Wird ein erlaubtes Terminalzeichen gefunden:
+            # found another character, or one escaped by a backslash:
             elif self.filter == None or self.filter(c):
                 bs = False
-                # So füge es dem aktuellen Terminalsymbol hinzu.
+                # Append it to the current terminal symbol:
                 term += c
                 if self.letters:
+                    # If terminals are single characters, append it immediately:
                     tokens.append(self.terminal(term))
                     term = ''
             else:

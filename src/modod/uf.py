@@ -1,3 +1,4 @@
+'''A Union-Find data structure.'''
 class UF:
     def __init__(self, iterable=()):
         self.list = list(iterable)
@@ -30,4 +31,3 @@ class UF:
 
     def __str__(self):
         return ', '.join(map(str, self.export_sets()))
-

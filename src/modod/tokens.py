@@ -1,7 +1,9 @@
 from parser.symbol import Term
 
-# Ein Terminalsymbol der Grammatik für reguläre Ausdrücke,
-# welches für ein Terminalsymbol im regulären Ausdruck steht.
+# These are the terminal symbols of the strict DRE grammar.
+
+# The terminal symbol in the grammar of DREs
+# which represents a terminal symbol of the parsed regular expression.
 class Terminal(Term):
     def __init__(self, symbol):
         self.symbol = symbol

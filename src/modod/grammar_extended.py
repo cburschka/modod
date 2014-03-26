@@ -5,38 +5,39 @@ from parser.cfg import slr1_grammar
 import parser.symbol
 from modod import lexer
 
-# Erweiterungen:
-#   - Konkatenation ohne Komma
-#   - * statt +?
-#   - Beliebiges Auslassen oder Hinzufügen von Klammern, unter der folgenden
-#     Operatorenpräzedenz:  Unär >> Konkatenation >> Auswahl
+# Syntax extensions:
+#   - Omission of Concatenation delimiter (,).
+#   - * as a shortcut for +?
+#   - character groups ("[" { x | x "-" x } "]") as a shortcut for Choice.
+#   - Arbitrary omission or addition of parentheses, using operator precedence:
+#     Unary >> Concatenation >> Choice
 
-'''Ungeklammertes unary-Symbol.'''
+'''Unparenthesized unary symbol.'''
 class Unary(gs.Unary):
     def child(self):
         return self.production[0]
 
-'''Ungeklammertes nary-Symbol.'''
+'''Unparenthesized nary symbol.'''
 class Nary(gs.Nary):
     def children(self):
         yield self.production[0]
         yield self.production[2]
-        # TODO: Python 3.3+ erlaubt 'yield from'.
+        # TODO: Python 3.3+ has 'yield from'.
         for x in self.production[3].children():
             yield x
 
-'''Klammerausdruck'''
+'''Parenthesized expression symbol'''
 class Paren(gs.Expr):
     def dre(self):
         return self.production[1].dre()
 
-'''Sternausdruck'''
+'''Kleene Star'''
 class OptPlus(Unary):
     def dre(self):
         return dre.Optional(dre.Plus(self.child().dre()))
 
-# Durch Mehrfachvererbung überschreiben diese Operatoren in den strikten
-# Operatoren nur die child() bzw. children() Funktion.
+# Through multiple inheritance, these operators override
+# the child(), children() functions in the overridden strict operators.
 class Optional(Unary, gs.Optional):
     pass
 class Plus(Unary, gs.Plus):
@@ -46,27 +47,28 @@ class Concat(Nary, gs.Concat):
 class Choice(Nary, gs.Choice):
     pass
 
-# Optionaler Komma-Delimiter.
+# Optional comma delimiter.
 class ConcatDelim(parser.symbol.NonTerm):
     pass
 
-# Expr kann jede Form haben.
-# Expr2 ist innerhalb eines Choice-Ausdrucks und kann selbst kein Choice sein.
-# Expr3 ist innerhalb einer Konkatenation oder einem unären Ausdruck und kann nur geklammert oder unär sein.
-# Innerhalb einer Klammer steht wiederum ein beliebiger Expr-Ausdruck.
+# Expr can have any form.
+# Expr2 is the child of a Choice, so it cannot be a Choice.
+# Expr3 is the child of a Concatenation or a unary, so it must be unary or parenthesized.
+# A parenthesized expression can have any form again.
 class Expr2(gs.Expr):
     pass
 class Expr3(gs.Expr):
     pass
 
-# *-Nichtterminal
+# * Terminal
 class Star(parser.symbol.Term):
     pass
-
+# [] Terminals for character groups.
 class SquareOpen(parser.symbol.Term):
     pass
 class SquareClose(parser.symbol.Term):
     pass
+# Content of a character group
 class TermRep(parser.symbol.NonTerm):
     def children(self):
         if self.production:
@@ -74,6 +76,7 @@ class TermRep(parser.symbol.NonTerm):
             for child in self.production[1].children():
                 yield child
 
+# Character group nonterm.
 class CharGroup(gs.Expr):
     def children(self):
         yield self.production[1]
@@ -94,6 +97,7 @@ class CharGroup(gs.Expr):
         return dre.Choice([dre.Terminal(a) for a in z])
 
 def build_grammar():
+    # The actual productions of the grammar.
     productions = {
         gs.Expr : {(Choice,), (Expr2,)},
         Expr2 : {(Concat,), (Expr3,)},
