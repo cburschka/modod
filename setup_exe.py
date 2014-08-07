@@ -5,7 +5,7 @@ from cx_Freeze import setup, Executable
 
 setup(
     name = 'modod-sore',
-    version = '0.1',
+    version = '0.2',
     description='SORE from word list.',
     options = {"build_exe": {'packages': ['modod', 'parser'], 'path': ['src'] + sys.path}},
     executables = [

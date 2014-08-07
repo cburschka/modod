@@ -8,19 +8,19 @@ def main():
     parser.add_argument("expressions",help="The expressions to simplify",nargs="*")
     parser.add_argument("-v","--verbose",help="Print the parsed expressions",action="store_true")
     parser.add_argument("--graph",metavar="DOT_FILE", help="Dump the graphs in DOT format into DOT_FILE.n.(in|out).dot")
-    parser.add_argument("--letters", help="Interpret terminal symbols (abc) as letter sequences (a,b,c).", action="store_true")
-    parser.add_argument("--chargroup", help="Attempt to print single-letter choices as character groups.", choices=['none', 'complete', 'all'], default='complete')
+    parser.add_argument("--long", help="Sequences of symbols are interpreted as single letters; i. e., abc is a single letter, as is a1", action="store_false")
+    parser.add_argument("--charset", help="Attempt to print single-letter choices as character sets.", choices=['none', 'complete', 'all'], default='complete')
     parser.add_argument("--join", help="Remove duplicate choice expressions", action="store_true")
     parser.add_argument("--steps", help="Print individual steps.", action="store_true")
     args=parser.parse_args()
-    if args.letters:
+    if args.long:
         modod._lexerExt.letters = True
         modod.dre.Concatenation._label = ''
     modod.charGroup = {
         'none': modod.CHARGROUP_NONE,
         'complete': modod.CHARGROUP_COMPLETE,
         'all': modod.CHARGROUP_PARTIAL
-    }[args.chargroup]
+    }[args.charset]
     def lineReader():
         try:
             line = input().strip()
