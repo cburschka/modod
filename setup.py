@@ -19,7 +19,7 @@ setup(
       'src/dtd-inf/sore.py',
       'src/simplify.py',
       'src/main_simplify.py',
-      'simplify.php',
+      'simplify.py',
       'dtd.py',
       'sore.py'
     ]
